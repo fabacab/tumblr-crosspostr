@@ -1,7 +1,7 @@
 === Tumblr Crosspostr ===
 Contributors: meitar
 Tags: tumblr, post, crosspost, publishing
-Requires at least: 2.6
+Requires at least: 3.1
 Tested up to: 3.8.1
 Stable tag: 0.1
 License: GPLv3

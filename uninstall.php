@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * Tumblr Crosspostr uninstaller
  *
  * @package plugin
@@ -10,4 +9,4 @@
 if (!defined('WP_UNINSTALL_PLUGIN')) { exit(); }
 
 // Delete options.
-delete_option('tumblr_crosspostr_options');
+delete_option('tumblr_crosspostr_settings');
