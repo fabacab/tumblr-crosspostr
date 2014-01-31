@@ -45,7 +45,7 @@ Tumblr Crosspostr transforms your WordPress website into a back-end for Tumblr. 
 
 See also the [Screenshots](https://wordpress.org/plugins/tumblr-crosspostr/screenshots/) section for a visual walk through of this process.
 
-=== Installation notes and troubleshooting ===
+= Installation notes and troubleshooting =
 
 Tumblr Crosspostr makes use of the [PHP Extension and Application Repository (PEAR)](http://pear.php.net/) for some core functions. Most systems have the required PEAR packages installed already and, if so, Tumblr Crosspostr prefers to use those. However, I also ship Tumblr Crosspostr with the required PEAR packages inside the `lib/pear/php` directory of the plugin, as a fallback.
 
@@ -119,6 +119,10 @@ Yes. Tumblr Crosspostr respects the WordPress post visibility setting and suppor
 = Is Tumblr Crosspostr available in languages other than English? =
 
 Not yet, but with your help it can be. To help translate the plugin into your language, please [sign up as a translator on Tumblr Crosspostr's Transifex project page](https://www.transifex.com/projects/p/tumblr-crosspostr/).
+
+= What if my theme doesn't support Post Formats? =
+
+Tumblr Crosspostr will still work even if your theme doesn't support the [Post Formats](http://codex.wordpress.org/Post_Formats) feature. However, in that case, you will only be able to make Text posts on Tumblr. Consider asking your theme developer to update your theme code so that it supports Post Formats.
 
 == Screenshots ==
 
