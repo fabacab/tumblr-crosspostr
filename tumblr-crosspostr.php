@@ -167,6 +167,10 @@ class Tumblr_Crosspostr {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
         $options = get_option('tumblr_crosspostr_settings');
 
+        if (isset($options['exclude_categories']) && in_category($options['exclude_categories'], $post_id)) {
+            return;
+        }
+
         $format = get_post_format($post_id);
         $status = get_post_status($post_id);
         if (!$state = $this->WordPressStatus2TumblrState($status)) {
