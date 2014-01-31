@@ -502,16 +502,16 @@ class Tumblr_Crosspostr {
                 </p>
             </td>
         </tr>
-        <?php if (!isset($options['access_token']) && isset($options['consumer_key']) && isset($options['consumer_secret'])) : ?>
+        <?php if (!isset($options['access_token']) && isset($options['consumer_key']) && isset($options['consumer_secret'])) { ?>
         <tr>
-            <th>
+            <th class="wp-ui-notification" style="border-radius: 5px; padding: 10px;">
                 <label for="tumblr_crosspostr_oauth_authorize"><?php esc_html_e('Connect to Tumblr:', 'tumblr-crosspostr');?></label>
             </th>
             <td>
                 <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_oauth_authorize'), 'tumblr-authorize');?>" class="button button-primary"><?php esc_html_e('Click here to connect to Tumblr','tumblr-crosspostr');?></a>
             </td>
         </tr>
-        <?php elseif (isset($options['access_token'])) : ?>
+        <?php } else if (isset($options['access_token'])) { ?>
         <tr>
             <th colspan="2">
                 <div class="updated">
@@ -522,13 +522,15 @@ class Tumblr_Crosspostr {
                 <input type="hidden" name="tumblr_crosspostr_settings[access_token_secret]" value="<?php print esc_attr($options['access_token_secret']);?>" />
             </th>
         </tr>
+        <?php } ?>
     </tbody>
 </table>
 </fieldset>
+        <?php if (isset($options['access_token'])) { ?>
 <fieldset><legend><?php esc_html_e('Crossposting Options', 'tumblr-crosspostr');?></legend>
 <table class="form-table" summary="<?php esc_attr_e('Options for customizing crossposting behavior.', 'tumblr-crosspostr');?>">
     <tbody>
-        <tr>
+        <tr<?php if (!isset($options['default_hostname'])) : print ' class="wp-ui-highlight"'; endif;?>>
             <th>
                 <label for="tumblr_crosspostr_default_hostname"><?php esc_html_e('Default Tumblr blog for crossposts', 'tumblr-crosspostr');?></label>
             </th>
@@ -537,7 +539,6 @@ class Tumblr_Crosspostr {
                 <p class="description"><?php esc_html_e('Choose which Tumblr blog you want to send your posts to by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
-        <?php endif;?>
         <tr>
             <th>
                 <label for="tumblr_crosspost_exclude_categories"><?php esc_html_e('Do not crosspost entries in these categories:');?></label>
@@ -601,6 +602,7 @@ class Tumblr_Crosspostr {
     </tbody>
 </table>
 </fieldset>
+        <?php } ?>
 <?php submit_button();?>
 </form>
 <div class="donation-appeal">
