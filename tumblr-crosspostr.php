@@ -189,6 +189,9 @@ class Tumblr_Crosspostr {
             'date' => get_post_time('U', true, $post_id),
             'format' => 'html' // Tumblr's "formats" are always either 'html' or 'markdown'
         );
+
+        if (!empty($options['exclude_tags'])) { unset($common_params['tags']); }
+
         $post_params = $this->prepareParamsByPostType($post_id, $common_params['type']);
 
         if (!empty($options['additional_markup'])) {
