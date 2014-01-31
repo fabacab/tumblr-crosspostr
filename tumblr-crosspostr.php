@@ -603,6 +603,13 @@ class Tumblr_Crosspostr {
 </fieldset>
 <?php submit_button();?>
 </form>
+<div class="donation-appeal">
+    <p style="text-align: center; font-size: larger; width: 70%; margin: 0 auto;"><?php print sprintf(
+esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery stores do not offer free food. If you like this plugin, please consider %1$s to its %2$s. &hearts; Thank you!', 'tumblr-crosspostr'),
+'<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=meitarm%40gmail%2ecom&lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr%2dcrosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">' . esc_html__('making a donation', 'tumblr-crosspostr') . '</a>',
+'<a href="http://Cyberbusking.org/">' . esc_html__('houseless, jobless, nomadic developer', 'tumblr-crosspostr') . '</a>'
+);?></p>
+</div>
 <?php
     } // end public function renderOptionsPage
 
