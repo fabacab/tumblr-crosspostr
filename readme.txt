@@ -92,7 +92,7 @@ If you notice any errors upon plugin activation, first check to ensure your syst
             ├── PEAR.php
             └── PEAR5.php
 
-It's also possible that your system administrator will apply updates to one or more of these PEAR packages without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, Tumblr Crosspostr may begin to issue errors. If this happens, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/meitar/tumblrize/issues/new).
+It's also possible that your system administrator will apply updates to one or more of these PEAR packages without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, Tumblr Crosspostr may begin to issue errors. If this happens, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/meitar/tumblr-crosspostr/issues/new).
 
 == Frequently Asked Questions ==
 
