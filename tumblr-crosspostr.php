@@ -181,9 +181,7 @@ class Tumblr_Crosspostr {
 
         $destination = sanitize_text_field($_POST['tumblr_crosspostr_destination']);
         $base_hostname = ($destination) ? $destination : $options['default_hostname'];
-        if ($base_hostname !== $options['default_hostname']) {
-            update_post_meta($post_id, 'tumblr_base_hostname', $base_hostname);
-        }
+        update_post_meta($post_id, 'tumblr_base_hostname', $base_hostname);
 
         if (isset($options['exclude_categories']) && in_category($options['exclude_categories'], $post_id)) {
             return;
@@ -535,7 +533,7 @@ class Tumblr_Crosspostr {
                 <label for="tumblr_crosspostr_default_hostname"><?php esc_html_e('Default Tumblr blog for crossposts', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <?php print $this->tumblrBlogsSelectField(array('id' => 'tumblr_crosspostr_default_hostname', 'name' => 'tumblr_crosspostr_settings[default_hostname]'), $options['default_hostname']);?>
+                <?php print $this->tumblrBlogsSelectField(array('id' => 'tumblr_crosspostr_default_hostname', 'name' => 'tumblr_crosspostr_settings[default_hostname]'), $this->getTumblrBasename(0));?>
                 <p class="description"><?php esc_html_e('Choose which Tumblr blog you want to send your posts to by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
