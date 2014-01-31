@@ -11,8 +11,7 @@
  */
 
 class Tumblr_Crosspostr {
-    private $tumblr; //< OAuth consumer for the Tumblr API.
-    private $tumblr_api_url = 'http://api.tumblr.com/v2';
+    private $tumblr; //< Tumblr API manipulation wrapper.
     private $tumblr_post_types = array(
         'text',
         'photo',
@@ -24,24 +23,17 @@ class Tumblr_Crosspostr {
     );
 
     public function __construct () {
-        session_start(); // Used for OAuth tokens.
         add_action('plugins_loaded', array($this, 'registerL10n'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
 
-        // Preferentially use our own PEAR packages.
-        // TODO: Simplify this include?
-        $old_path = set_include_path(__DIR__ . '/lib/pear/php' . PATH_SEPARATOR . get_include_path());
-        require_once 'HTTP/OAuth/Consumer.php';
-        //set_include_path($old_path); // TODO: Wrap into a class? Uncommenting causes errors.
         // Initialize consumer if we can, set up authroization flow if we can't.
+        require_once 'lib/TumblrCrosspostrAPIClient.php';
         $options = get_option('tumblr_crosspostr_settings');
         if (isset($options['consumer_key']) && isset($options['consumer_secret'])) {
-            $this->tumblr = new HTTP_OAuth_Consumer($options['consumer_key'], $options['consumer_secret']);
-            if (isset($options['access_token'])) {
+            $this->tumblr = new Tumblr_Crosspostr_API_Client($options['consumer_key'], $options['consumer_secret']);
+            if (isset($options['access_token']) && isset($options['access_token_secret'])) {
                 $this->tumblr->setToken($options['access_token']);
-            }
-            if (isset($options['access_token_secret'])) {
                 $this->tumblr->setTokenSecret($options['access_token_secret']);
             }
         } else {
@@ -84,19 +76,22 @@ class Tumblr_Crosspostr {
     public function authorizeTumblrApp () {
         check_admin_referer('tumblr-authorize');
 
-        $this->tumblr->getRequestToken('http://www.tumblr.com/oauth/request_token', admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback'));
-        $_SESSION['tumblr_crosspostr_oauth_token'] = $this->tumblr->getToken();
-        $_SESSION['tumblr_crosspostr_oauth_token_secret'] = $this->tumblr->getTokenSecret();
-        wp_redirect($this->tumblr->getAuthorizeUrl('http://www.tumblr.com/oauth/authorize'));
+        $this->tumblr->getRequestToken(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback'));
+        wp_redirect($this->tumblr->getAuthorizeUrl());
         exit();
     }
 
     public function completeAuthorization () {
         $options = get_option('tumblr_crosspostr_settings');
-        $this->tumblr = new HTTP_OAuth_Consumer($options['consumer_key'], $options['consumer_secret'], $_SESSION['tumblr_crosspostr_oauth_token'], $_SESSION['tumblr_crosspostr_oauth_token_secret']);
-        $this->tumblr->getAccessToken('http://www.tumblr.com/oauth/access_token', $_GET['oauth_verifier']);
-        $options['access_token'] = $this->tumblr->getToken();
-        $options['access_token_secret'] = $this->tumblr->getTokenSecret();
+        $this->tumblr = new Tumblr_Crosspostr_API_Client(
+            $options['consumer_key'],
+            $options['consumer_secret'],
+            $_SESSION['tumblr_crosspostr_oauth_token'],
+            $_SESSION['tumblr_crosspostr_oauth_token_secret']
+        );
+        $this->tumblr->getAccessToken($_GET['oauth_verifier']); // Puts new tokens in $_SESSION.
+        $options['access_token'] = $_SESSION['tumblr_crosspostr_oauth_token'];
+        $options['access_token_secret'] = $_SESSION['tumblr_crosspostr_oauth_token_secret'];
         update_option('tumblr_crosspostr_settings', $options);
     }
 
@@ -216,7 +211,7 @@ class Tumblr_Crosspostr {
             <td>
                 <input id="tumblr_crosspostr_consumer_secret" name="tumblr_crosspostr_settings[consumer_secret]" value="<?php print esc_attr($options['consumer_secret']);?>" placeholder="<?php esc_attr_e('Paste your consumer secret here', 'tumblr-crosspostr');?>" />
                 <p class="description">
-                    <?php //esc_html_e('Your Tumblr API key is also called your consumer key.', 'tumblr-crosspostr');?>
+                    <?php esc_html_e('Your consumer secret is like your app password. Never share this with anyone.', 'tumblr-crosspostr');?>
                 </p>
             </td>
         </tr>
@@ -229,7 +224,7 @@ class Tumblr_Crosspostr {
                 <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_oauth_authorize'), 'tumblr-authorize');?>" class="button button-primary"><?php esc_html_e('Click here to connect to Tumblr','tumblr-crosspostr');?></a>
             </td>
         </tr>
-        <?php else : ?>
+        <?php elseif (isset($options['access_token'])) : ?>
         <tr>
             <th colspan="2">
                 <div class="updated"><p><?php esc_html_e('Connected to Tumblr!', 'tumblr-crosspostr');?></p></div>
@@ -249,15 +244,10 @@ class Tumblr_Crosspostr {
                 <label for="tumblr_crosspostr_default_hostname"><?php esc_html_e('Sync posts from this blog to my Tumblr at', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-<?php
-        // TODO: Move to a class specifically for interacting with Tumblr?
-        $resp = $this->tumblr->sendRequest($this->tumblr_api_url . '/user/info');
-        $data = json_decode($resp->getBody());
-?>
                 <select id="tumblr_crosspostr_default_hostname" name="tumblr_crosspostr_settings[default_hostname]">
-                    <?php foreach ($data->response->user->blogs as $blog) : ?>
+                    <?php foreach ($this->tumblr->getUserBlogs() as $blog) : ?>
                     <option
-                        <?php if ($options['default_hostname'] === parse_url($blog->url, PHP_URL_HOST)) : print 'selected="selected"'; endif;?>
+                        <?php if (isset($options['default_hostname']) && $options['default_hostname'] === parse_url($blog->url, PHP_URL_HOST)) : print 'selected="selected"'; endif;?>
                         value="<?php print esc_attr(parse_url($blog->url, PHP_URL_HOST));?>">
                             <?php print esc_html($blog->title);?>
                     </option>
@@ -275,7 +265,7 @@ class Tumblr_Crosspostr {
                 <select id="tumblr_crosspostr_default_post_type" name="tumblr_crosspostr_settings[default_post_type]">
                     <?php foreach ($this->tumblr_post_types as $k => $v) : ?>
                         <option
-                            <?php if ($options['default_post_type'] === $k) : print 'selected="selected"'; endif;?>
+                            <?php if (isset($options['default_post_type']) && $options['default_post_type'] === $k) : print 'selected="selected"'; endif;?>
                             value="<?php print esc_attr($k);?>">
                                 <?php print esc_html($v);?>
                         </option>
