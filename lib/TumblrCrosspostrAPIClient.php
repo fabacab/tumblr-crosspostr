@@ -13,11 +13,9 @@ class Tumblr_Crosspostr_API_Client {
     private $api_url = 'http://api.tumblr.com/v2';
 
     function __construct ($consumer_key, $consumer_secret, $oauth_token = false, $oauth_token_secret = false) {
-        // Preferentially use our own PEAR packages.
-        // TODO: Simplify this include?
-        $tumblr_crosspostr_old_path = set_include_path(__DIR__ . '/pear/php' . PATH_SEPARATOR . get_include_path());
+        // Include our own PEAR in case their system doesn't have it.
+        $tumblr_crosspostr_old_path = set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__ . '/pear/php');
         require_once 'HTTP/OAuth/Consumer.php';
-        // set_include_path($tumblr_crosspostr_old_path);
 
         // If there's not yet an active session,
         if (session_id() === '' ) { // (this avoids an E_NOTICE error)
