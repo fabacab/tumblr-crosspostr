@@ -8,7 +8,7 @@ Stable tag: 0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Tumblr Crosspostr cross-posts your published WordPress entries to Tumblr. All you need is a Tumblr account. Changes you make to your WordPress posts are reflected in your Tumblr posts.
+Tumblr Crosspostr cross-posts your published WordPress entries to Tumblr. Changes to your WordPress posts are reflected in your Tumblr posts.
 
 == Description ==
 

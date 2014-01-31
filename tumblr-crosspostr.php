@@ -432,6 +432,14 @@ class Tumblr_Crosspostr {
 
     public function renderMetaBox ($post) {
         wp_nonce_field('editing_tumblr_crosspostr', 'tumblr_crosspostr_meta_box_nonce');
+        if (!isset($this->tumblr)) {
+?>
+<div class="error">
+    <p><?php esc_html_e('Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure you connected Tumblr Crosspostr to your Tumblr account?', 'tumblr-crosspostr');?></p>
+</div>
+<?php
+            return;
+        }
         $options = get_option('tumblr_crosspostr_settings');
 
         // Set default crossposting options for this post.
