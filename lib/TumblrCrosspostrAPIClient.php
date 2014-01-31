@@ -55,9 +55,37 @@ class Tumblr_Crosspostr_API_Client {
     }
 
     public function getUserBlogs () {
-        $resp = $this->client->sendRequest("{$this->api_url}/user/info");
-        // TODO: This could use some error handling.
-        $data = json_decode($resp->getBody());
+        $data = $this->talkToTumblr('/user/info');
+        // TODO: This could use some error handling?
         return $data->response->user->blogs;
+    }
+
+    public function postToTumblrBlog ($blog, $params) {
+        $api_method = "/blog/$blog/post";
+        $data = $this->talkToTumblr($api_method, $params);
+        if (empty($data->response->id)) {
+            // TODO: Handle error?
+        } else {
+            return $data->response->id;
+        }
+    }
+    public function editOnTumblrBlog ($blog, $params) {
+        $api_method = "/blog/$blog/post/edit";
+        $data = $this->talkToTumblr($api_method, $params);
+        if (empty($data->response->id)) {
+            // TODO: Handle error?
+        } else {
+            return $data->response->id;
+        }
+    }
+    public function deleteFromTumblrBlog($blog, $params) {
+        $api_method = "/blog/$blog/post/delete";
+        $data = $this->talkToTumblr($api_method, $params);
+        return ($data->meta->status === 200) ? true : false;
+    }
+
+    private function talkToTumblr ($path, $params = array(), $method = 'POST') {
+        $resp = $this->client->sendRequest("{$this->api_url}$path", $params, $method);
+        return json_decode($resp->getBody());
     }
 }

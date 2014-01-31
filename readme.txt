@@ -1,6 +1,6 @@
 === Tumblr Crosspostr ===
 Contributors: meitar
-Tags: tumblr, post, crosspost, publishing
+Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
 Stable tag: 0.1
@@ -13,7 +13,19 @@ Tumblr Crosspostr cross-posts your published WordPress entries to Tumblr. All yo
 
 Tumblrize posts to Tumblr whenever you hit the "publish" button. It uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post.
 
-Tumblrize is very lightweight. It just requires you to connect your WordPress with your Tumblr account. After that, you're ready to cross-post!
+Tumblrize is very lightweight. It just requires you to connect your WordPress with your Tumblr account. After that, you're ready to cross-post! Tumblr Crosspostr uses [post formats](http://codex.wordpress.org/Post_Formats) to automatically choose a Tumblr post type to match. This means the "Standard" post format on your WordPress blog is treated as a "Text" post on your Tumblr blog, a post with the "Video" post format becomes a "Video" post on Tumblr, and so on. To take full advantage of Tumblr Crosspostr, I suggest you choose a WordPress theme that supports all the post formats that your Tumblr theme supports. :)
+
+The WordPress post format to Tumblr post type mapping looks like this:
+
+* WordPress's `Standard` post format becomes Tumblr's `Text` post type
+* WordPress's `Aside` and `Status` post formats become Tumblr's `Text` post type (without a title)
+* WordPress's `Image` post format becomes Tumblr's `Photo` post type
+* WordPress's `Video` post format becomes Tumblr's `Video` post type
+* WordPress's `Audio` post format becomes Tumblr's `Audio` post type
+* WordPress's `Quote` post format becomes Tumblr's `Quote` post type
+* WordPress's `Link` post format becomes Tumblr's `Link` post type
+* WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type
+* WordPress's `Chat` post format becomes Tumblr's `Chat` post type
 
 Other options allow sending additional metadata from your WordPress entry (notably tags) to Tumblr, and more.
 

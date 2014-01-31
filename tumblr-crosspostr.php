@@ -12,20 +12,15 @@
 
 class Tumblr_Crosspostr {
     private $tumblr; //< Tumblr API manipulation wrapper.
-    private $tumblr_post_types = array(
-        'text',
-        'photo',
-        'link',
-        'quote',
-        'audio',
-        'video',
-        'chat'
-    );
 
     public function __construct () {
         add_action('plugins_loaded', array($this, 'registerL10n'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
+        add_action('save_post', array($this, 'savePost'));
+        add_action('before_delete_post', array($this, 'removeFromTumblr'));
+        // run late, so themes have a chance to register support
+        add_action('after_setup_theme', array($this, 'validateThemeSupport'), 700);
 
         // Initialize consumer if we can, set up authroization flow if we can't.
         require_once 'lib/TumblrCrosspostrAPIClient.php';
@@ -49,17 +44,6 @@ class Tumblr_Crosspostr {
                 add_action('init', array($this, 'completeAuthorization'));
             }
         }
-
-        // i18n labels for post types
-        $this->tumblr_post_types = array(
-            'text' => __('Text', 'tumblr-crosspostr'),
-            'photo' => __('Photo', 'tumblr-crosspostr'),
-            'link' => __('Link', 'tumblr-crosspostr'),
-            'quote' => __('Quote', 'tumblr-crosspostr'),
-            'audio' => __('Audio', 'tumblr-crosspostr'),
-            'video' => __('Video', 'tumblr-crosspostr'),
-            'chat' => __('Chat', 'tumblr-crosspostr')
-        );
     }
 
     public function showMissingConfigNotice () {
@@ -71,6 +55,21 @@ class Tumblr_Crosspostr {
 </div>
 <?php
         }
+    }
+
+    public function validateThemeSupport () {
+        if (!current_theme_supports('post-formats')) {
+            add_action('admin_notices', array($this, 'showLackOfSupportForFormatsNotice'));
+        }
+
+    }
+
+    public function showLackOfSupportForFormatsNotice () {
+?>
+<div class="error">
+    <p><?php _e('The current theme does not seem to support WordPress Post Formats. Post Formats is required to make use of Tumblr Crosspostr. Please activate a theme that supports Post Formats before you begin cross-posting!', 'tumblr-crosspostr');?></p>
+</div>
+<?php
     }
 
     public function authorizeTumblrApp () {
@@ -105,6 +104,179 @@ class Tumblr_Crosspostr {
             'tumblr_crosspostr_settings',
             array($this, 'validateSettings')
         );
+    }
+
+    private function WordPressPostFormat2TumblrPostType ($format) {
+        switch ($format) {
+            case 'image':
+            case 'gallery':
+                $type = 'photo';
+                break;
+            case 'quote':
+                $type = 'quote';
+                break;
+            case 'link':
+                $type = 'link';
+                break;
+            case 'audio':
+                $type = 'audio';
+                break;
+            case 'video':
+                $type = 'video';
+                break;
+            case 'chat':
+                $type = 'chat';
+                break;
+            case 'aside':
+            case false:
+            default:
+                $type = 'text';
+                break;
+        }
+        return $type;
+    }
+
+    /**
+     * Translates a WordPress post status to a Tumblr post state.
+     *
+     * @param string $status The WordPress post status to translate.
+     * @return mixed The translates Tumblr post state or false if the WordPress status has no equivalently compatible state on Tumblr.
+     */
+    private function WordPressStatus2TumblrState ($status) {
+        switch ($status) {
+            case 'draft':
+            case 'private':
+                $state = $status;
+                break;
+            case 'publish':
+                $state = 'published';
+                break;
+            case 'future':
+                $state = 'queue';
+                break;
+            case 'auto-draft':
+            case 'inherit':
+            case 'pending':
+            default:
+                $state = false;
+        }
+        return $state;
+    }
+
+    public function savePost ($post_id) {
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
+        $options = get_option('tumblr_crosspostr_settings');
+
+        $format = get_post_format($post_id);
+        $status = get_post_status($post_id);
+        if (!$state = $this->WordPressStatus2TumblrState($status)) {
+            return; // do not crosspost unsupported post states
+        }
+        $tags = array();
+        if ($t = get_the_tags($post_id)) {
+            foreach ($t as $tag) {
+                $tags[] = $tag->name;
+            }
+        }
+        $common_params = array(
+            'type' => $this->WordPressPostFormat2TumblrPostType($format),
+            'state' => $state,
+            'tags' => implode(',', $tags),
+            'date' => get_post_time('U', true, $post_id),
+            'format' => 'html' // Tumblr's "formats" are always either 'html' or 'markdown'
+        );
+        $post_params = $this->prepareParamsByPostType($post_id, $common_params['type']);
+
+        if (!empty($options['additional_markup'])) {
+            $html = $this->replacePlaceholders($options['additional_markup'], $post_id);
+            foreach ($post_params as $k => $v) {
+                switch ($k) {
+                    case 'body':
+                    case 'caption':
+                    case 'description':
+                        $post_params[$k] = $v . $html; // append
+                        break;
+                }
+            }
+        }
+
+        $all_params = array_merge($common_params, $post_params);
+
+        // If there's already a Tumblr post ID for this post, edit that post on Tumblr.
+        $editing = get_post_meta($post_id, 'tumblr_post_id', true);
+        $tumblr_id = (!empty($editing)) ?
+            // TODO: Variablize the default hostname on a per-post basis.
+            $this->crosspostToTumblr($options['default_hostname'], $all_params, $editing) :
+            $this->crosspostToTumblr($options['default_hostname'], $all_params);
+        update_post_meta($post_id, 'tumblr_post_id', $tumblr_id);
+    }
+
+    private function replacePlaceholders ($str, $post_id) {
+        $placeholders = array(
+            '%permalink%',
+            '%the_title%',
+            '%blog_url%',
+            '%blog_name%'
+        );
+        foreach ($placeholders as $x) {
+            if (0 === strpos($x, '%blog_')) {
+                $arg = substr($x, 6, -1);
+                $str = str_replace($x, get_bloginfo($arg), $str);
+            } else {
+                $func = 'get_' . substr($x, 1, -1);
+                if (function_exists($func)) {
+                    $str = str_replace($x, call_user_func($func, $post_id), $str);
+                }
+            }
+        }
+        return $str;
+    }
+
+    private function crosspostToTumblr ($blog, $params, $tumblr_id = false, $deleting = false) {
+        // TODO: Smoothen this deleting thing.
+        //       Cancel WordPress deletions if Tumblr deletions aren't working?
+        if ($deleting === true && $tumblr_id) {
+            $params['id'] = $tumblr_id;
+            return $this->tumblr->deleteFromTumblrBlog($blog, $params);
+        } else if ($tumblr_id) {
+            $params['id'] = (int) $tumblr_id;
+            $id = $this->tumblr->editOnTumblrBlog($blog, $params);
+        } else {
+            $id = $this->tumblr->postToTumblrBlog($blog, $params);
+        }
+        return $id;
+    }
+
+    private function prepareParamsByPostType ($post_id, $type) {
+        $post_body = get_post_field('post_content', $post_id);
+        $r = array();
+        // TODO: Add error handling for when the $post_body doesn't give
+        //       us what we need to fulfill the Tumblr post type req's.
+        switch ($type) {
+            case 'link':
+                $r['title'] = get_post_field('post_title', $post_id);
+                $pattern = '/<a.*?href="(.*?)".*?>/';
+                $matches = array();
+                preg_match($pattern, $post_body, $matches);
+                $r['url'] = $matches[1];
+                $r['description'] = apply_filters('the_content', $post_body);
+                break;
+            case 'text':
+                $r['title'] = get_post_field('post_title', $post_id);
+                // fall through
+            case 'aside':
+            default:
+                $r['body'] = apply_filters('the_content', $post_body);
+                break;
+        }
+        return $r;
+    }
+
+    public function removeFromTumblr ($post_id) {
+        $options = get_option('tumblr_crosspostr_settings');
+        $tumblr_id = get_post_meta($post_id, 'tumblr_post_id', true);
+        // TODO: Variablize the default hostname on a per-post basis.
+        $this->crosspostToTumblr($options['default_hostname'], array(), $tumblr_id, true);
     }
 
     /**
@@ -259,23 +431,6 @@ class Tumblr_Crosspostr {
         <?php endif;?>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_default_post_type"><?php esc_html_e('Default Tumblr post type', 'tumblr-crosspostr');?></label>
-            </th>
-            <td>
-                <select id="tumblr_crosspostr_default_post_type" name="tumblr_crosspostr_settings[default_post_type]">
-                    <?php foreach ($this->tumblr_post_types as $k => $v) : ?>
-                        <option
-                            <?php if (isset($options['default_post_type']) && $options['default_post_type'] === $k) : print 'selected="selected"'; endif;?>
-                            value="<?php print esc_attr($k);?>">
-                                <?php print esc_html($v);?>
-                        </option>
-                    <?php endforeach;?>
-                </select>
-                <p class="description"><?php print sprintf(esc_html__('Select a default type. Useful if you usually publish posts of a specific type. (Defaults to %s.)', 'tumblr-crosspostr'), '<code>' . esc_html__('Text', 'tumblr-crosspostr') . '</code>');?></p>
-            </td>
-        </tr>
-        <tr>
-            <th>
                 <label for="tumblr_crosspost_exclude_categories"><?php esc_html_e('Do not crosspost entries in these categories:');?></label>
             </th>
             <td>
@@ -308,10 +463,10 @@ class Tumblr_Crosspostr {
         if (isset($options['additional_markup'])) {
             print esc_html($options['additional_markup']);
         } else {
-            print '<p class="tumblr-crosspostr-linkback"><a href="%permalink%" title="' . esc_html__('Go to the original post.', 'tumblr-crosspostr') . '" rel="bookmark">%posttitle%</a> ' . esc_html__('was originally published on', 'tumblr_crosspostr') . ' <a href="%bloglink%">%blogname%</a></p>';
+            print '<p class="tumblr-crosspostr-linkback"><a href="%permalink%" title="' . esc_html__('Go to the original post.', 'tumblr-crosspostr') . '" rel="bookmark">%the_title%</a> ' . esc_html__('was originally published on', 'tumblr_crosspostr') . ' <a href="%blog_url%">%blog_name%</a></p>';
         }
 ?></textarea>
-                <p class="description"><?php _e('Text or HTML you want to add to each post. Useful for things like a link back to your original post. You can use <code>%permalink%</code>, <code>%posttitle%</code>, <code>%bloglink%</code>, and <code>%blogname%</code> as placeholders for the cross-posted post\'s link, its title, the link to the homepage for this site, and the name of this blog, respectively.', 'tumblr-crosspostr');?></p>
+                <p class="description"><?php _e('Text or HTML you want to add to each post. Useful for things like a link back to your original post. You can use <code>%permalink%</code>, <code>%the_title%</code>, <code>%blog_url%</code>, and <code>%blog_name%</code> as placeholders for the cross-posted post\'s link, its title, the link to the homepage for this site, and the name of this blog, respectively.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
         <tr>
