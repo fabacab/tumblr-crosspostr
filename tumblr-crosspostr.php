@@ -68,7 +68,7 @@ class Tumblr_Crosspostr {
     public function showLackOfSupportForFormatsNotice () {
 ?>
 <div class="error">
-    <p><?php _e('The current theme does not seem to support WordPress Post Formats. Post Formats is required to make use of Tumblr Crosspostr. Please activate a theme that supports Post Formats before you begin cross-posting!', 'tumblr-crosspostr');?></p>
+    <p><?php _e('The current theme does not seem to support WordPress Post Formats. Post Formats is recommended to make full use of Tumblr Crosspostr. Without an active theme supporting Post Formats, your WordPress posts will only be crossposted as Text posts on Tumblr.', 'tumblr-crosspostr');?></p>
 </div>
 <?php
     }
