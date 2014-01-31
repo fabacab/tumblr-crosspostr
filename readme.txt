@@ -45,7 +45,7 @@ Tumblr Crosspostr transforms your WordPress website into a back-end for Tumblr. 
 
 See also the [Screenshots](https://wordpress.org/plugins/tumblr-crosspostr/screenshots/) section for a visual walk through of this process.
 
-=== Installation notes and troubleshooting ==
+=== Installation notes and troubleshooting ===
 
 Tumblr Crosspostr makes use of the [PHP Extension and Application Repository (PEAR)](http://pear.php.net/) for some core functions. Most systems have the required PEAR packages installed already and, if so, Tumblr Crosspostr prefers to use those. However, I also ship Tumblr Crosspostr with the required PEAR packages inside the `lib/pear/php` directory of the plugin, as a fallback.
 
