@@ -182,7 +182,7 @@ class Tumblr_Crosspostr {
         $destination = sanitize_text_field($_POST['tumblr_crosspostr_destination']);
         $base_hostname = ($destination) ? $destination : $options['default_hostname'];
         if ($base_hostname !== $options['default_hostname']) {
-            update_post_meta($post_id, 'tumblr_crosspostr_destination', $base_hostname);
+            update_post_meta($post_id, 'tumblr_base_hostname', $base_hostname);
         }
 
         if (isset($options['exclude_categories']) && in_category($options['exclude_categories'], $post_id)) {
@@ -345,7 +345,7 @@ class Tumblr_Crosspostr {
     }
 
     private function getTumblrBasename ($post_id) {
-        $d = get_post_meta($post_id, 'tumblr_crosspostr_destination', true);
+        $d = get_post_meta($post_id, 'tumblr_base_hostname', true);
         if (empty($d)) {
             $options = get_option('tumblr_crosspostr_settings');
             $d = $options['default_hostname'];
