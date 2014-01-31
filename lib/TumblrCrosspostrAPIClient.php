@@ -6,13 +6,11 @@
  */
 
 class Tumblr_Crosspostr_API_Client {
+    private $client; //< HTTP_OAuth_Consumer class.
     private $request_token_url = 'http://www.tumblr.com/oauth/request_token';
     private $authorize_url = 'http://www.tumblr.com/oauth/authorize';
     private $access_token_url = 'http://www.tumblr.com/oauth/access_token';
     private $api_url = 'http://api.tumblr.com/v2';
-    private $base_hostname;
-
-    public $client; //< HTTP_OAuth_Consumer class.
 
     function __construct ($consumer_key, $consumer_secret, $oauth_token = false, $oauth_token_secret = false) {
         // Preferentially use our own PEAR packages.

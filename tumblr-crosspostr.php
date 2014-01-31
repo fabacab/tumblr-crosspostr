@@ -17,6 +17,7 @@ class Tumblr_Crosspostr {
         add_action('plugins_loaded', array($this, 'registerL10n'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
+        add_action('add_meta_boxes', array($this, 'addMetaBox'));
         add_action('save_post', array($this, 'savePost'));
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
         // run late, so themes have a chance to register support
@@ -165,7 +166,24 @@ class Tumblr_Crosspostr {
 
     public function savePost ($post_id) {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
+        if (!isset($_POST['tumblr_crosspostr_meta_box_nonce']) || !wp_verify_nonce($_POST['tumblr_crosspostr_meta_box_nonce'], 'editing_tumblr_crosspostr')) {
+            return;
+        }
+
+        if ('N' === $_POST['tumblr_crosspostr_crosspost']) {
+            update_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N'); // 'N' means "no"
+            return;
+        } else {
+            delete_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N');
+        }
+
         $options = get_option('tumblr_crosspostr_settings');
+
+        $destination = sanitize_text_field($_POST['tumblr_crosspostr_destination']);
+        $base_hostname = ($destination) ? $destination : $options['default_hostname'];
+        if ($base_hostname !== $options['default_hostname']) {
+            update_post_meta($post_id, 'tumblr_crosspostr_destination', $base_hostname);
+        }
 
         if (isset($options['exclude_categories']) && in_category($options['exclude_categories'], $post_id)) {
             return;
@@ -219,9 +237,8 @@ class Tumblr_Crosspostr {
         // If there's already a Tumblr post ID for this post, edit that post on Tumblr.
         $editing = get_post_meta($post_id, 'tumblr_post_id', true);
         $tumblr_id = (!empty($editing)) ?
-            // TODO: Variablize the default hostname on a per-post basis.
-            $this->crosspostToTumblr($options['default_hostname'], $all_params, $editing) :
-            $this->crosspostToTumblr($options['default_hostname'], $all_params);
+            $this->crosspostToTumblr($base_hostname, $all_params, $editing) :
+            $this->crosspostToTumblr($base_hostname, $all_params);
         update_post_meta($post_id, 'tumblr_post_id', $tumblr_id);
     }
 
@@ -327,11 +344,19 @@ class Tumblr_Crosspostr {
         return $matches[$group];
     }
 
+    private function getTumblrBasename ($post_id) {
+        $d = get_post_meta($post_id, 'tumblr_crosspostr_destination', true);
+        if (empty($d)) {
+            $options = get_option('tumblr_crosspostr_settings');
+            $d = $options['default_hostname'];
+        }
+        return $d;
+    }
+
     public function removeFromTumblr ($post_id) {
         $options = get_option('tumblr_crosspostr_settings');
         $tumblr_id = get_post_meta($post_id, 'tumblr_post_id', true);
-        // TODO: Variablize the default hostname on a per-post basis.
-        $this->crosspostToTumblr($options['default_hostname'], array(), $tumblr_id, true);
+        $this->crosspostToTumblr($this->getTumblrBasename($post_id), array(), $tumblr_id, true);
     }
 
     /**
@@ -397,6 +422,42 @@ class Tumblr_Crosspostr {
         );
     }
 
+    public function addMetaBox ($post) {
+        add_meta_box(
+            'tumblr-crosspostr-meta-box',
+            __('Tumblr Crosspostr', 'tumblr-crosspostr'),
+            array($this, 'renderMetaBox'),
+            'post',
+            'side'
+        );
+    }
+
+    public function renderMetaBox ($post) {
+        wp_nonce_field('editing_tumblr_crosspostr', 'tumblr_crosspostr_meta_box_nonce');
+        $options = get_option('tumblr_crosspostr_settings');
+
+        // Set default crossposting options for this post.
+        $x = get_post_meta($post->ID, 'tumblr_crosspostr_crosspost', true);
+        $d = $this->getTumblrBasename($post->ID);
+?>
+<fieldset>
+    <legend><?php esc_html_e('Send this post to Tumblr?', 'tumblr-crosspostr');?></legend>
+    <p class="description" style="float: right; width: 75%;"><?php esc_html_e('If this post is in a category that Tumblr Crosspostr excludes, this will be ignored.', 'tumblr-crosspostr');?></p>
+    <ul>
+        <li><label><input type="radio" name="tumblr_crosspostr_crosspost" value="Y"<?php if ('N' !== $x) { print ' checked="checked"'; }?>> <?php esc_html_e('Yes', 'tumblr-crosspostr');?></label></li>
+        <li><label><input type="radio" name="tumblr_crosspostr_crosspost" value="N"<?php if ('N' === $x) { print ' checked="checked"'; }?>> <?php esc_html_e('No', 'tumblr-crosspostr');?></label></li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><?php esc_html_e('Crosspost destination', 'tumblr-crosspostr');?><legend>
+    <p><label>
+        <?php esc_html_e('Send to my Tumblr blog titled', 'tumblr-crosspostr');?>
+        <?php print $this->tumblrBlogsSelectField(array('name' => 'tumblr_crosspostr_destination'), $d);?>
+    </label></p>
+</fieldset>
+<?php
+    }
+
     /**
      * Writes the HTML for the options page, and each setting, as needed.
      */
@@ -453,7 +514,9 @@ class Tumblr_Crosspostr {
         <?php elseif (isset($options['access_token'])) : ?>
         <tr>
             <th colspan="2">
-                <div class="updated"><p><?php esc_html_e('Connected to Tumblr!', 'tumblr-crosspostr');?></p></div>
+                <div class="updated">
+                    <p><?php esc_html_e('Connected to Tumblr!', 'tumblr-crosspostr');?></p>
+                </div>
                 <?php // TODO: Should the access tokens never be revealed to the client? ?>
                 <input type="hidden" name="tumblr_crosspostr_settings[access_token]" value="<?php print esc_attr($options['access_token']);?>" />
                 <input type="hidden" name="tumblr_crosspostr_settings[access_token_secret]" value="<?php print esc_attr($options['access_token_secret']);?>" />
@@ -467,18 +530,10 @@ class Tumblr_Crosspostr {
     <tbody>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_default_hostname"><?php esc_html_e('Sync posts from this blog to my Tumblr at', 'tumblr-crosspostr');?></label>
+                <label for="tumblr_crosspostr_default_hostname"><?php esc_html_e('Default Tumblr blog for crossposts', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <select id="tumblr_crosspostr_default_hostname" name="tumblr_crosspostr_settings[default_hostname]">
-                    <?php foreach ($this->tumblr->getUserBlogs() as $blog) : ?>
-                    <option
-                        <?php if (isset($options['default_hostname']) && $options['default_hostname'] === parse_url($blog->url, PHP_URL_HOST)) : print 'selected="selected"'; endif;?>
-                        value="<?php print esc_attr(parse_url($blog->url, PHP_URL_HOST));?>">
-                            <?php print esc_html($blog->title);?>
-                    </option>
-                    <?php endforeach;?>
-                </select>
+                <?php print $this->tumblrBlogsSelectField(array('id' => 'tumblr_crosspostr_default_hostname', 'name' => 'tumblr_crosspostr_settings[default_hostname]'), $options['default_hostname']);?>
                 <p class="description"><?php esc_html_e('Choose which Tumblr blog you want to send your posts to by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
@@ -560,6 +615,27 @@ class Tumblr_Crosspostr {
         $url .= '&oac[admin_contact_email]=' . get_bloginfo('admin_email');
         $url .= '&oac[default_callback_url]=' . urlencode(plugins_url(basename(__DIR__) . '/oauth-callback.php'));
         return $url;
+    }
+
+    private function tumblrBlogsSelectField ($attributes = array(), $selected = false) {
+        $html = '<select';
+        if (!empty($attributes)) {
+            foreach ($attributes as $k => $v) {
+                $html .=  ' ' . $k . '="' . esc_attr($v) . '"';
+            }
+        }
+        $html .= '>';
+        foreach ($this->tumblr->getUserBlogs() as $blog) {
+            $html .= '<option value="' . esc_attr(parse_url($blog->url, PHP_URL_HOST)) . '"';
+            if ($selected && $selected === parse_url($blog->url, PHP_URL_HOST)) {
+                $html .= ' selected="selected"';
+            }
+            $html .= '>';
+            $html .= esc_html($blog->title);
+            $html .= '</option>';
+        }
+        $html .= '</select>';
+        return $html;
     }
 
     // Modified from https://stackoverflow.com/a/4997018/2736587 which claims
