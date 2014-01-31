@@ -299,12 +299,11 @@ class Tumblr_Crosspostr {
                         $errmsg = __('Consumer secret cannot be empty.', 'tumblr-crosspostr');
                         add_settings_error('tumblr_crosspostr_settings', 'empty-consumer-secret', $errmsg);
                     }
-                    $safe_input[$k]   = sanitize_text_field($v);
+                    $safe_input[$k] = sanitize_text_field($v);
                 break;
                 case 'access_token':
                 case 'access_token_secret':
                 case 'default_hostname':
-                case 'default_post_type':
                     $safe_input[$k] = sanitize_text_field($v);
                 break;
                 case 'exclude_categories':
@@ -315,7 +314,7 @@ class Tumblr_Crosspostr {
                     $safe_input[$k] = $safe_v;
                 break;
                 case 'additional_markup':
-                    $safe_v = trim($v);
+                    $safe_input[$k] = trim($v);
                 break;
                 case 'exclude_tags':
                     $safe_input[$k] = intval($v);
