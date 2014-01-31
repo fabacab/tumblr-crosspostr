@@ -43,6 +43,8 @@ Tumblr Crosspostr transforms your WordPress website into a back-end for Tumblr. 
 1. Click "Allow" to grant access to your blog from Tumblr Crosspostr.
 1. Start posting!!!
 
+See also the [Screenshots](https://wordpress.org/plugins/tumblr-crosspostr/screenshots/) section for a visual walk through of this process.
+
 === Installation notes and troubleshooting ==
 
 Tumblr Crosspostr makes use of the [PHP Extension and Application Repository (PEAR)](http://pear.php.net/) for some core functions. Most systems have the required PEAR packages installed already and, if so, Tumblr Crosspostr prefers to use those. However, I also ship Tumblr Crosspostr with the required PEAR packages inside the `lib/pear/php` directory of the plugin, as a fallback.
@@ -120,9 +122,13 @@ Not yet, but with your help it can be. To help translate the plugin into your la
 
 == Screenshots ==
 
-1. The Tumblr Crosspostr options screen.
+1. When you first install Tumblr Crosspostr, you'll need to connect it to your Tumblr account before you can start crossposting. This screenshot shows how its options screen first appears after you active the plugin.
 
-2. The Tumblr Crosspostr custom post editing box, allowing you to specify individual Tumblr Crosspostr options on a per-post basis.
+2. Once you create and enter your API key and click "Save Changes," the options screen prompts you to connect to Tumblr with another button. Press the "Click here to connect to Tumblr" button to begin the OAuth connection process.
+
+3. After allowing Tumblr Crosspostr access to your Tumblr account, you'll find you're able to access the remainder of the options page. You must choose at least one default Tumblr blog to send your crossposts to, so this option is highlighted if it is not yet set. Set your cross-posting preferences and click "Save Changes." You're now ready to start crossposting!
+
+4. You can optionally choose not to crosspost individual WordPress posts from the Tumblr Crosspostr custom post editing box. This box also enables you to send a specific post to a Tumblr blog other than the default one you selected in the previous step.
 
 == Changelog ==
 
