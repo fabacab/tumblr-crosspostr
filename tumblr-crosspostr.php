@@ -250,16 +250,41 @@ class Tumblr_Crosspostr {
     private function prepareParamsByPostType ($post_id, $type) {
         $post_body = get_post_field('post_content', $post_id);
         $r = array();
-        // TODO: Add error handling for when the $post_body doesn't give
-        //       us what we need to fulfill the Tumblr post type req's.
         switch ($type) {
+            case 'photo':
+                $r['caption'] = apply_filters('the_content', $this->strip_only($post_body, 'img', true, 1));
+                $r['link'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
+                $r['source'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
+                break;
+            case 'quote':
+                // TODO: Buggy. Doesn't always pick up the contents of cite="" attribute.
+                $r['quote'] = $this->extractByRegex(
+                    '/<blockquote.*?(?:cite="(.*?)")?.*?>(.*?)<\/blockquote>/',
+                    $post_body,
+                    2
+                );
+                $r['source'] = $this->extractByRegex(
+                    '/<blockquote.*?(?:cite="(.*?)")?.*?>(.*?)<\/blockquote>/',
+                    $post_body,
+                    1
+                );
+                break;
             case 'link':
                 $r['title'] = get_post_field('post_title', $post_id);
-                $pattern = '/<a.*?href="(.*?)".*?>/';
-                $matches = array();
-                preg_match($pattern, $post_body, $matches);
-                $r['url'] = $matches[1];
+                $r['url'] = $this->extractByRegex('/<a.*?href="(.*?)".*?>/', $post_body, 1);
                 $r['description'] = apply_filters('the_content', $post_body);
+                break;
+            case 'chat':
+                // TODO: Not yet implemented.
+                break;
+            case 'audio':
+                $r['caption'] = apply_filters('the_content', $post_body);
+                $r['external_url'] = $this->extractByRegex('/<a.*?href="(.*?\.[Mm][Pp]3)".*?>/', $post_body, 1);
+                break;
+            case 'video':
+                $r['caption'] = apply_filters('the_content', $this->strip_only($post_body, 'iframe', true, 1));
+                $r['embed'] = 'https://www.youtube.com/watch?v='
+                    . $this->extractByRegex('/youtube\.com\/(?:v|embed)\/([\w\-]+)/', $post_body, 1);
                 break;
             case 'text':
                 $r['title'] = get_post_field('post_title', $post_id);
@@ -270,6 +295,22 @@ class Tumblr_Crosspostr {
                 break;
         }
         return $r;
+    }
+
+    // TODO: Add error handling for when the $post_body doesn't give
+    //       us what we need to fulfill the Tumblr post type req's.
+    /**
+     * Extracts a given string from another string according to a regular expression.
+     *
+     * @param string $pattern The PCRE-compatible regular expression.
+     * @param string $str The source from which to extract text matching the $pattern.
+     * @param int $group If the regex uses capture groups, the number of the capture group to return.
+     * @return string The matched text.
+     */
+    private function extractByRegex ($pattern, $str, $group = 0) {
+        $matches = array();
+        preg_match($pattern, $str, $matches);
+        return $matches[$group];
     }
 
     public function removeFromTumblr ($post_id) {
@@ -506,6 +547,25 @@ class Tumblr_Crosspostr {
         $url .= '&oac[default_callback_url]=' . urlencode(plugins_url(basename(__DIR__) . '/oauth-callback.php'));
         return $url;
     }
+
+    // Modified from https://stackoverflow.com/a/4997018/2736587 which claims
+    // http://www.php.net/manual/en/function.strip-tags.php#96483
+    // as its source. Werksferme.
+    private function strip_only($str, $tags, $stripContent = false, $limit = -1) {
+        $content = '';
+        if(!is_array($tags)) {
+            $tags = (strpos($str, '>') !== false ? explode('>', str_replace('<', '', $tags)) : array($tags));
+            if(end($tags) == '') array_pop($tags);
+        }
+        foreach($tags as $tag) {
+            if ($stripContent) {
+                $content = '(.+</'.$tag.'[^>]*>|)';
+            }
+            $str = preg_replace('#</?'.$tag.'[^>]*>'.$content.'#is', '', $str, $limit);
+        }
+        return $str;
+    }
+
 }
 
 $tumblr_crosspostr = new Tumblr_Crosspostr();

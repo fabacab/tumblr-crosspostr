@@ -11,30 +11,36 @@ Tumblr Crosspostr cross-posts your published WordPress entries to Tumblr. All yo
 
 == Description ==
 
-Tumblrize posts to Tumblr whenever you hit the "publish" button. It uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post.
+Tumblr Crosspostr posts to Tumblr whenever you hit the "Publish" (or "Save Draft") button. It uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post. Deleting a post from WordPress that you've previously cross-posted to Tumblr deletes it from Tumblr, too.
 
-Tumblrize is very lightweight. It just requires you to connect your WordPress with your Tumblr account. After that, you're ready to cross-post! Tumblr Crosspostr uses [post formats](http://codex.wordpress.org/Post_Formats) to automatically choose a Tumblr post type to match. This means the "Standard" post format on your WordPress blog is treated as a "Text" post on your Tumblr blog, a post with the "Video" post format becomes a "Video" post on Tumblr, and so on. To take full advantage of Tumblr Crosspostr, I suggest you choose a WordPress theme that supports all the post formats that your Tumblr theme supports. :)
+Tumblr Crosspostr is very lightweight. It just requires you to connect to your Tumblr account from the plugin options screen. After that, you're ready to cross-post!
+
+Tumblr Crosspostr uses [post formats](http://codex.wordpress.org/Post_Formats) to automatically choose the appropriate Tumblr post type. This means the "Standard" post format on your WordPress blog is treated as a "Text" post on your Tumblr blog, a post with the "Video" post format becomes a "Video" post on Tumblr, and so on. To take full advantage of Tumblr Crosspostr, I suggest you choose a WordPress theme that supports all the post formats that your Tumblr theme supports. :)
 
 The WordPress post format to Tumblr post type mapping looks like this:
 
-* WordPress's `Standard` post format becomes Tumblr's `Text` post type
-* WordPress's `Aside` and `Status` post formats become Tumblr's `Text` post type (without a title)
+* WordPress's `Standard`, `Aside`, and `Status` post formats become Tumblr's `Text` post type
 * WordPress's `Image` post format becomes Tumblr's `Photo` post type
 * WordPress's `Video` post format becomes Tumblr's `Video` post type
 * WordPress's `Audio` post format becomes Tumblr's `Audio` post type
 * WordPress's `Quote` post format becomes Tumblr's `Quote` post type
 * WordPress's `Link` post format becomes Tumblr's `Link` post type
-* WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type
-* WordPress's `Chat` post format becomes Tumblr's `Chat` post type
+* WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type (sadly this is not yet implemented, but maybe one day soon!!)
+* WordPress's `Chat` post format becomes Tumblr's `Chat` post type (sadly this is not yet implemented, but maybe one day soon!!)
 
-Other options allow sending additional metadata from your WordPress entry (notably tags) to Tumblr, and more.
+Other options enable tweaking additional metadata from your WordPress entry (notably tags) to Tumblr, and more.
+
+Tumblr Crosspostr transforms your WordPress website into a back-end for Tumblr. Create your posts using WordPress, but publish to Tumblr. This means you'll always have a portable copy of your entire Tumblr blog.
 
 == Installation ==
 
 1. Download the plugin file.
 1. Unzip the file into your 'wp-content/plugins/' directory.
 1. Go to your WordPress administration panel and activate the plugin.
-1. Go to Tumblrize Options (from the Settings menu) and provide your Tumblr login information.
+1. Go to Tumblr Crosspostr Settings (from the Settings menu) and either create or enter your Tumblr OAuth consumer key and consumer secret. Then click "Save Changes."
+1. Once you've entered your consumer key and consumer secret, a "Connect to Tumblr" button will appear. Click that to be redirected to Tumblr's authorization page.
+1. Click "Allow" to grant access to your blog from Tumblr Crosspostr.
+1. Start posting!!!
 
 == Frequently Asked Questions ==
 
