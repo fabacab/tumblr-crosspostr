@@ -253,7 +253,11 @@ class Tumblr_Crosspostr {
                 $str = str_replace($x, get_bloginfo($arg), $str);
             } else {
                 $func = 'get_' . substr($x, 1, -1);
-                if (function_exists($func)) {
+                $valid_funcs = array(
+                    'get_permalink',
+                    'get_the_title'
+                );
+                if (in_array($func, $valid_funcs, true)) {
                     $str = str_replace($x, call_user_func($func, $post_id), $str);
                 }
             }
@@ -347,7 +351,7 @@ class Tumblr_Crosspostr {
         $d = get_post_meta($post_id, 'tumblr_base_hostname', true);
         if (empty($d)) {
             $options = get_option('tumblr_crosspostr_settings');
-            $d = $options['default_hostname'];
+            $d = (isset($options['default_hostname'])) ? $options['default_hostname'] : '';
         }
         return $d;
     }
