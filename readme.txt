@@ -4,11 +4,11 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.2
+Stable tag: 0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Tumblr Crosspostr cross-posts your published WordPress entries to Tumblr. Changes to your WordPress posts are reflected in your Tumblr posts.
+Tumblr Crosspostr cross-posts your WordPress entries to Tumblr. Changes to your WordPress posts are reflected in your Tumblr posts.
 
 == Description ==
 
@@ -29,7 +29,7 @@ The WordPress post format to Tumblr post type mapping looks like this:
 * WordPress's `Chat` post format becomes Tumblr's `Chat` post type
 * WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type (sadly this is not yet implemented, but maybe one day soon!!)
 
-Other options enable tweaking additional metadata from your WordPress entry (notably tags) to Tumblr, and more.
+Other options enable tweaking additional metadata from your WordPress entry (notably tags and "Content source" attributions) to Tumblr, and more.
 
 Tumblr Crosspostr transforms your WordPress website into a back-end for Tumblr. Create your posts using WordPress, but publish to Tumblr. This means you'll always have a portable copy of your entire Tumblr blog.
 
@@ -104,6 +104,10 @@ Yes. WordPress's tags are also crossposted to Tumblr. If you'd like to keep your
 
 Additionally, the "Automatically add these tags to all crossposts" setting lets you enter a comma-separated list of tags that will always be applied to your Tumblr crossposts.
 
+= Does Tumblr Crosspostr properly attribute content sources? =
+
+Yes. By default, Tumblr Crosspostr will set itself up so that your WordPress blog's posts are attributed as the "Source" for each of your crossposts. Moreover, in each of your posts, you can enter a "Content source" URL in exactly the way Tumblr's own post editor lets you attribute sources, which will be entered as the "Content source" meta field on your Tumblr posts. You can even turn this feature off entirely if you're using Tumblr Crosspostr "secretly," as the back-end to a more elaborate publishing platform might do.
+
 = Can I send older WordPress posts to Tumblr? =
 
 Yes. Go edit the desired post, verify the crosspost option is set to `Yes`, and update the post. Tumblr Crosspostr will keep the original post date. Note that sometimes it seems to take Tumblr a few minutes to reflect many new changes, so you may want to use [Tumblr's "mega editor"](http://staff.tumblr.com/post/746164238/mega-editor) to verify that your post really made it over to Tumblr.
@@ -142,9 +146,15 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 == Changelog ==
 
+= Version 0.3 =
+
+* Feature: Implement support for [Tumblr's meta "Content source" field](http://staff.tumblr.com/post/1059624418/content-attribution). Use the `Content source` field in Tumblr Crosspostr's post editing box to set the "Content source" field of your post on Tumblr.
+* Security: Harden HTML placeholder replacement subroutine.
+* Other minor improvements fix several PHP `E_NOTICE` messages on extremely sensitive systems.
+
 = Version 0.2 =
 
-* Implement support for `Chat` post format and type. Simply write your WordPress chat post the way Tumblr expects, one remark per line with speaker labels, like this:
+* Feature: Implement support for `Chat` post format and type. Simply write your WordPress chat post the way Tumblr expects, one remark per line with speaker labels, like this:
 
         Person A: Some inane observation.
         Person B: Some witty retort.

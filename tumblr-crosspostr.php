@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.2
+ * Version: 0.3
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -183,6 +183,15 @@ class Tumblr_Crosspostr {
         $base_hostname = ($destination) ? $destination : $options['default_hostname'];
         update_post_meta($post_id, 'tumblr_base_hostname', $base_hostname);
 
+        $source_url = false;
+        if (empty($_POST['tumblr_crosspostr_meta_source_url']) && 'Y' === $options['auto_source']) {
+            $source_url = get_permalink($post_id);
+            delete_post_meta($post_id, 'tumblr_source_url');
+        } else {
+            $source_url = sanitize_text_field($_POST['tumblr_crosspostr_meta_source_url']);
+            update_post_meta($post_id, 'tumblr_source_url', $source_url);
+        }
+
         if (isset($options['exclude_categories']) && in_category($options['exclude_categories'], $post_id)) {
             return;
         }
@@ -205,6 +214,7 @@ class Tumblr_Crosspostr {
             'date' => get_post_time('U', true, $post_id),
             'format' => 'html' // Tumblr's "formats" are always either 'html' or 'markdown'
         );
+        if ($source_url) { $common_params['source_url'] = $source_url; }
 
         if (!empty($options['exclude_tags'])) { unset($common_params['tags']); }
 
@@ -396,6 +406,11 @@ class Tumblr_Crosspostr {
                     }
                     $safe_input[$k] = $safe_v;
                 break;
+                case 'auto_source':
+                    if ('Y' === $v || 'N' === $v) {
+                        $safe_input[$k] = $v;
+                    }
+                break;
                 case 'additional_markup':
                     $safe_input[$k] = trim($v);
                 break;
@@ -450,6 +465,7 @@ class Tumblr_Crosspostr {
         // Set default crossposting options for this post.
         $x = get_post_meta($post->ID, 'tumblr_crosspostr_crosspost', true);
         $d = $this->getTumblrBasename($post->ID);
+        $s = get_post_meta($post->ID, 'tumblr_source_url', true);
 ?>
 <fieldset>
     <legend><?php esc_html_e('Send this post to Tumblr?', 'tumblr-crosspostr');?></legend>
@@ -465,6 +481,19 @@ class Tumblr_Crosspostr {
         <?php esc_html_e('Send to my Tumblr blog titled', 'tumblr-crosspostr');?>
         <?php print $this->tumblrBlogsSelectField(array('name' => 'tumblr_crosspostr_destination'), $d);?>
     </label></p>
+</fieldset>
+<fieldset>
+    <legend><?php esc_html_e('Tumblr meta fields', 'tumblr-crosspostr');?></legend>
+    <p>
+        <label><?php esc_html_e('Content source:', 'tumblr-crosspostr');?>
+            <input id="tumblr_crosspostr_meta_source_url"
+                name="tumblr_crosspostr_meta_source_url"
+                title="<?php esc_attr_e('Set the content source of this post on Tumblr by pasting the URL where you found the content you are blogging about.', 'tumblr-crosspostr'); if ($options['auto_source'] === 'Y') { print ' ' . esc_attr__('Leave this blank to set the content source URL of your Tumblr post to the permalink of this WordPress post.', 'tumblr-crosspostr'); } ?>"
+                value="<?php print esc_attr($s);?>"
+                placeholder="<?php esc_attr_e('//original-source.com/', 'tumblr-crosspostr');?>" />
+            <span class="description"><?php esc_html_e('Provide source attribution, if relevant.', 'tumblr-crosspostr');?></span>
+        </label>
+    </p>
 </fieldset>
 <?php
     }
@@ -574,6 +603,34 @@ class Tumblr_Crosspostr {
         </tr>
         <tr>
             <th>
+                <label for="tumblr_crosspostr_auto_source_yes"><?php esc_html_e('Use permalinks from this blog as the "Content source" for crossposts on Tumblr?');?></label>
+            </th>
+            <td>
+                <ul style="float: left;">
+                    <li>
+                        <label>
+                            <input type="radio" id="tumblr_crosspostr_auto_source_yes"
+                                name="tumblr_crosspostr_settings[auto_source]"
+                                <?php if (!isset($options['auto_source']) || $options['auto_source'] === 'Y') { print 'checked="checked"'; } ?>
+                                value="Y" />
+                            <?php esc_html_e('Yes', 'tumblr-crosspostr');?>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="tumblr_crosspostr_auto_source_no"
+                                name="tumblr_crosspostr_settings[auto_source]"
+                                <?php if (isset($options['auto_source']) && $options['auto_source'] === 'N') { print 'checked="checked"'; } ?>
+                                value="N" />
+                            <?php esc_html_e('No', 'tumblr-crosspostr');?>
+                        </label>
+                    </li>
+                </ul>
+                <p class="description" style="padding: 0 5em;"><?php print sprintf(esc_html__('When enabled, leaving the %sContent source%s field blank on a given entry will result in setting %sthe "Content source" field on your Tumblr post%s to the permalink of your WordPress post. Useful for providing automatic back-links to your main blog, but turn this off if you "secretly" use Tumblr Crosspostr as the back-end of a publishing platform.', 'tumblr-crosspostr'), '<code>', '</code>', '<a href="http://staff.tumblr.com/post/1059624418/content-attribution">', '</a>');?></p>
+            </td>
+        </tr>
+        <tr>
+            <th>
                 <label for="tumblr_crosspostr_additional_markup"><?php esc_html_e('Add this markup to each crossposted entry.', 'tumblr-crosspostr');?></label>
             </th>
             <td>
@@ -587,7 +644,7 @@ class Tumblr_Crosspostr {
             print '<p class="tumblr-crosspostr-linkback"><a href="%permalink%" title="' . esc_html__('Go to the original post.', 'tumblr-crosspostr') . '" rel="bookmark">%the_title%</a> ' . esc_html__('was originally published on', 'tumblr_crosspostr') . ' <a href="%blog_url%">%blog_name%</a></p>';
         }
 ?></textarea>
-                <p class="description"><?php _e('Text or HTML you want to add to each post. Useful for things like a link back to your original post. You can use <code>%permalink%</code>, <code>%the_title%</code>, <code>%blog_url%</code>, and <code>%blog_name%</code> as placeholders for the cross-posted post\'s link, its title, the link to the homepage for this site, and the name of this blog, respectively.', 'tumblr-crosspostr');?></p>
+                <p class="description"><?php _e('Text or HTML you want to add to each post. Useful for things like a link back to your original post. You can use <code>%permalink%</code>, <code>%the_title%</code>, <code>%blog_url%</code>, and <code>%blog_name%</code> as placeholders for the cross-posted post\'s link, its title, the link to the homepage for this site, and the name of this blog, respectively. Leave this blank or use this field for a different purpose if you prefer to use only the Tumblr "Content source" meta field for links back to your main blog.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
         <tr>
