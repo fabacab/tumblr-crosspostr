@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.1
+Stable tag: 0.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -26,8 +26,8 @@ The WordPress post format to Tumblr post type mapping looks like this:
 * WordPress's `Audio` post format becomes Tumblr's `Audio` post type
 * WordPress's `Quote` post format becomes Tumblr's `Quote` post type
 * WordPress's `Link` post format becomes Tumblr's `Link` post type
+* WordPress's `Chat` post format becomes Tumblr's `Chat` post type
 * WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type (sadly this is not yet implemented, but maybe one day soon!!)
-* WordPress's `Chat` post format becomes Tumblr's `Chat` post type (sadly this is not yet implemented, but maybe one day soon!!)
 
 Other options enable tweaking additional metadata from your WordPress entry (notably tags) to Tumblr, and more.
 
@@ -106,7 +106,7 @@ Additionally, the "Automatically add these tags to all crossposts" setting lets 
 
 = Can I send older WordPress posts to Tumblr? =
 
-Yes. Go edit the desired post, verify the crosspost option is set to `Yes`, and update the post. Tumblr Crosspostr will keep the original post date. Note that sometimes it it seems to take Tumblr a few minutes to reflect many new changes, so you may want to use [Tumblr's "mega editor"](http://staff.tumblr.com/post/746164238/mega-editor) to verify that your post really made it over to Tumblr.
+Yes. Go edit the desired post, verify the crosspost option is set to `Yes`, and update the post. Tumblr Crosspostr will keep the original post date. Note that sometimes it seems to take Tumblr a few minutes to reflect many new changes, so you may want to use [Tumblr's "mega editor"](http://staff.tumblr.com/post/746164238/mega-editor) to verify that your post really made it over to Tumblr.
 
 = What if I edit a post that has been cross-posted? =
 
@@ -126,7 +126,7 @@ Tumblr Crosspostr will still work even if your theme doesn't support the [Post F
 
 == Screenshots ==
 
-1. When you first install Tumblr Crosspostr, you'll need to connect it to your Tumblr account before you can start crossposting. This screenshot shows how its options screen first appears after you active the plugin.
+1. When you first install Tumblr Crosspostr, you'll need to connect it to your Tumblr account before you can start crossposting. This screenshot shows how its options screen first appears after you activate the plugin.
 
 2. Once you create and enter your API key and click "Save Changes," the options screen prompts you to connect to Tumblr with another button. Press the "Click here to connect to Tumblr" button to begin the OAuth connection process.
 
@@ -135,6 +135,13 @@ Tumblr Crosspostr will still work even if your theme doesn't support the [Post F
 4. You can optionally choose not to crosspost individual WordPress posts from the Tumblr Crosspostr custom post editing box. This box also enables you to send a specific post to a Tumblr blog other than the default one you selected in the previous step.
 
 == Changelog ==
+
+= Version 0.2 =
+
+* Implement support for `Chat` post format and type. Simply write your WordPress chat post the way Tumblr expects, one remark per line with speaker labels, like this:
+
+        Person A: Some inane observation.
+        Person B: Some witty retort.
 
 = Verson 0.1 =
 
