@@ -124,6 +124,12 @@ Not yet, but with your help it can be. To help translate the plugin into your la
 
 Tumblr Crosspostr will still work even if your theme doesn't support the [Post Formats](http://codex.wordpress.org/Post_Formats) feature. However, in that case, you will only be able to make Text posts on Tumblr. Consider asking your theme developer to update your theme code so that it supports Post Formats.
 
+If you feel comfortable doing this yourself, then in most cases, this is literally a one-line change. Simply use the [add_theme_support()](http://codex.wordpress.org/Function_Reference/add_theme_support) function in your theme's `functions.php` file:
+
+    add_theme_support('post-formats', array('link', 'image', 'quote', 'video', 'audio', 'chat''));
+
+And if you choose to do this yourself, consider getting in touch with your theme's developer to let them know how easy it was! We devs love to hear this kind of stuff. :)
+
 == Screenshots ==
 
 1. When you first install Tumblr Crosspostr, you'll need to connect it to your Tumblr account before you can start crossposting. This screenshot shows how its options screen first appears after you activate the plugin.
