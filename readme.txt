@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.3
+Stable tag: 0.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -145,6 +145,12 @@ And if you choose to do this yourself, consider getting in touch with your theme
 4. You can optionally choose not to crosspost individual WordPress posts from the Tumblr Crosspostr custom post editing box. This box also enables you to send a specific post to a Tumblr blog other than the default one you selected in the previous step.
 
 == Changelog ==
+
+= Version 0.4 =
+
+* "Quote" posts got better:
+    * Fixes bug where certain `<blockquote>` code caused failure to post to Tumblr.
+    * Start your WordPress post with a `<blockquote>` and everything in your post after the first `</blockquote>` will be used for the "Source" field on Tumblr, including HTML.
 
 = Version 0.3 =
 
