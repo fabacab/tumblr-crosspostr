@@ -300,17 +300,10 @@ class Tumblr_Crosspostr {
                 $r['source'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
                 break;
             case 'quote':
-                // TODO: Buggy. Doesn't always pick up the contents of cite="" attribute.
-                $r['quote'] = $this->extractByRegex(
-                    '/<blockquote.*?(?:cite="(.*?)")?.*?>(.*?)<\/blockquote>/',
-                    $post_body,
-                    2
-                );
-                $r['source'] = $this->extractByRegex(
-                    '/<blockquote.*?(?:cite="(.*?)")?.*?>(.*?)<\/blockquote>/',
-                    $post_body,
-                    1
-                );
+                $pattern = '/<blockquote.*?>(.*?)<\/blockquote>/';
+                $r['quote'] = $this->extractByRegex($pattern, $post_body, 1);
+                $len = strlen($this->extractByRegex($pattern, $post_body, 0));
+                $r['source'] = apply_filters('the_content', substr($post_body, $len));
                 break;
             case 'link':
                 $r['title'] = get_post_field('post_title', $post_id);
