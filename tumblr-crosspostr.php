@@ -309,8 +309,8 @@ class Tumblr_Crosspostr {
                 $r['source'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
                 break;
             case 'quote':
-                $pattern = '/<blockquote.*?>(.*?)<\/blockquote>/';
-                $r['quote'] = $this->extractByRegex($pattern, $post_body, 1);
+                $pattern = '/<blockquote.*?>(.*?)<\/blockquote>/s';
+                $r['quote'] = wpautop($this->extractByRegex($pattern, $post_body, 1));
                 $len = strlen($this->extractByRegex($pattern, $post_body, 0));
                 $r['source'] = apply_filters('the_content', substr($post_body, $len));
                 break;
