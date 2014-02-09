@@ -169,6 +169,7 @@ class Tumblr_Crosspostr {
         if (!isset($_POST['tumblr_crosspostr_meta_box_nonce']) || !wp_verify_nonce($_POST['tumblr_crosspostr_meta_box_nonce'], 'editing_tumblr_crosspostr')) {
             return;
         }
+        if (!$this->isConnectedToTumblr()) { return; }
 
         if ('N' === $_POST['tumblr_crosspostr_crosspost']) {
             update_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N'); // 'N' means "no"
@@ -441,6 +442,10 @@ class Tumblr_Crosspostr {
             'post',
             'side'
         );
+    }
+
+    private function isConnectedToTumblr () {
+        return isset($this->tumblr);
     }
 
     public function renderMetaBox ($post) {
