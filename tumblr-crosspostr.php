@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.4
+ * Version: 0.5
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -21,7 +21,7 @@ class Tumblr_Crosspostr {
         add_action('save_post', array($this, 'savePost'));
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
         // run late, so themes have a chance to register support
-        add_action('after_setup_theme', array($this, 'validateThemeSupport'), 700);
+        add_action('after_setup_theme', array($this, 'registerThemeSupport'), 700);
 
         // Initialize consumer if we can, set up authroization flow if we can't.
         require_once 'lib/TumblrCrosspostrAPIClient.php';
@@ -58,19 +58,27 @@ class Tumblr_Crosspostr {
         }
     }
 
-    public function validateThemeSupport () {
-        if (!current_theme_supports('post-formats')) {
-            add_action('admin_notices', array($this, 'showLackOfSupportForFormatsNotice'));
-        }
-
-    }
-
-    public function showLackOfSupportForFormatsNotice () {
+    private function showError ($msg) {
 ?>
 <div class="error">
-    <p><?php _e('The current theme does not seem to support WordPress Post Formats. Post Formats is recommended to make full use of Tumblr Crosspostr. Without an active theme supporting Post Formats, your WordPress posts will only be crossposted as Text posts on Tumblr.', 'tumblr-crosspostr');?></p>
+    <p><?php print esc_html($msg);?></p>
 </div>
 <?php
+    }
+
+    public function registerThemeSupport () {
+        $formats = array(
+            'link',
+            'image',
+            'quote',
+            'video',
+            'audio',
+            'chat'
+        );
+        $x = get_theme_support('post-formats');
+        $f = (empty($x)) ? array() : $x[0];
+        $diff = array_diff($formats, $f);
+        add_theme_support('post-formats', array_merge($f, $diff));
     }
 
     public function authorizeTumblrApp () {
@@ -450,12 +458,8 @@ class Tumblr_Crosspostr {
 
     public function renderMetaBox ($post) {
         wp_nonce_field('editing_tumblr_crosspostr', 'tumblr_crosspostr_meta_box_nonce');
-        if (!isset($this->tumblr)) {
-?>
-<div class="error">
-    <p><?php esc_html_e('Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure you connected Tumblr Crosspostr to your Tumblr account?', 'tumblr-crosspostr');?></p>
-</div>
-<?php
+        if (!$this->isConnectedToTumblr()) {
+            $this->showError(__('Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure you connected Tumblr Crosspostr to your Tumblr account?', 'tumblr-crosspostr'));
             return;
         }
         $options = get_option('tumblr_crosspostr_settings');

@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.4
+Stable tag: 0.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,7 +16,7 @@ Tumblr Crosspostr posts to Tumblr whenever you hit the "Publish" (or "Save Draft
 
 Tumblr Crosspostr is very lightweight. It just requires you to connect to your Tumblr account from the plugin options screen. After that, you're ready to cross-post!
 
-Tumblr Crosspostr uses [post formats](http://codex.wordpress.org/Post_Formats) to automatically choose the appropriate Tumblr post type. The first image, video embed, etcetera that Tumblr Crosspostr detects will be used as the primary media for the Tumblr post type. To take full advantage of Tumblr Crosspostr, I suggest you choose a WordPress theme that supports all the post formats that your Tumblr theme supports. :)
+Tumblr Crosspostr uses [post formats](http://codex.wordpress.org/Post_Formats) to automatically choose the appropriate Tumblr post type. The first image, video embed, etcetera that Tumblr Crosspostr detects will be used as the primary media for the Tumblr post type. To take full advantage of Tumblr Crosspostr, I suggest you choose a WordPress theme that supports all the post formats that your Tumblr theme supports, but Tumblr Crosspostr will still work even if your theme does not natively support this feature. :)
 
 The WordPress post format to Tumblr post type mapping looks like this:
 
@@ -126,7 +126,7 @@ Not yet, but with your help it can be. To help translate the plugin into your la
 
 = What if my theme doesn't support Post Formats? =
 
-Tumblr Crosspostr will still work even if your theme doesn't support the [Post Formats](http://codex.wordpress.org/Post_Formats) feature. However, in that case, you will only be able to make Text posts on Tumblr. Consider asking your theme developer to update your theme code so that it supports Post Formats.
+Tumblr Crosspostr will still work even if your theme doesn't support the [Post Formats](http://codex.wordpress.org/Post_Formats) feature. However, consider asking your theme developer to update your theme code so that it supports Post Formats itself for other plugins to use, too.
 
 If you feel comfortable doing this yourself, then in most cases, this is literally a one-line change. Simply use the [add_theme_support()](http://codex.wordpress.org/Function_Reference/add_theme_support) function in your theme's `functions.php` file:
 
@@ -145,6 +145,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 4. You can optionally choose not to crosspost individual WordPress posts from the Tumblr Crosspostr custom post editing box. This box also enables you to send a specific post to a Tumblr blog other than the default one you selected in the previous step.
 
 == Changelog ==
+
+= Version 0.5 =
+
+* Feature: Automatically register supported post formats. This means you can now use Tumblr Crosspostr even with themes that do not natively support the post format you want.
+* Bugfix: Don't try cross-posting if we don't have an API connection to Tumblr.
 
 = Version 0.4 =
 
