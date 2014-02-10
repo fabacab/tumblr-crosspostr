@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.5.1
+Stable tag: 0.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -29,7 +29,7 @@ The WordPress post format to Tumblr post type mapping looks like this:
 * WordPress's `Chat` post format becomes Tumblr's `Chat` post type
 * WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type (sadly this is not yet implemented, but maybe one day soon!!)
 
-Other options enable tweaking additional metadata from your WordPress entry (notably tags and "Content source" attributions) to Tumblr, and more.
+Other options and features enable tweaking additional metadata from your WordPress entry (notably tags and "Content source" attributions) to Tumblr, sending all your post archives to Tumblr in one click, and more.
 
 Tumblr Crosspostr transforms your WordPress website into a back-end for Tumblr. Create your posts using WordPress, but publish to Tumblr. This means you'll always have a portable copy of your entire Tumblr blog.
 
@@ -144,7 +144,13 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 4. You can optionally choose not to crosspost individual WordPress posts from the Tumblr Crosspostr custom post editing box. This box also enables you to send a specific post to a Tumblr blog other than the default one you selected in the previous step.
 
+5. If you already have a lot of content that you want to quickly copy to Tumblr, you can use the "Tumblrize Archives" tool to do exactly that.
+
 == Changelog ==
+
+= Version 0.6 =
+
+* Feature: "Tumblrize Archives" tool crossposts all post archives to Tumblr. This feature respects individual post settings, if there are any already set. This is especially useful as a one-time operation when you first install Tumblr Crosspostr to quickly crosspost your existing blog over to Tumblr. Note that this is not a "Sync" button in that it cannot delete posts from Tumblr that have already been deleted from WordPress (because those posts no longer exist in WordPress). To delete posts from WordPress and Tumblr in batch, use WordPress's standard "Move to trash" buttons.
 
 = Version 0.5.1 =
 
