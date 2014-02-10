@@ -725,7 +725,7 @@ class Tumblr_Crosspostr {
     </tbody>
 </table>
 </fieldset>
- a       <?php } ?>
+        <?php } ?>
 <?php submit_button();?>
 </form>
 <div class="donation-appeal">
