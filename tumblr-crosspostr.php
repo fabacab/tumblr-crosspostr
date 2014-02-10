@@ -172,44 +172,71 @@ class Tumblr_Crosspostr {
         return $state;
     }
 
-    public function savePost ($post_id) {
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
-        if (!isset($_POST['tumblr_crosspostr_meta_box_nonce']) || !wp_verify_nonce($_POST['tumblr_crosspostr_meta_box_nonce'], 'editing_tumblr_crosspostr')) {
-            return;
-        }
-        if (!$this->isConnectedToTumblr()) { return; }
+    private function isPostCrosspostable ($post_id) {
+        $options = get_option('tumblr_crosspostr_settings');
+        $crosspostable = true;
 
-        if ('N' === $_POST['tumblr_crosspostr_crosspost']) {
-            update_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N'); // 'N' means "no"
-            return;
-        } else {
-            delete_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N');
+        // Do not crosspost if this post is excluded by a certain category.
+        if (isset($options['exclude_categories']) && in_category($options['exclude_categories'], $post_id)) {
+            $crosspostable = false;
         }
+
+        // Do not crosspost if this specific post was excluded.
+        if ('N' === get_post_meta($post_id, 'tumblr_crosspostr_crosspost', true)) {
+            $crosspostable = false;
+        }
+
+        // Do not crosspost unsupported post states.
+        if (!$this->WordPressStatus2TumblrState(get_post_status($post_id))) {
+            $crosspostable = false;
+        }
+
+        return $crosspostable;
+    }
+
+    /**
+     * Translates a WordPress post data for Tumblr's API.
+     *
+     * @param int $post_id The ID number of the WordPress post.
+     * @return mixed A simple object representing data for Tumblr or FALSE if the given post should not be crossposted.
+     */
+    private function prepareForTumblr ($post_id) {
+        if (!$this->isPostCrosspostable($post_id)) { return false; }
 
         $options = get_option('tumblr_crosspostr_settings');
+        $custom = get_post_custom($post_id);
 
-        $destination = sanitize_text_field($_POST['tumblr_crosspostr_destination']);
-        $base_hostname = ($destination) ? $destination : $options['default_hostname'];
-        update_post_meta($post_id, 'tumblr_base_hostname', $base_hostname);
+        $prepared_post = new stdClass();
 
-        $source_url = false;
-        if (empty($_POST['tumblr_crosspostr_meta_source_url']) && 'Y' === $options['auto_source']) {
+        // Set the post's Tumblr destination.
+        $base_hostname = false;
+        if (!empty($_POST['tumblr_crosspostr_destination'])) {
+            $base_hostname = sanitize_text_field($_POST['tumblr_crosspostr_destination']);
+        } else if (!empty($custom['tumblr_base_hostname'][0])) {
+            $base_hostname = sanitize_text_field($custom['tumblr_base_hostname'][0]);
+        } else {
+            $base_hostname = sanitize_text_field($options['default_hostname']);
+        }
+        if ($base_hostname !== $options['default_hostname']) {
+            update_post_meta($post_id, 'tumblr_base_hostname', $base_hostname);
+        }
+        $prepared_post->base_hostname = $base_hostname;
+
+        // Set "Content source" meta field.
+        if (!empty($_POST['tumblr_crosspostr_meta_source_url'])) {
+            $source_url = sanitize_text_field($_POST['tumblr_crosspostr_meta_source_url']);
+            update_post_meta($post_id, 'tumblr_source_url', $source_url);
+        } else if (!empty($custom['tumblr_source_url'][0])) {
+            $source_url = sanitize_text_field($custom['tumblr_source_url'][0]);
+        } else if ('Y' === $options['auto_source']) {
             $source_url = get_permalink($post_id);
             delete_post_meta($post_id, 'tumblr_source_url');
         } else {
-            $source_url = sanitize_text_field($_POST['tumblr_crosspostr_meta_source_url']);
-            update_post_meta($post_id, 'tumblr_source_url', $source_url);
-        }
-
-        if (isset($options['exclude_categories']) && in_category($options['exclude_categories'], $post_id)) {
-            return;
+            $source_url = false;
         }
 
         $format = get_post_format($post_id);
-        $status = get_post_status($post_id);
-        if (!$state = $this->WordPressStatus2TumblrState($status)) {
-            return; // do not crosspost unsupported post states
-        }
+        $state = $this->WordPressStatus2TumblrState(get_post_status($post_id));
         $tags = array();
         if ($t = get_the_tags($post_id)) {
             foreach ($t as $tag) {
@@ -249,14 +276,32 @@ class Tumblr_Crosspostr {
             }
         }
 
-        $all_params = array_merge($common_params, $post_params);
+        $prepared_post->params = array_merge($common_params, $post_params);
 
-        // If there's already a Tumblr post ID for this post, edit that post on Tumblr.
-        $editing = get_post_meta($post_id, 'tumblr_post_id', true);
-        $tumblr_id = (!empty($editing)) ?
-            $this->crosspostToTumblr($base_hostname, $all_params, $editing) :
-            $this->crosspostToTumblr($base_hostname, $all_params);
-        update_post_meta($post_id, 'tumblr_post_id', $tumblr_id);
+        $tumblr_id = get_post_meta($post_id, 'tumblr_post_id', true); // Will be empty if none exists.
+        $prepared_post->tumblr_id = (empty($tumblr_id)) ? false : $tumblr_id;
+
+        return $prepared_post;
+    }
+
+    public function savePost ($post_id) {
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
+        if (!isset($_POST['tumblr_crosspostr_meta_box_nonce']) || !wp_verify_nonce($_POST['tumblr_crosspostr_meta_box_nonce'], 'editing_tumblr_crosspostr')) {
+            return;
+        }
+        if (!$this->isConnectedToTumblr()) { return; }
+
+        if ('N' === $_POST['tumblr_crosspostr_crosspost']) {
+            update_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N'); // 'N' means "no"
+            return;
+        } else {
+            delete_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N');
+        }
+
+        if ($prepared_post = $this->prepareForTumblr($post_id)) {
+            $tumblr_id = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
+            update_post_meta($post_id, 'tumblr_post_id', $tumblr_id);
+        }
     }
 
     private function replacePlaceholders ($str, $post_id) {
@@ -439,6 +484,14 @@ class Tumblr_Crosspostr {
             'manage_options',
             'tumblr_crosspostr_settings',
             array($this, 'renderOptionsPage')
+        );
+
+        add_management_page(
+            __('Tumblrize Archives', 'tumblr-crosspostr'),
+            __('Tumblrize Archives', 'tumblr-crosspostr'),
+            'manage_options',
+            'tumblr_crosspostr_crosspost_archives',
+            array($this, 'dispatchTumblrizeArchivesPages')
         );
     }
 
@@ -672,7 +725,7 @@ class Tumblr_Crosspostr {
     </tbody>
 </table>
 </fieldset>
-        <?php } ?>
+ a       <?php } ?>
 <?php submit_button();?>
 </form>
 <div class="donation-appeal">
@@ -684,6 +737,61 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
 </div>
 <?php
     } // end public function renderOptionsPage
+
+    public function dispatchTumblrizeArchivesPages () {
+        if (!isset($_GET['tumblr_crosspostr_nonce']) || !wp_verify_nonce($_GET['tumblr_crosspostr_nonce'], 'tumblrize_everything')) {
+            $this->renderManagementPage();
+        } else {
+            if (!$this->isConnectedToTumblr()) {
+                wp_redirect(admin_url('options-general.php?page=tumblr_crosspostr_settings'));
+                exit();
+            }
+            $posts = get_posts(array(
+                'nopaging' => true,
+                'order' => 'ASC',
+            ));
+            $tumblrized = array();
+            foreach ($posts as $post) {
+                if ($prepared_post = $this->prepareForTumblr($post->ID)) {
+                    $tumblr_id = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
+                    update_post_meta($post->ID, 'tumblr_post_id', $tumblr_id);
+                    $tumblrized[] = array('id' => $tumblr_id, 'base_hostname' => $prepared_post->base_hostname);
+                }
+            }
+            $blogs = array();
+            foreach ($tumblrized as $p) {
+                $blogs[] = $p['base_hostname'];
+            }
+            $blogs_touched = count(array_unique($blogs));
+            $posts_touched = count($tumblrized);
+            print '<p>' . sprintf(
+                _n(
+                    'Success! %1$d post has been crossposted.',
+                    'Success! %1$d posts have been crossposted to %2$d blogs.',
+                    $posts_touched,
+                    'tumblr-crosspostr'
+                ),
+                $posts_touched,
+                $blogs_touched
+            ) . '</p>';
+            print '<p>' . esc_html_e('Blogs touched:', 'tumblr-crosspostr') . '</p>';
+            print '<ul>';
+            foreach (array_unique($blogs) as $blog) {
+                print '<li><a href="' . esc_url("http://$blog/") . '">' . esc_html($blog) . '</a></li>';
+            }
+            print '</ul>';
+        }
+    }
+
+    private function renderManagementPage () {
+        $options = get_option('tumblr_crosspostr_settings');
+?>
+<h2><?php esc_html_e('Crosspost Archives to Tumblr', 'tumblr-crosspostr');?></h2>
+<p><?php esc_html_e('If you have post archives on this website, Tumblr Crosspostr can copy them to your Tumblr blog.', 'tumblr-crosspostr');?></p>
+<p><a href="<?php print wp_nonce_url(admin_url('tools.php?page=tumblr_crosspostr_crosspost_archives'), 'tumblrize_everything', 'tumblr_crosspostr_nonce');?>" class="button button-primary">Tumblrize Everything!</a></p>
+<p class="description"><?php print sprintf(esc_html__('Copies all posts from your archives to your default Tumblr blog (%s). This may take some time if you have a lot of content. If you do not want to crosspost a specific post, set the answer to the "Send this post to Tumblr?" question to "No" when editing those posts before taking this action. If you have previously crossposted some posts, this will update that content on your Tumblr blog(s).', 'tumblr-crosspostr'), '<code>' . esc_html($options['default_hostname']) . '</code>');?></p>
+<?php
+    } // end renderManagementPage ()
 
     private function getTumblrAppRegistrationUrl () {
         $url = 'http://www.tumblr.com/oauth/register?';
