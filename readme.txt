@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.6
+Stable tag: 0.6.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,7 +146,13 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 5. If you already have a lot of content that you want to quickly copy to Tumblr, you can use the "Tumblrize Archives" tool to do exactly that.
 
+6. Get help where you need it by from WordPress's built-in "Help" system.
+
 == Changelog ==
+
+= Version 0.6.1 = 
+
+* Feature: Detailed help is now available from the WordPress post screen's "Help" tab.
 
 = Version 0.6 =
 

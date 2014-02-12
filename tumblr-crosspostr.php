@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.6
+ * Version: 0.6.1
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -17,6 +17,7 @@ class Tumblr_Crosspostr {
         add_action('plugins_loaded', array($this, 'registerL10n'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
+        add_action('admin_head', array($this, 'registerContextualHelp'));
         add_action('add_meta_boxes', array($this, 'addMetaBox'));
         add_action('save_post', array($this, 'savePost'));
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
@@ -62,6 +63,18 @@ class Tumblr_Crosspostr {
 ?>
 <div class="error">
     <p><?php print esc_html($msg);?></p>
+</div>
+<?php
+    }
+
+    private function showDonationAppeal () {
+?>
+<div class="donation-appeal">
+    <p style="text-align: center; font-size: larger; width: 70%; margin: 0 auto;"><?php print sprintf(
+esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery stores do not offer free food. If you like this plugin, please consider %1$s to its %2$s. &hearts; Thank you!', 'tumblr-crosspostr'),
+'<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=meitarm%40gmail%2ecom&lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr%2dcrosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">' . esc_html__('making a donation', 'tumblr-crosspostr') . '</a>',
+'<a href="http://Cyberbusking.org/">' . esc_html__('houseless, jobless, nomadic developer', 'tumblr-crosspostr') . '</a>'
+);?></p>
 </div>
 <?php
     }
@@ -113,6 +126,46 @@ class Tumblr_Crosspostr {
             'tumblr_crosspostr_settings',
             array($this, 'validateSettings')
         );
+    }
+
+    public function registerContextualHelp () {
+        $screen = get_current_screen();
+        if ($screen->id !== 'post') { return; }
+        $html = '<p>' . esc_html__('You can automatically copy this post to your Tumblr blog:', 'tumblr-crosspostr') . '</p>'
+        . '<ol>'
+        . '<li>' . sprintf(
+            esc_html__('Compose your post for WordPress as you normally would, with the appropriate %sPost Format%s.', 'tumblr-crosspostr'),
+            '<a href="#formatdiv">', '</a>'
+            ) . '</li>'
+        . '<li>' . sprintf(
+            esc_html__('In %sthe Tumblr Crosspostr box%s, ensure the "Send this post to Tumblr?" option is set to "Yes." (You can set it to "No" if you do not want to copy this post to Tumblr.)', 'tumblr-crosspostr'),
+            '<a href="#tumblr-crosspostr-meta-box">', '</a>'
+            ) . '</li>'
+        . '<li>' . esc_html__('If you have more than one Tumblr, choose the one you want to send this post to from the "Send to my Tumblr blog" list.', 'tumblr-crosspostr') . '</li>'
+        . '<li>' . esc_html__('Optionally, enter any additional details specifically for Tumblr, such as the "Content source" field.', 'tumblr-crosspostr') . '</li>'
+        . '</ol>'
+        . '<p>' . esc_html__('When you are done, click "Publish" (or "Save Draft"), and Tumblr Crosspostr will send your post to the Tumblr blog you chose.', 'tumblr-crosspostr') . '</p>'
+        . '<p>' . esc_html__('Note that Tumblr does not allow you to change the post format after you have saved a copy of your post, so please be sure you choose the appropriate Post Format before you save your post.', 'tumblr-crosspostr') . '</p>';
+        ob_start();
+        $this->showDonationAppeal();
+        $x = ob_get_contents();
+        ob_end_clean();
+        $html .= $x;
+        $screen->add_help_tab(array(
+            'id' => 'tumblr_crosspostr-' . $screen->base . '-help',
+            'title' => __('Crossposting to Tumblr', 'tumblr-crosspostr'),
+            'content' => $html
+        ));
+
+        $x = esc_html__('Tumblr Crosspostr:', 'tumblr-crosspostr');
+        $y = esc_html__('Tumblr Crosspostr support forum', 'tumblr-crosspostr');
+        $z = esc_html__('Donate to Tumblr Crosspostr', 'tumblr-crosspostr');
+        $sidebar = <<<END_HTML
+<p><strong>$x</strong></p>
+<p><a href="https://wordpress.org/support/plugin/tumblr-crosspostr">$y</a></p>
+<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">&hearts; $z &hearts;</a></p>
+END_HTML;
+        $screen->set_help_sidebar($screen->get_help_sidebar() . $sidebar);
     }
 
     private function WordPressPostFormat2TumblrPostType ($format) {
@@ -728,14 +781,8 @@ class Tumblr_Crosspostr {
         <?php } ?>
 <?php submit_button();?>
 </form>
-<div class="donation-appeal">
-    <p style="text-align: center; font-size: larger; width: 70%; margin: 0 auto;"><?php print sprintf(
-esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery stores do not offer free food. If you like this plugin, please consider %1$s to its %2$s. &hearts; Thank you!', 'tumblr-crosspostr'),
-'<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=meitarm%40gmail%2ecom&lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr%2dcrosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">' . esc_html__('making a donation', 'tumblr-crosspostr') . '</a>',
-'<a href="http://Cyberbusking.org/">' . esc_html__('houseless, jobless, nomadic developer', 'tumblr-crosspostr') . '</a>'
-);?></p>
-</div>
 <?php
+        $this->showDonationAppeal();
     } // end public function renderOptionsPage
 
     public function dispatchTumblrizeArchivesPages () {
@@ -780,6 +827,7 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
                 print '<li><a href="' . esc_url("http://$blog/") . '">' . esc_html($blog) . '</a></li>';
             }
             print '</ul>';
+            $this->showDonationAppeal();
         }
     }
 
@@ -791,6 +839,7 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
 <p><a href="<?php print wp_nonce_url(admin_url('tools.php?page=tumblr_crosspostr_crosspost_archives'), 'tumblrize_everything', 'tumblr_crosspostr_nonce');?>" class="button button-primary">Tumblrize Everything!</a></p>
 <p class="description"><?php print sprintf(esc_html__('Copies all posts from your archives to your default Tumblr blog (%s). This may take some time if you have a lot of content. If you do not want to crosspost a specific post, set the answer to the "Send this post to Tumblr?" question to "No" when editing those posts before taking this action. If you have previously crossposted some posts, this will update that content on your Tumblr blog(s).', 'tumblr-crosspostr'), '<code>' . esc_html($options['default_hostname']) . '</code>');?></p>
 <?php
+        $this->showDonationAppeal();
     } // end renderManagementPage ()
 
     private function getTumblrAppRegistrationUrl () {
