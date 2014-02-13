@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.6.1
+Stable tag: 0.6.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -149,6 +149,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it by from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.6.2 =
+
+* French translation (`fr_FR`). Activate the French version of this plugin by [configuring your WordPress to use that language](http://codex.wordpress.org/WordPress_in_Your_Language). Want Tumblr Crosspostr in your language? [Help us translate](https://www.transifex.com/signup/contributor/?next=/projects/p/tumblr-crosspostr/)!
+* Bugfix: Contextual help's support and donation links now open in new tabs or windows so you don't lose your place when writing.
 
 = Version 0.6.1 = 
 
