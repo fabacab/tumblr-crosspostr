@@ -162,8 +162,8 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
         $z = esc_html__('Donate to Tumblr Crosspostr', 'tumblr-crosspostr');
         $sidebar = <<<END_HTML
 <p><strong>$x</strong></p>
-<p><a href="https://wordpress.org/support/plugin/tumblr-crosspostr">$y</a></p>
-<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">&hearts; $z &hearts;</a></p>
+<p><a href="https://wordpress.org/support/plugin/tumblr-crosspostr" target="_blank">$y</a></p>
+<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank">&hearts; $z &hearts;</a></p>
 END_HTML;
         $screen->set_help_sidebar($screen->get_help_sidebar() . $sidebar);
     }
