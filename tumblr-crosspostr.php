@@ -15,6 +15,7 @@ class Tumblr_Crosspostr {
 
     public function __construct () {
         add_action('plugins_loaded', array($this, 'registerL10n'));
+        add_action('init', array($this, 'setTumblrSyncSchedules'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
         add_action('admin_head', array($this, 'registerContextualHelp'));
@@ -23,6 +24,8 @@ class Tumblr_Crosspostr {
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
         // run late, so themes have a chance to register support
         add_action('after_setup_theme', array($this, 'registerThemeSupport'), 700);
+
+        add_action('tumblr_crosspostr_sync_tumblr', array($this, 'syncFromTumblrBlog'));
 
         // Initialize consumer if we can, set up authroization flow if we can't.
         require_once 'lib/TumblrCrosspostrAPIClient.php';
@@ -499,6 +502,12 @@ END_HTML;
                 case 'default_hostname':
                     $safe_input[$k] = sanitize_text_field($v);
                 break;
+                case 'sync_tumblr':
+                    $safe_input[$k] = array();
+                    foreach ($v as $x) {
+                        $safe_input[$k][] = sanitize_text_field($x);
+                    }
+                break;
                 case 'exclude_categories':
                     $safe_v = array();
                     foreach ($v as $x) {
@@ -559,7 +568,8 @@ END_HTML;
     }
 
     private function isConnectedToTumblr () {
-        return isset($this->tumblr);
+        $options = get_option('tumblr_crosspostr_settings');
+        return isset($this->tumblr) && isset($options['access_token']);
     }
 
     public function renderMetaBox ($post) {
@@ -685,6 +695,17 @@ END_HTML;
             <td>
                 <?php print $this->tumblrBlogsSelectField(array('id' => 'tumblr_crosspostr_default_hostname', 'name' => 'tumblr_crosspostr_settings[default_hostname]'), $this->getTumblrBasename(0));?>
                 <p class="description"><?php esc_html_e('Choose which Tumblr blog you want to send your posts to by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></p>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="tumblr_crosspostr_sync_from_tumblr"><?php esc_html_e('Sync posts from Tumblr', 'tumblr-crosspostr');?></label>
+            </th>
+            <td>
+                <ul id="tumblr_crosspostr_sync_tumblr">
+                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => 'tumblr_crosspostr_sync_tumblr', 'name' => 'tumblr_crosspostr_settings[sync_tumblr][]'), $options['sync_tumblr']);?>
+                </ul>
+                <p class="description"><?php esc_html_e('Content you create on the Tumblr blogs you select will automatically be copied to this blog.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
         <tr>
@@ -842,6 +863,39 @@ END_HTML;
         $this->showDonationAppeal();
     } // end renderManagementPage ()
 
+    public function setTumblrSyncSchedules () {
+        if (!$this->isConnectedToTumblr()) { return; }
+        $options = get_option('tumblr_crosspostr_settings');
+        $blogs_to_sync = (empty($options['sync_tumblr'])) ? array() : $options['sync_tumblr'];
+        // If we are being asked to sync, set up a daily schedule for that.
+        if (!empty($blogs_to_sync)) {
+            foreach ($blogs_to_sync as $x) {
+                if (!wp_get_schedule('tumblr_crosspostr_sync_tumblr', array($x))) {
+                    wp_schedule_event(time(), 'daily', 'tumblr_crosspostr_sync_tumblr', array($x));
+                }
+            }
+        }
+        // For any blogs we know of but aren't being asked to sync,
+        $known_blogs = array();
+        foreach ($this->tumblr->getUserBlogs() as $blog) {
+            $known_blogs[] = parse_url($blog->url, PHP_URL_HOST);
+        }
+        $to_unschedule = array_diff($known_blogs, $blogs_to_sync);
+        foreach ($to_unschedule as $x) {
+            // check to see if there's a scheduled event to sync it, and,
+            // if so, unschedule it.
+            wp_unschedule_event(
+                wp_next_scheduled('tumblr_crosspostr_sync_tumblr', array($x)),
+                'tumblr_crosspostr_sync_tumblr',
+                array($x)
+            );
+        }
+    }
+
+    public function syncFromTumblrBlog ($base_hostname) {
+        // Should we use `updated` or `before_id`?
+    }
+
     private function getTumblrAppRegistrationUrl () {
         $url = 'http://www.tumblr.com/oauth/register?';
         $url .= 'oac[title]=' . get_bloginfo('name');
@@ -871,6 +925,37 @@ END_HTML;
             $html .= '</option>';
         }
         $html .= '</select>';
+        return $html;
+    }
+
+    private function tumblrBlogsListCheckboxes ($attributes = array(), $selected = false) {
+        $html = '';
+        foreach ($this->tumblr->getUserBlogs() as $blog) {
+            $html .= '<li>';
+            $html .= '<label>';
+            $x = parse_url($blog->url, PHP_URL_HOST);
+            $html .= '<input type="checkbox"';
+            if (!empty($attributes)) {
+                foreach ($attributes as $k => $v) {
+                    $html .= ' ';
+                    switch ($k) {
+                        case 'id':
+                            $html .= $k . '="' . esc_attr($v) . '-' . esc_attr($x) . '"';
+                            break;
+                        default:
+                            $html .= $k . '="' . esc_attr($v) . '"';
+                            break;
+                    }
+                }
+            }
+            if ($selected && in_array($x, $selected)) {
+                $html .= ' checked="checked"';
+            }
+            $html .= ' value="' . esc_attr($x) . '"';
+            $html .= '>';
+            $html .= esc_html($blog->title) . '</label>';
+            $html .= '</li>';
+        }
         return $html;
     }
 
