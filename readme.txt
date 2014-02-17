@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.6.2
+Stable tag: 0.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -149,6 +149,15 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it by from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7 =
+
+* Feature: "Sync posts from Tumblr" will import posts you create on your Tumblr blog(s) into your WordPress blog, along with their metadata such as tags, post types/formats, and content sources. This is useful for creating an automatic backup of the conversations you have in reblog threads on Tumblr.
+    * When first activated, your entire Tumblr archive will be copied (including private posts).
+    * Once every 24 hours, Tumblr Crosspostr will fetch up to the most recent 100 posts on your Tumblr blog to see if you have reblogged anything on Tumblr. If you have, Tumblr Crosspostr will import those posts to your WordPress blog.
+    * Posts you created on Tumblr using Tumblr Crosspostr will not be duplicated.
+    * Once imported to WordPress, edits you make on Tumblr are not retrieved, but edits you make on WordPress are sent back to Tumblr, so prefer using WordPress to edit and update your imported posts.
+    * **This feature is experimental.** Please make sure you have a backup of your WordPress website before you enable sync'ing from Tumblr.
 
 = Version 0.6.2 =
 

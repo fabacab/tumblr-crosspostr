@@ -11,6 +11,7 @@ class Tumblr_Crosspostr_API_Client {
     private $authorize_url = 'http://www.tumblr.com/oauth/authorize';
     private $access_token_url = 'http://www.tumblr.com/oauth/access_token';
     private $api_url = 'http://api.tumblr.com/v2';
+    private $api_key; //< Also the "Consumer key" the user entered.
 
     function __construct ($consumer_key, $consumer_secret, $oauth_token = false, $oauth_token_secret = false) {
         // Include our own PEAR in case their system doesn't have it.
@@ -50,10 +51,31 @@ class Tumblr_Crosspostr_API_Client {
         $this->client->setTokenSecret($token);
     }
 
+    public function setApiKey ($key) {
+        $this->api_key = $key;
+    }
+
     public function getUserBlogs () {
         $data = $this->talkToTumblr('/user/info');
         // TODO: This could use some error handling?
         return $data->response->user->blogs;
+    }
+
+    public function getBlogInfo ($base_hostname) {
+        $data = $this->talkToTumblr("/blog/$base_hostname/info?api_key={$this->api_key}", array(), 'GET');
+        // TODO: Handle error?
+        return $data->response->blog;
+    }
+
+    public function getPosts ($base_hostname, $params = array()) {
+        $url = "/blog/$base_hostname/posts?api_key={$this->api_key}";
+        if (!empty($params)) {
+            foreach ($params as $k => $v) {
+                $url .= "&$k=$v";
+            }
+        }
+        $data = $this->talkToTumblr($url, array(), 'GET');
+        return $data->response;
     }
 
     public function postToTumblrBlog ($blog, $params) {

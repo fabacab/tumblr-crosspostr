@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.6.2
+ * Version: 0.7
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -201,6 +201,26 @@ END_HTML;
         return $type;
     }
 
+    private function TumblrPostType2WordPressPostFormat ($type) {
+        switch ($type) {
+            case 'quote':
+            case 'audio':
+            case 'video':
+            case 'chat':
+            case 'link':
+                $format = $type;
+                break;
+            case 'photo':
+                $format = 'image';
+                break;
+            case 'answer':
+            case 'text':
+            default:
+                $format = '';
+        }
+        return $format;
+    }
+
     /**
      * Translates a WordPress post status to a Tumblr post state.
      *
@@ -227,6 +247,22 @@ END_HTML;
         }
         return $state;
     }
+
+    private function TumblrState2WordPressStatus ($state) {
+        switch ($state) {
+            case 'draft':
+            case 'private':
+                $status = $state;
+                break;
+            case 'queue':
+                $status = 'future';
+            case 'published':
+            default:
+                $status = 'publish';
+        }
+        return $status;
+    }
+
 
     private function isPostCrosspostable ($post_id) {
         $options = get_option('tumblr_crosspostr_settings');
@@ -700,6 +736,7 @@ END_HTML;
         <tr>
             <th>
                 <label for="tumblr_crosspostr_sync_from_tumblr"><?php esc_html_e('Sync posts from Tumblr', 'tumblr-crosspostr');?></label>
+                <p class="description"><?php esc_html_e('(This feature is experimental. Please backup your website before you turn this on.)', 'tumblr-crosspostr');?></p>
             </th>
             <td>
                 <ul id="tumblr_crosspostr_sync_tumblr">
@@ -893,7 +930,120 @@ END_HTML;
     }
 
     public function syncFromTumblrBlog ($base_hostname) {
-        // Should we use `updated` or `before_id`?
+        $options = get_option('tumblr_crosspostr_settings');
+        if (!isset($options['last_synced_ids'])) {
+            $options['last_synced_ids'] = array();
+        }
+        $latest_synced_id = (isset($options['last_synced_ids'][$base_hostname]))
+            ? $options['last_synced_ids'][$base_hostname]
+            : 0;
+
+        $this->tumblr->setApiKey($options['consumer_key']);
+
+        $ids_synced = array(0); // Init with 0
+        $offset = 0;
+        $limit = 50;
+        $num_posts_to_get = 0;
+        // If we never synced, trawl through entire Tumblr archive.
+        if (0 === $latest_synced_id) {
+            $info = $this->tumblr->getBlogInfo($base_hostname);
+            $num_posts_to_get = $info->posts; // get all of them
+        } else {
+            $num_posts_to_get = $limit * 2; // Just get the last 2 batches.
+        }
+        $i = 0;
+        while ($i < $num_posts_to_get) {
+            $resp = $this->tumblr->getPosts($base_hostname, array('offset' => $offset, 'limit' => $limit));
+            // If there aren't as many posts as we're trying to get,
+            if ($resp->total_posts <= $num_posts_to_get) {
+                // reset the loop condition so we only try getting
+                // as many posts that actually exist.
+                $num_posts_to_get = $resp->total_posts;
+            }
+            $posts = $resp->posts;
+            foreach (array_reverse($posts) as $post) { // "older" posts first
+                $preexisting_posts = get_posts(array(
+                    'meta_key' => 'tumblr_post_id',
+                    'meta_value' => $post->id
+                ));
+                if (empty($preexisting_posts)) {
+                    if ($this->importPostFromTumblr($post)) {
+                        $ids_synced[] = $post->id;
+                    }
+                }
+                $i++; // in foreach cuz we're counting posts
+            }
+            $offset = $offset + $limit; // Set up next fetch.
+        }
+
+        // Record the latest Tumblr post ID to be sync'ed on the blog.
+        // (Usefully, Tumblr post ID's are sequential.)
+        $options['last_synced_ids'][$base_hostname] = ($latest_synced_id > max($ids_synced))
+            ? $latest_synced_id
+            : max($ids_synced);
+        update_option('tumblr_crosspostr_settings', $options);
+    }
+
+    private function translateTumblrPostContent ($post) {
+        $content = '';
+        switch ($post->type) {
+            case 'photo':
+                foreach ($post->photos as $photo) {
+                    $content .= '<img src="' . $photo->original_size->url . '" alt="" />';
+                    $content .= $post->caption;
+                }
+                break;
+            case 'quote':
+                $content .= '<blockquote>' . $post->text . '</blockquote>';
+                $content .= $post->source;
+                break;
+            case 'link':
+                $content .= '<a href="' . $post->url . '">' . $post->title . '</a>';
+                $content .= $post->description;
+                break;
+            case 'audio':
+                $content .= $post->caption;
+                $content .= $post->player;
+                break;
+            case 'audio':
+                $content .= $post->caption;
+                $content .= $post->player[0]->embed_code;
+                break;
+            case 'answer':
+                $content .= '<a href="' . $post->asking_url .'" class="tumblr_blog">' . $post->asking_name . '</a>:';
+                $content .= '<blockquote cite="' . $post->post_url . '" class="tumblr_ask">' . $post->question . '</blockquote>';
+                $content .= $post->answer;
+                break;
+            case 'chat':
+            case 'text':
+            default:
+                $content .= $post->body;
+                break;
+        }
+        return $content;
+    }
+
+    private function importPostFromTumblr ($post) {
+        $wp_post = array();
+        $wp_post['post_content'] = $this->translateTumblrPostContent($post);
+        $wp_post['post_title'] = (isset($post->title)) ? $post->title : '';
+        $wp_post['post_status'] = $this->TumblrState2WordPressStatus($post->state);
+        // TODO: Figure out how to handle multi-author blogs.
+        //$wp_post['post_author'] = $post->author;
+        $wp_post['post_date'] = date('Y-m-d H:i:s', $post->timestamp);
+        $wp_post['post_date_gmt'] = gmdate('Y-m-d H:i:s', $post->timestamp);
+        $wp_post['tags_input'] = $post->tags;
+
+        $wp_id = wp_insert_post($wp_post);
+        if ($wp_id) {
+            set_post_format($wp_id, $this->TumblrPostType2WordPressPostFormat($post->type));
+            update_post_meta($wp_id, 'tumblr_base_hostname', parse_url($post->post_url, PHP_URL_HOST));
+            update_post_meta($wp_id, 'tumblr_post_id', $post->id);
+            if (isset($post->source_url)) {
+                update_post_meta($wp_id, 'tumblr_source_url', $post->source_url);
+            }
+        }
+        return $wp_id;
     }
 
     private function getTumblrAppRegistrationUrl () {
