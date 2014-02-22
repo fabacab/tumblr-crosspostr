@@ -15,7 +15,7 @@ class Tumblr_Crosspostr_API_Client {
 
     function __construct ($consumer_key, $consumer_secret, $oauth_token = false, $oauth_token_secret = false) {
         // Include our own PEAR in case their system doesn't have it.
-        $tumblr_crosspostr_old_path = set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__ . '/pear/php');
+        $tumblr_crosspostr_old_path = set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/pear/php');
         require_once 'HTTP/OAuth/Consumer.php';
 
         // If there's not yet an active session,
