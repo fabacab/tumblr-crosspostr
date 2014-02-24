@@ -563,12 +563,14 @@ END_HTML;
                     $safe_input[$k] = intval($v);
                 break;
                 case 'additional_tags':
-                    $tags = explode(',', $v);
-                    $safe_tags = array();
-                    foreach ($tags as $t) {
-                        $safe_tags[] = sanitize_text_field($t);
+                    if (is_string($v)) {
+                        $tags = explode(',', $v);
+                        $safe_tags = array();
+                        foreach ($tags as $t) {
+                            $safe_tags[] = sanitize_text_field($t);
+                        }
+                        $safe_input[$k] = $safe_tags;
                     }
-                    $safe_input[$k] = $safe_tags;
                 break;
             }
         }
@@ -661,6 +663,19 @@ END_HTML;
             wp_die(__('You do not have sufficient permissions to access this page.', 'tumblr-crosspostr'));
         }
         $options = get_option('tumblr_crosspostr_settings');
+        if (isset($_GET['disconnect']) && wp_verify_nonce($_GET['tumblr_crosspostr_nonce'], 'disconnect_from_tumblr')) {
+            unset($options['access_token']);
+            if (update_option('tumblr_crosspostr_settings', $options)) {
+?>
+<div class="updated">
+    <p>
+        <?php esc_html_e('Disconnected from Tumblr.', 'tumblr-crosspostr');?>
+        <span class="description"><?php esc_html_e('The connection to Tumblr was disestablished. You can reconnect using the same credentials, or enter different credentials before reconnecting.', 'tumblr-crosspostr');?></span>
+    </p>
+</div>
+<?php
+            }
+        }
 ?>
 <h2><?php esc_html_e('Tumblr Crosspostr Settings', 'tumblr-crosspostr');?></h2>
 <form method="post" action="options.php">
@@ -709,7 +724,11 @@ END_HTML;
         <tr>
             <th colspan="2">
                 <div class="updated">
-                    <p><?php esc_html_e('Connected to Tumblr!', 'tumblr-crosspostr');?></p>
+                    <p>
+                        <?php esc_html_e('Connected to Tumblr!', 'tumblr-crosspostr');?>
+                        <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=tumblr_crosspostr_settings&disconnect'), 'disconnect_from_tumblr', 'tumblr_crosspostr_nonce');?>" class="button"><?php esc_html_e('Disconnect', 'tumblr-crosspostr');?></a>
+                        <span class="description"><?php esc_html_e('Disconnecting will stop cross-posts from appearing on or being imported from your Tumblr blog(s), and will reset the options below to their defaults. You can re-connect at any time.', 'tumblr-crosspostr');?></span>
+                    </p>
                 </div>
                 <?php // TODO: Should the access tokens never be revealed to the client? ?>
                 <input type="hidden" name="tumblr_crosspostr_settings[access_token]" value="<?php print esc_attr($options['access_token']);?>" />
