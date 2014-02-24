@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.1
+Stable tag: 0.7.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -149,6 +149,12 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it by from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.2 =
+
+* Feature: Save a given post's reblog key when importing that post with the "Sync posts from Tumblr" feature. Theme authors can then use the `tumblr_reblog_key` [custom field](http://codex.wordpress.org/Custom_Fields) to create a link on the WordPress post that lets a user reblog the original post on Tumblr. For instance:
+    *     <a href="http://www.tumblr.com/reblog/<?php echo get_post_meta($post->ID, 'tumblr_post_id', true);?>/<?php echo get_post_meta($post->ID, 'tumblr_reblog_key', true);?>?redirect_to=<?php echo esc_url(get_permalink());?>">
+* Feature: Manual Tumblr disconnection button. If you want to change the Tumblr account or OAuth application credentials used to connect to Tumblr after you made a prior connection, you can now use the "Disconnect" button to disestablish your existing connection and create it anew.
 
 = Version 0.7.1 =
 

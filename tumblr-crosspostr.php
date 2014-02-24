@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.1
+ * Version: 0.7.2
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -391,8 +391,8 @@ END_HTML;
         }
 
         if ($prepared_post = $this->prepareForTumblr($post_id)) {
-            $tumblr_id = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
-            update_post_meta($post_id, 'tumblr_post_id', $tumblr_id);
+            $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
+            update_post_meta($post_id, 'tumblr_post_id', $data->response->id);
         }
     }
 
@@ -421,19 +421,27 @@ END_HTML;
         return $str;
     }
 
+    /**
+     * Issues a Tumblr API call.
+     *
+     * @param string $blog The Tumblr blog's base hostname.
+     * @param array @params Any additional parameters for the request.
+     * @param int $tumblr_id The ID of a specific Tumblr post (only needed if editing or deleting this post).
+     * @param bool $deleting Whether or not to delete, rather than to edit, a specific Tumblr post.
+     * @return array Tumblr's decoded JSON response.
+     */
     private function crosspostToTumblr ($blog, $params, $tumblr_id = false, $deleting = false) {
         // TODO: Smoothen this deleting thing.
         //       Cancel WordPress deletions if Tumblr deletions aren't working?
         if ($deleting === true && $tumblr_id) {
-            $params['id'] = $tumblr_id;
+            $params['id'] = (int) $tumblr_id;
             return $this->tumblr->deleteFromTumblrBlog($blog, $params);
         } else if ($tumblr_id) {
             $params['id'] = (int) $tumblr_id;
-            $id = $this->tumblr->editOnTumblrBlog($blog, $params);
+            return $this->tumblr->editOnTumblrBlog($blog, $params);
         } else {
-            $id = $this->tumblr->postToTumblrBlog($blog, $params);
+            return $this->tumblr->postToTumblrBlog($blog, $params);
         }
-        return $id;
     }
 
     private function prepareParamsByPostType ($post_id, $type) {
@@ -877,9 +885,9 @@ END_HTML;
             $tumblrized = array();
             foreach ($posts as $post) {
                 if ($prepared_post = $this->prepareForTumblr($post->ID)) {
-                    $tumblr_id = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
-                    update_post_meta($post->ID, 'tumblr_post_id', $tumblr_id);
-                    $tumblrized[] = array('id' => $tumblr_id, 'base_hostname' => $prepared_post->base_hostname);
+                    $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
+                    update_post_meta($post->ID, 'tumblr_post_id', $data->response->id);
+                    $tumblrized[] = array('id' => $data->response->id, 'base_hostname' => $prepared_post->base_hostname);
                 }
             }
             $blogs = array();
@@ -1058,6 +1066,7 @@ END_HTML;
             set_post_format($wp_id, $this->TumblrPostType2WordPressPostFormat($post->type));
             update_post_meta($wp_id, 'tumblr_base_hostname', parse_url($post->post_url, PHP_URL_HOST));
             update_post_meta($wp_id, 'tumblr_post_id', $post->id);
+            update_post_meta($wp_id, 'tumblr_reblog_key', $post->reblog_key);
             if (isset($post->source_url)) {
                 update_post_meta($wp_id, 'tumblr_source_url', $post->source_url);
             }
