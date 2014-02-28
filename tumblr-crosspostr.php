@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.2
+ * Version: 0.7.3
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -18,6 +18,7 @@ class Tumblr_Crosspostr {
         add_action('init', array($this, 'setTumblrSyncSchedules'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
+        add_action('admin_enqueue_scripts', array($this, 'registerAdminScripts'));
         add_action('admin_head', array($this, 'registerContextualHelp'));
         add_action('add_meta_boxes', array($this, 'addMetaBox'));
         add_action('save_post', array($this, 'savePost'));
@@ -391,6 +392,13 @@ END_HTML;
         }
 
         if ($prepared_post = $this->prepareForTumblr($post_id)) {
+            if (isset($_POST['tumblr_crosspostr_send_tweet'])) {
+                if (!empty($_POST['tumblr_crosspostr_tweet_text'])) {
+                    $prepared_post->params['tweet'] = sanitize_text_field($_POST['tumblr_crosspostr_tweet_text']);
+                }
+            } else {
+                $prepared_post->params['tweet'] = 'off';
+            }
             $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
             update_post_meta($post_id, 'tumblr_post_id', $data->response->id);
         }
@@ -603,6 +611,11 @@ END_HTML;
         );
     }
 
+    public function registerAdminScripts () {
+        wp_register_style('tumblr-crosspostr', plugins_url('tumblr-crosspostr.css', __FILE__));
+        wp_enqueue_style('tumblr-crosspostr');
+    }
+
     public function addMetaBox ($post) {
         add_meta_box(
             'tumblr-crosspostr-meta-box',
@@ -650,7 +663,7 @@ END_HTML;
     <legend><?php esc_html_e('Tumblr meta fields', 'tumblr-crosspostr');?></legend>
     <p>
         <label><?php esc_html_e('Content source:', 'tumblr-crosspostr');?>
-            <input id="tumblr_crosspostr_meta_source_url"
+            <input id="tumblr_crosspostr_meta_source_url" type="text"
                 name="tumblr_crosspostr_meta_source_url"
                 title="<?php esc_attr_e('Set the content source of this post on Tumblr by pasting the URL where you found the content you are blogging about.', 'tumblr-crosspostr'); if ($options['auto_source'] === 'Y') { print ' ' . esc_attr__('Leave this blank to set the content source URL of your Tumblr post to the permalink of this WordPress post.', 'tumblr-crosspostr'); } ?>"
                 value="<?php print esc_attr($s);?>"
@@ -659,7 +672,31 @@ END_HTML;
         </label>
     </p>
 </fieldset>
+    <?php if ($post->post_status !== 'publish') { ?>
+<fieldset>
+    <legend><?php esc_html_e('Social media broadcasts', 'tumblr-crosspostr');?></legend>
+    <details open="open"><!-- Leave open until browsers work out their keyboard accessibility issues with this. -->
+        <summary><?php esc_html_e('Twitter', 'tumblr-crosspostr');?></summary>
+        <p>
+            <label>
+                <?php esc_html_e('Send tweet?', 'tumblr-crosspostr');?>
+                <input type="checkbox" name="tumblr_crosspostr_send_tweet" value="1" checked="checked"
+                    title="<?php esc_html_e('Uncheck to disable the auto-tweet.', 'tumblr-crosspostr');?>"
+                    />
+            </label>
+            <label>
+                <input id="tumblr_crosspostr_tweet_text" type="text"
+                    name="tumblr_crosspostr_tweet_text"
+                    title="<?php esc_attr_e('If your Tumblr automatically tweets new posts to your Twitter account, you can customize the default tweet text by entering it here.', 'tumblr-crosspostr');?>"
+                    placeholder="<?php print sprintf(esc_attr__('New post: %s :)', 'tumblr-crosspostr'), '[URL]');?>"
+                    maxlength="140" />
+                <span class="description"><?php print sprintf(esc_html__('Use %s where you want the link to your Tumblr post appear, or leave blank to use the default Tumblr auto-tweet.', 'tumblr-crosspostr'), '<code>[URL]</code>');?></span>
+            </label>
+        </p>
+    </details>
+</fieldset>
 <?php
+        }
     }
 
     /**

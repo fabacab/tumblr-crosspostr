@@ -1,0 +1,6 @@
+#tumblr-crosspostr-meta-box legend {
+    display: none;
+}
+#tumblr-crosspostr-meta-box input[type="text"] {
+    width: 100%;
+}
