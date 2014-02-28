@@ -640,7 +640,7 @@ END_HTML;
     </ul>
 </fieldset>
 <fieldset>
-    <legend><?php esc_html_e('Crosspost destination', 'tumblr-crosspostr');?><legend>
+    <legend><?php esc_html_e('Crosspost destination', 'tumblr-crosspostr');?></legend>
     <p><label>
         <?php esc_html_e('Send to my Tumblr blog titled', 'tumblr-crosspostr');?>
         <?php print $this->tumblrBlogsSelectField(array('name' => 'tumblr_crosspostr_destination'), $d);?>
