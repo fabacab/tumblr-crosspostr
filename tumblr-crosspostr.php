@@ -690,7 +690,7 @@ END_HTML;
                     title="<?php esc_attr_e('If your Tumblr automatically tweets new posts to your Twitter account, you can customize the default tweet text by entering it here.', 'tumblr-crosspostr');?>"
                     placeholder="<?php print sprintf(esc_attr__('New post: %s :)', 'tumblr-crosspostr'), '[URL]');?>"
                     maxlength="140" />
-                <span class="description"><?php print sprintf(esc_html__('Use %s where you want the link to your Tumblr post appear, or leave blank to use the default Tumblr auto-tweet.', 'tumblr-crosspostr'), '<code>[URL]</code>');?></span>
+                <span class="description"><?php print sprintf(esc_html__('Use %s where you want the link to your Tumblr post to appear, or leave blank to use the default Tumblr auto-tweet.', 'tumblr-crosspostr'), '<code>[URL]</code>');?></span>
             </label>
         </p>
     </details>

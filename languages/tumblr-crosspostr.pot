@@ -1,0 +1,457 @@
+# Copyright (C) 2014 Tumblr Crosspostr
+# This file is distributed under the same license as the Tumblr Crosspostr package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Tumblr Crosspostr 0.7.3\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/tumblr-crosspostr\n"
+"POT-Creation-Date: 2014-02-28 20:10:39+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: tumblr-crosspostr.php:60
+msgid "Connect to Tumblr"
+msgstr ""
+
+#: tumblr-crosspostr.php:60
+msgid ""
+"Almost done! Connect your blog to Tumblr to begin crossposting with Tumblr "
+"Crosspostr."
+msgstr ""
+
+#: tumblr-crosspostr.php:78
+msgid ""
+"Tumblr Crosspostr is provided as free software, but sadly grocery stores do "
+"not offer free food. If you like this plugin, please consider %1$s to its "
+"%2$s. &hearts; Thank you!"
+msgstr ""
+
+#: tumblr-crosspostr.php:79
+msgid "making a donation"
+msgstr ""
+
+#: tumblr-crosspostr.php:80
+msgid "houseless, jobless, nomadic developer"
+msgstr ""
+
+#: tumblr-crosspostr.php:138
+msgid "You can automatically copy this post to your Tumblr blog:"
+msgstr ""
+
+#: tumblr-crosspostr.php:141
+msgid ""
+"Compose your post for WordPress as you normally would, with the appropriate "
+"%sPost Format%s."
+msgstr ""
+
+#: tumblr-crosspostr.php:145
+msgid ""
+"In %sthe Tumblr Crosspostr box%s, ensure the \"Send this post to Tumblr?\" "
+"option is set to \"Yes.\" (You can set it to \"No\" if you do not want to "
+"copy this post to Tumblr.)"
+msgstr ""
+
+#: tumblr-crosspostr.php:148
+msgid ""
+"If you have more than one Tumblr, choose the one you want to send this post "
+"to from the \"Send to my Tumblr blog\" list."
+msgstr ""
+
+#: tumblr-crosspostr.php:149
+msgid ""
+"Optionally, enter any additional details specifically for Tumblr, such as "
+"the \"Content source\" field."
+msgstr ""
+
+#: tumblr-crosspostr.php:151
+msgid ""
+"When you are done, click \"Publish\" (or \"Save Draft\"), and Tumblr "
+"Crosspostr will send your post to the Tumblr blog you chose."
+msgstr ""
+
+#: tumblr-crosspostr.php:152
+msgid ""
+"Note that Tumblr does not allow you to change the post format after you have "
+"saved a copy of your post, so please be sure you choose the appropriate Post "
+"Format before you save your post."
+msgstr ""
+
+#: tumblr-crosspostr.php:160
+msgid "Crossposting to Tumblr"
+msgstr ""
+
+#: tumblr-crosspostr.php:164
+msgid "Tumblr Crosspostr:"
+msgstr ""
+
+#: tumblr-crosspostr.php:165
+msgid "Tumblr Crosspostr support forum"
+msgstr ""
+
+#: tumblr-crosspostr.php:166
+msgid "Donate to Tumblr Crosspostr"
+msgstr ""
+
+#: tumblr-crosspostr.php:540
+msgid "Consumer key cannot be empty."
+msgstr ""
+
+#: tumblr-crosspostr.php:547
+msgid "Consumer secret cannot be empty."
+msgstr ""
+
+#: tumblr-crosspostr.php:598 tumblr-crosspostr.php:725
+msgid "Tumblr Crosspostr Settings"
+msgstr ""
+
+#. #-#-#-#-#  tumblr-crosspostr.pot (Tumblr Crosspostr 0.7.3)  #-#-#-#-#
+#. Plugin Name of the plugin/theme
+#: tumblr-crosspostr.php:599 tumblr-crosspostr.php:622
+msgid "Tumblr Crosspostr"
+msgstr ""
+
+#: tumblr-crosspostr.php:606 tumblr-crosspostr.php:607
+msgid "Tumblrize Archives"
+msgstr ""
+
+#: tumblr-crosspostr.php:637
+msgid ""
+"Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure "
+"you connected Tumblr Crosspostr to your Tumblr account?"
+msgstr ""
+
+#: tumblr-crosspostr.php:648
+msgid "Send this post to Tumblr?"
+msgstr ""
+
+#: tumblr-crosspostr.php:649
+msgid ""
+"If this post is in a category that Tumblr Crosspostr excludes, this will be "
+"ignored."
+msgstr ""
+
+#: tumblr-crosspostr.php:651 tumblr-crosspostr.php:846
+msgid "Yes"
+msgstr ""
+
+#: tumblr-crosspostr.php:652 tumblr-crosspostr.php:855
+msgid "No"
+msgstr ""
+
+#: tumblr-crosspostr.php:656
+msgid "Crosspost destination"
+msgstr ""
+
+#: tumblr-crosspostr.php:658
+msgid "Send to my Tumblr blog titled"
+msgstr ""
+
+#: tumblr-crosspostr.php:663
+msgid "Tumblr meta fields"
+msgstr ""
+
+#: tumblr-crosspostr.php:665
+msgid "Content source:"
+msgstr ""
+
+#: tumblr-crosspostr.php:668
+msgid ""
+"Set the content source of this post on Tumblr by pasting the URL where you "
+"found the content you are blogging about."
+msgstr ""
+
+#: tumblr-crosspostr.php:668
+msgid ""
+"Leave this blank to set the content source URL of your Tumblr post to the "
+"permalink of this WordPress post."
+msgstr ""
+
+#: tumblr-crosspostr.php:670
+msgid "//original-source.com/"
+msgstr ""
+
+#: tumblr-crosspostr.php:671
+msgid "Provide source attribution, if relevant."
+msgstr ""
+
+#: tumblr-crosspostr.php:677
+msgid "Social media broadcasts"
+msgstr ""
+
+#: tumblr-crosspostr.php:679
+msgid "Twitter"
+msgstr ""
+
+#: tumblr-crosspostr.php:682
+msgid "Send tweet?"
+msgstr ""
+
+#: tumblr-crosspostr.php:684
+msgid "Uncheck to disable the auto-tweet."
+msgstr ""
+
+#: tumblr-crosspostr.php:690
+msgid ""
+"If your Tumblr automatically tweets new posts to your Twitter account, you "
+"can customize the default tweet text by entering it here."
+msgstr ""
+
+#: tumblr-crosspostr.php:691
+msgid "New post: %s :)"
+msgstr ""
+
+#: tumblr-crosspostr.php:693
+msgid ""
+"Use %s where you want the link to your Tumblr post to appear, or leave blank "
+"to use the default Tumblr auto-tweet."
+msgstr ""
+
+#: tumblr-crosspostr.php:708
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: tumblr-crosspostr.php:717
+msgid "Disconnected from Tumblr."
+msgstr ""
+
+#: tumblr-crosspostr.php:718
+msgid ""
+"The connection to Tumblr was disestablished. You can reconnect using the "
+"same credentials, or enter different credentials before reconnecting."
+msgstr ""
+
+#: tumblr-crosspostr.php:728
+msgid "Connection to Tumblr"
+msgstr ""
+
+#: tumblr-crosspostr.php:729
+msgid "Required settings to connect to Tumblr."
+msgstr ""
+
+#: tumblr-crosspostr.php:733
+msgid "Tumblr API key/OAuth consumer key"
+msgstr ""
+
+#: tumblr-crosspostr.php:736
+msgid "Paste your API key here"
+msgstr ""
+
+#: tumblr-crosspostr.php:738
+msgid "Your Tumblr API key is also called your consumer key."
+msgstr ""
+
+#: tumblr-crosspostr.php:740
+msgid "If you need an API key, you can %s."
+msgstr ""
+
+#: tumblr-crosspostr.php:742
+msgid ""
+"Get an API key from Tumblr by registering your WordPress blog as a new "
+"Tumblr app."
+msgstr ""
+
+#: tumblr-crosspostr.php:743
+msgid "create one here"
+msgstr ""
+
+#: tumblr-crosspostr.php:750
+msgid "OAuth consumer secret"
+msgstr ""
+
+#: tumblr-crosspostr.php:753
+msgid "Paste your consumer secret here"
+msgstr ""
+
+#: tumblr-crosspostr.php:755
+msgid ""
+"Your consumer secret is like your app password. Never share this with anyone."
+msgstr ""
+
+#: tumblr-crosspostr.php:762
+msgid "Connect to Tumblr:"
+msgstr ""
+
+#: tumblr-crosspostr.php:765
+msgid "Click here to connect to Tumblr"
+msgstr ""
+
+#: tumblr-crosspostr.php:773
+msgid "Connected to Tumblr!"
+msgstr ""
+
+#: tumblr-crosspostr.php:774
+msgid "Disconnect"
+msgstr ""
+
+#: tumblr-crosspostr.php:775
+msgid ""
+"Disconnecting will stop cross-posts from appearing on or being imported from "
+"your Tumblr blog(s), and will reset the options below to their defaults. You "
+"can re-connect at any time."
+msgstr ""
+
+#: tumblr-crosspostr.php:788
+msgid "Crossposting Options"
+msgstr ""
+
+#: tumblr-crosspostr.php:789
+msgid "Options for customizing crossposting behavior."
+msgstr ""
+
+#: tumblr-crosspostr.php:793
+msgid "Default Tumblr blog for crossposts"
+msgstr ""
+
+#: tumblr-crosspostr.php:797
+msgid ""
+"Choose which Tumblr blog you want to send your posts to by default. This can "
+"be overriden on a per-post basis, too."
+msgstr ""
+
+#: tumblr-crosspostr.php:802
+msgid "Sync posts from Tumblr"
+msgstr ""
+
+#: tumblr-crosspostr.php:803
+msgid ""
+"(This feature is experimental. Please backup your website before you turn "
+"this on.)"
+msgstr ""
+
+#: tumblr-crosspostr.php:809
+msgid ""
+"Content you create on the Tumblr blogs you select will automatically be "
+"copied to this blog."
+msgstr ""
+
+#: tumblr-crosspostr.php:814
+msgid "Do not crosspost entries in these categories:"
+msgstr ""
+
+#: tumblr-crosspostr.php:831
+msgid ""
+"Will cause posts in the specificied categories never to be crossposted to "
+"Tumblr. This is useful if, for instance, you are creating posts "
+"automatically using another plugin and wish to avoid a feedback loop of "
+"crossposting back and forth from one service to another."
+msgstr ""
+
+#: tumblr-crosspostr.php:836
+msgid ""
+"Use permalinks from this blog as the \"Content source\" for crossposts on "
+"Tumblr?"
+msgstr ""
+
+#: tumblr-crosspostr.php:859
+msgid ""
+"When enabled, leaving the %sContent source%s field blank on a given entry "
+"will result in setting %sthe \"Content source\" field on your Tumblr post%s "
+"to the permalink of your WordPress post. Useful for providing automatic back-"
+"links to your main blog, but turn this off if you \"secretly\" use Tumblr "
+"Crosspostr as the back-end of a publishing platform."
+msgstr ""
+
+#: tumblr-crosspostr.php:864
+msgid "Add this markup to each crossposted entry."
+msgstr ""
+
+#: tumblr-crosspostr.php:870
+msgid "Anything you type in this box will be added to every crosspost."
+msgstr ""
+
+#: tumblr-crosspostr.php:874
+msgid "Go to the original post."
+msgstr ""
+
+#: tumblr-crosspostr.php:874
+msgid "was originally published on"
+msgstr ""
+
+#: tumblr-crosspostr.php:877
+msgid ""
+"Text or HTML you want to add to each post. Useful for things like a link "
+"back to your original post. You can use <code>%permalink%</code>, <code>"
+"%the_title%</code>, <code>%blog_url%</code>, and <code>%blog_name%</code> as "
+"placeholders for the cross-posted post's link, its title, the link to the "
+"homepage for this site, and the name of this blog, respectively. Leave this "
+"blank or use this field for a different purpose if you prefer to use only "
+"the Tumblr \"Content source\" meta field for links back to your main blog."
+msgstr ""
+
+#: tumblr-crosspostr.php:882 tumblr-crosspostr.php:897
+msgid "Do not send post tags to Tumblr"
+msgstr ""
+
+#: tumblr-crosspostr.php:886
+msgid ""
+"When enabled, tags on your WordPress posts are not applied to your Tumblr "
+"posts. Useful if you maintain different taxonomies on your different sites."
+msgstr ""
+
+#: tumblr-crosspostr.php:892
+msgid "Automatically add these tags to all crossposts:"
+msgstr ""
+
+#: tumblr-crosspostr.php:896
+msgid "crosspost, magic"
+msgstr ""
+
+#: tumblr-crosspostr.php:897
+msgid ""
+"Comma-separated list of additional tags that will be added to every post "
+"sent to Tumblr. Useful if only some posts on your Tumblr blog are cross-"
+"posted and you want to know which of your Tumblr posts were generated by "
+"this plugin. (These tags will always be applied regardless of the value of "
+"the \"%s\" option.)"
+msgstr ""
+
+#: tumblr-crosspostr.php:937
+msgid "Success! %1$d post has been crossposted."
+msgid_plural "Success! %1$d posts have been crossposted to %2$d blogs."
+msgstr[0] ""
+msgstr[1] ""
+
+#: tumblr-crosspostr.php:946
+msgid "Blogs touched:"
+msgstr ""
+
+#: tumblr-crosspostr.php:959
+msgid "Crosspost Archives to Tumblr"
+msgstr ""
+
+#: tumblr-crosspostr.php:960
+msgid ""
+"If you have post archives on this website, Tumblr Crosspostr can copy them "
+"to your Tumblr blog."
+msgstr ""
+
+#: tumblr-crosspostr.php:962
+msgid ""
+"Copies all posts from your archives to your default Tumblr blog (%s). This "
+"may take some time if you have a lot of content. If you do not want to "
+"crosspost a specific post, set the answer to the \"Send this post to Tumblr?"
+"\" question to \"No\" when editing those posts before taking this action. If "
+"you have previously crossposted some posts, this will update that content on "
+"your Tumblr blog(s)."
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/meitar/tumblr-crosspostr/#readme"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Automatically crossposts to your Tumblr blog when you publish a post on your "
+"WordPress blog."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Meitar Moscovitz"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://Cyberbusking.org/"
+msgstr ""
