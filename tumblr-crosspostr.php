@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.4
+ * Version: 0.7.4.1
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -525,7 +525,9 @@ END_HTML;
                 break;
             case 'link':
                 $r['title'] = get_post_field('post_title', $post_id);
-                $r['url'] = $this->extractByRegex('/<a.*?href="(.*?)".*?>/', $post_body, 1);
+                $r['url'] = ($e && preg_match('/<a.*?href="(.*?)".*?>/', $post_excerpt))
+                    ? $this->extractByRegex('/<a.*?href="(.*?)".*?>/', $post_excerpt, 1)
+                    : $this->extractByRegex('/<a.*?href="(.*?)".*?>/', $post_body, 1);
                 $r['description'] = ($e)
                     ? apply_filters('the_excerpt', $post_excerpt)
                     : apply_filters('the_content', $post_body);
