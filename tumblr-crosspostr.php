@@ -405,6 +405,12 @@ END_HTML;
             delete_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N');
         }
 
+        if (isset($_POST['tumblr_crosspostr_use_excerpt'])) {
+            update_post_meta($post_id, 'tumblr_crosspostr_use_excerpt', 1);
+        } else {
+            delete_post_meta($post_id, 'tumblr_crosspostr_use_excerpt');
+        }
+
         if ($prepared_post = $this->prepareForTumblr($post_id)) {
             if (isset($_POST['tumblr_crosspostr_send_tweet'])) {
                 if (!empty($_POST['tumblr_crosspostr_tweet_text'])) {
@@ -488,10 +494,24 @@ END_HTML;
 
     private function prepareParamsByPostType ($post_id, $type) {
         $post_body = get_post_field('post_content', $post_id);
+        $post_excerpt = get_post_field('post_excerpt', $post_id);
+        // Mimic wp_trim_excerpt() without The Loop.
+        if (empty($post_excerpt)) {
+            $text = $post_body;
+            $text = strip_shortcodes($text);
+            $text = apply_filters('the_content', $text);
+            $text = str_replace(']]>', ']]&gt;', $text);
+            $text = wp_trim_words($text);
+            $post_excerpt = $text;
+        }
+
+        $e = $this->getTumblrUseExcerpt($post_id); // Use excerpt?
         $r = array();
         switch ($type) {
             case 'photo':
-                $r['caption'] = apply_filters('the_content', $this->strip_only($post_body, 'img', true, 1));
+                $r['caption'] = ($e)
+                    ? apply_filters('the_excerpt', $post_excerpt)
+                    : apply_filters('the_content', $this->strip_only($post_body, 'img', true, 1));
                 $r['link'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
                 $r['source'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
                 break;
@@ -499,23 +519,31 @@ END_HTML;
                 $pattern = '/<blockquote.*?>(.*?)<\/blockquote>/s';
                 $r['quote'] = wpautop($this->extractByRegex($pattern, $post_body, 1));
                 $len = strlen($this->extractByRegex($pattern, $post_body, 0));
-                $r['source'] = apply_filters('the_content', substr($post_body, $len));
+                $r['source'] = ($e)
+                    ? apply_filters('the_excerpt', $post_excerpt)
+                    : apply_filters('the_content', substr($post_body, $len));
                 break;
             case 'link':
                 $r['title'] = get_post_field('post_title', $post_id);
                 $r['url'] = $this->extractByRegex('/<a.*?href="(.*?)".*?>/', $post_body, 1);
-                $r['description'] = apply_filters('the_content', $post_body);
+                $r['description'] = ($e)
+                    ? apply_filters('the_excerpt', $post_excerpt)
+                    : apply_filters('the_content', $post_body);
                 break;
             case 'chat':
                 $r['title'] = get_post_field('post_title', $post_id);
                 $r['conversation'] = wp_strip_all_tags($post_body);
                 break;
             case 'audio':
-                $r['caption'] = apply_filters('the_content', $post_body);
+                $r['caption'] = ($e)
+                    ? apply_filters('the_excerpt', $post_excerpt)
+                    : apply_filters('the_content', $post_body);
                 $r['external_url'] = $this->extractByRegex('/<a.*?href="(.*?\.[Mm][Pp]3)".*?>/', $post_body, 1);
                 break;
             case 'video':
-                $r['caption'] = apply_filters('the_content', $this->strip_only($post_body, 'iframe', true, 1));
+                $r['caption'] = ($e)
+                    ? apply_filters('the_excerpt', $post_excerpt)
+                    : apply_filters('the_content', $this->strip_only($post_body, 'iframe', true, 1));
                 $r['embed'] = 'https://www.youtube.com/watch?v='
                     . $this->extractByRegex('/youtube\.com\/(?:v|embed)\/([\w\-]+)/', $post_body, 1);
                 break;
@@ -524,7 +552,9 @@ END_HTML;
                 // fall through
             case 'aside':
             default:
-                $r['body'] = apply_filters('the_content', $post_body);
+                $r['body'] = ($e)
+                    ? apply_filters('the_excerpt', $post_excerpt)
+                    : apply_filters('the_content', $post_body);
                 break;
         }
         return $r;
@@ -553,6 +583,15 @@ END_HTML;
             $d = (isset($options['default_hostname'])) ? $options['default_hostname'] : '';
         }
         return $d;
+    }
+
+    private function getTumblrUseExcerpt ($post_id) {
+        $e = get_post_meta($post_id, 'tumblr_crosspostr_use_excerpt', true);
+        if (empty($e)) {
+            $options = get_option('tumblr_crosspostr_settings');
+            $e = (isset($options['use_excerpt'])) ? $options['use_excerpt'] : 0;
+        }
+        return intval($e);
     }
 
     public function removeFromTumblr ($post_id) {
@@ -609,6 +648,7 @@ END_HTML;
                 case 'additional_markup':
                     $safe_input[$k] = trim($v);
                 break;
+                case 'use_excerpt':
                 case 'exclude_tags':
                     $safe_input[$k] = intval($v);
                 break;
@@ -676,6 +716,7 @@ END_HTML;
         // Set default crossposting options for this post.
         $x = get_post_meta($post->ID, 'tumblr_crosspostr_crosspost', true);
         $d = $this->getTumblrBasename($post->ID);
+        $e = $this->getTumblrUseExcerpt($post->ID);
         $s = get_post_meta($post->ID, 'tumblr_source_url', true);
 ?>
 <fieldset>
@@ -687,24 +728,31 @@ END_HTML;
     </ul>
 </fieldset>
 <fieldset>
-    <legend><?php esc_html_e('Crosspost destination', 'tumblr-crosspostr');?></legend>
-    <p><label>
-        <?php esc_html_e('Send to my Tumblr blog titled', 'tumblr-crosspostr');?>
-        <?php print $this->tumblrBlogsSelectField(array('name' => 'tumblr_crosspostr_destination'), $d);?>
-    </label></p>
-</fieldset>
-<fieldset>
-    <legend><?php esc_html_e('Tumblr meta fields', 'tumblr-crosspostr');?></legend>
-    <p>
-        <label><?php esc_html_e('Content source:', 'tumblr-crosspostr');?>
-            <input id="tumblr_crosspostr_meta_source_url" type="text"
-                name="tumblr_crosspostr_meta_source_url"
-                title="<?php esc_attr_e('Set the content source of this post on Tumblr by pasting the URL where you found the content you are blogging about.', 'tumblr-crosspostr'); if ($options['auto_source'] === 'Y') { print ' ' . esc_attr__('Leave this blank to set the content source URL of your Tumblr post to the permalink of this WordPress post.', 'tumblr-crosspostr'); } ?>"
-                value="<?php print esc_attr($s);?>"
-                placeholder="<?php esc_attr_e('//original-source.com/', 'tumblr-crosspostr');?>" />
-            <span class="description"><?php esc_html_e('Provide source attribution, if relevant.', 'tumblr-crosspostr');?></span>
-        </label>
-    </p>
+    <legend><?php esc_html_e('Crossposting options', 'tumblr-crosspostr');?></legend>
+    <details open="open">
+        <summary><?php esc_html_e('Destination & content', 'tumblr-crosspostr');?></summary>
+        <p><label>
+            <?php esc_html_e('Send to my Tumblr blog titled', 'tumblr-crosspostr');?>
+            <?php print $this->tumblrBlogsSelectField(array('name' => 'tumblr_crosspostr_destination'), $d);?>
+        </label></p>
+        <p><label>
+            <?php esc_html_e('Send excerpt instead of main content?', 'tumblr-crosspostr');?>
+                <input type="checkbox" name="tumblr_crosspostr_use_excerpt" value="1"
+                    <?php if (1 === $e) { print 'checked="checked"'; } ?>
+                    title="<?php esc_html_e('Uncheck to disable the auto-tweet.', 'tumblr-crosspostr');?>"
+                    />
+        </label></p>
+        <p>
+            <label><?php esc_html_e('Content source:', 'tumblr-crosspostr');?>
+                <input id="tumblr_crosspostr_meta_source_url" type="text"
+                    name="tumblr_crosspostr_meta_source_url"
+                    title="<?php esc_attr_e('Set the content source of this post on Tumblr by pasting the URL where you found the content you are blogging about.', 'tumblr-crosspostr'); if ($options['auto_source'] === 'Y') { print ' ' . esc_attr__('Leave this blank to set the content source URL of your Tumblr post to the permalink of this WordPress post.', 'tumblr-crosspostr'); } ?>"
+                    value="<?php print esc_attr($s);?>"
+                    placeholder="<?php esc_attr_e('//original-source.com/', 'tumblr-crosspostr');?>" />
+                <span class="description"><?php esc_html_e('Provide source attribution, if relevant.', 'tumblr-crosspostr');?></span>
+            </label>
+        </p>
+    </details>
 </fieldset>
     <?php if ($post->post_status !== 'publish') { ?>
 <fieldset>
@@ -895,7 +943,16 @@ END_HTML;
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_additional_markup"><?php esc_html_e('Add this markup to each crossposted entry.', 'tumblr-crosspostr');?></label>
+                <label for="tumblr_crosspostr_use_excerpt"><?php esc_html_e('Send excerpts instead of main content?', 'tumblr-crosspostr');?></label>
+            </th>
+            <td>
+                <input type="checkbox" <?php if (isset($options['use_excerpt'])) : print 'checked="checked"'; endif; ?> value="1" id="tumblr_crosspostr_use_excerpt" name="tumblr_crosspostr_settings[use_excerpt]" />
+                <label for="tumblr_crosspostr_use_excerpt"><span class="description"><?php esc_html_e('When enabled, the excerpts (as opposed to the body) of your WordPress posts will be used as the main content of your Tumblr posts. Useful if you prefer to crosspost summaries instead of the full text of your entires to Tumblr by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></span></label>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="tumblr_crosspostr_additional_markup"><?php esc_html_e('Add the following markup to each crossposted entry:', 'tumblr-crosspostr');?></label>
             </th>
             <td>
                 <textarea
