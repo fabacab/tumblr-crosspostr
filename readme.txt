@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.3
+Stable tag: 0.7.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -142,13 +142,18 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 3. After allowing Tumblr Crosspostr access to your Tumblr account, you'll find you're able to access the remainder of the options page. You must choose at least one default Tumblr blog to send your crossposts to, so this option is highlighted if it is not yet set. Set your cross-posting preferences and click "Save Changes." You're now ready to start crossposting!
 
-4. You can optionally choose not to crosspost individual WordPress posts from the Tumblr Crosspostr custom post editing box. This box also enables you to send a specific post to a Tumblr blog other than the default one you selected in the previous step, and [control the Tumblr auto-tweet](http://www.tumblr.com/docs/twitter) setting for this post (if enabled on your Tumblr blog).
+4. You can optionally choose not to crosspost individual WordPress posts from the Tumblr Crosspostr custom post editing box. This box also enables you to send a specific post to a Tumblr blog other than the default one you selected in the previous step, send the post's excerpt rather than its main body to Tumblr, and [control the Tumblr auto-tweet](http://www.tumblr.com/docs/twitter) setting (if enabled on your Tumblr blog).
 
 5. If you already have a lot of content that you want to quickly copy to Tumblr, you can use the "Tumblrize Archives" tool to do exactly that.
 
 6. Get help where you need it by from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.4 =
+
+* Feature: "Send excerpt instead of main content?" option lets you crosspost a post's [excerpt](http://codex.wordpress.org/Excerpt) rather than its main content. If you use this option but do not provide an excerpt manually, an automatic one is generated (similar to how the `[the_excerpt()](http://codex.wordpress.org/Function_Reference/the_excerpt)` template tag works).
+* Feature: When you publish a post, a "View post on Tumblr" link offers an easy way to see your crossposted entry.
 
 = Version 0.7.3 =
 
