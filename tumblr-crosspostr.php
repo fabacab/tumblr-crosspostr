@@ -19,7 +19,7 @@ class Tumblr_Crosspostr {
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
         add_action('admin_enqueue_scripts', array($this, 'registerAdminScripts'));
-        add_action('admin_head', array($this, 'registerContextualHelp'));
+        add_action('admin_head', array($this, 'doAdminHeadActions'));
         add_action('add_meta_boxes', array($this, 'addMetaBox'));
         add_action('save_post', array($this, 'savePost'));
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
@@ -67,6 +67,14 @@ class Tumblr_Crosspostr {
 ?>
 <div class="error">
     <p><?php print esc_html($msg);?></p>
+</div>
+<?php
+    }
+
+    private function showNotice ($msg) {
+?>
+<div class="updated">
+    <p><?php print $msg; // No escaping because we want links, so be careful. ?></p>
 </div>
 <?php
     }
@@ -132,7 +140,13 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
         );
     }
 
-    public function registerContextualHelp () {
+
+    public function doAdminHeadActions () {
+        $this->registerContextualHelp();
+        $this->showAdminNotices();
+    }
+
+    private function registerContextualHelp () {
         $screen = get_current_screen();
         if ($screen->id !== 'post') { return; }
         $html = '<p>' . esc_html__('You can automatically copy this post to your Tumblr blog:', 'tumblr-crosspostr') . '</p>'
@@ -400,7 +414,27 @@ END_HTML;
                 $prepared_post->params['tweet'] = 'off';
             }
             $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
-            update_post_meta($post_id, 'tumblr_post_id', $data->response->id);
+            if (!empty($data->response->id)) {
+                update_post_meta($post_id, 'tumblr_post_id', $data->response->id);
+                if ($prepared_post->params['state'] === 'published') {
+                    $url = 'http://' . $this->getTumblrBasename($post_id) . '/post/' . get_post_meta($post_id, 'tumblr_post_id', true);
+                    $msg = array(
+                        esc_html__('Post crossposted.', 'tumblr-crosspostr')
+                        . ' <a href="' . $url . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>'
+                    );
+                    update_option('_tumblr_crosspostr_admin_notices', $msg);
+                }
+            }
+        }
+    }
+
+    private function showAdminNotices () {
+        $notices = get_option('_tumblr_crosspostr_admin_notices');
+        if ($notices) {
+            foreach ($notices as $msg) {
+                $this->showNotice($msg);
+            }
+            delete_option('_tumblr_crosspostr_admin_notices');
         }
     }
 
