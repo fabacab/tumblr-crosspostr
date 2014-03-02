@@ -152,7 +152,7 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 = Version 0.7.4 =
 
-* Feature: "Send excerpt instead of main content?" option lets you crosspost a post's [excerpt](http://codex.wordpress.org/Excerpt) rather than its main content. If you use this option but do not provide an excerpt manually, an automatic one is generated (similar to how the `[the_excerpt()](http://codex.wordpress.org/Function_Reference/the_excerpt)` template tag works).
+* Feature: "Send excerpt instead of main content?" option lets you crosspost a post's [excerpt](http://codex.wordpress.org/Excerpt) rather than its main content. If you use this option but do not provide an excerpt manually, an automatic one is generated (similar to how the [`the_excerpt()`](http://codex.wordpress.org/Function_Reference/the_excerpt) template tag works).
 * Feature: When you publish a post, a "View post on Tumblr" link offers an easy way to see your crossposted entry.
 
 = Version 0.7.3 =
