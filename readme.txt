@@ -117,7 +117,7 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 5. If you already have a lot of content that you want to quickly copy to Tumblr, you can use the "Tumblrize Archives" tool to do exactly that.
 
-6. Get help where you need it by from WordPress's built-in "Help" system.
+6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
 
