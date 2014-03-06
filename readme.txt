@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.6
+Stable tag: 0.7.6.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -120,6 +120,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.6.1 =
+
+* Video posts got *even better*:
+    * Videos from any source can be crossposted now, too. Just make sure the embed code the video site gives you is using an `<iframe>`. [The Onion](http://TheOnion.com/) fans, this one's for you! ;)
 
 = Version 0.7.6 =
 
