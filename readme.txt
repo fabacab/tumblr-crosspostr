@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.5
+Stable tag: 0.7.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -88,7 +88,12 @@ Yes. Tumblr Crosspostr respects the WordPress post visibility setting and suppor
 
 = Is Tumblr Crosspostr available in languages other than English? =
 
-Not yet, but with your help it can be. To help translate the plugin into your language, please [sign up as a translator on Tumblr Crosspostr's Transifex project page](https://www.transifex.com/projects/p/tumblr-crosspostr/).
+This plugin has been translated into the following languages:
+
+* French (`fr_FR`)
+    * Thanks, [Julien](http://ijulien.com/)! :D
+
+With your help it can be translated into even more! To contribute a translation of this plugin into your language, please [sign up as a translator on Tumblr Crosspostr's Transifex project page](https://www.transifex.com/projects/p/tumblr-crosspostr/).
 
 = What if my theme doesn't support Post Formats? =
 
@@ -115,6 +120,15 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it by from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.6 =
+
+* Video posts got better:
+    * Vimeo embeds are now crossposted, too.
+    * YouTube's "privacy-enhanced" (`nocookie`) mode is now supported, so help protect your readers' privacy by embedding privacy-enhanced YouTube videos on your blog. [Quoth Teh Googlez](https://support.google.com/youtube/answer/171780?expand=PrivacyEnhancedMode#privacy): "Enabling this option means that YouTube won't store information about visitors on your web page unless they play the video." ([Learn more about why this matters](http://maymay.net/blog/2014/03/01/advertisements-are-malware/).)
+* Feature: WordPress post slugs become Tumblr custom post slugs (for Tumblr blogs with that feature enabled).
+* Developer: Replace [PEAR's `HTTP_OAuth`](https://pear.php.net/package/HTTP_OAuth) with [Manuel Lemos's `oauth_client_class`](https://freecode.com/projects/php-oauth-api). This is a major under-the-hood update that makes it easier for Tumblr Crosspostr's codebase to be reused with other [OAuth](http://oauth.net/) Web services. It also happens to reduce the plugin's total disk space used by about half. :)
+* Bugfix: Ampersands (`&`) in crossposted tags now display correctly on Tumblr.
 
 = Version 0.7.5 =
 
