@@ -28,22 +28,23 @@ class Tumblr_Crosspostr {
 
         add_action('tumblr_crosspostr_sync_tumblr', array($this, 'syncFromTumblrBlog'));
 
+        $options = get_option('tumblr_crosspostr_settings');
         // Initialize consumer if we can, set up authroization flow if we can't.
         require_once 'lib/TumblrCrosspostrAPIClient.php';
-        $options = get_option('tumblr_crosspostr_settings');
         if (isset($options['consumer_key']) && isset($options['consumer_secret'])) {
             $this->tumblr = new Tumblr_Crosspostr_API_Client($options['consumer_key'], $options['consumer_secret']);
             if (isset($options['access_token']) && isset($options['access_token_secret'])) {
-                $this->tumblr->setToken($options['access_token']);
-                $this->tumblr->setTokenSecret($options['access_token_secret']);
+                $this->tumblr->client->access_token = $options['access_token'];
+                $this->tumblr->client->access_token_secret = $options['access_token_secret'];
             }
         } else {
+            $this->tumblr = new Tumblr_Crosspostr_API_Client;
             add_action('admin_notices', array($this, 'showMissingConfigNotice'));
         }
 
         // OAuth connection workflow.
         if (isset($_GET['tumblr_crosspostr_oauth_authorize'])) {
-            add_action('init', array($this, 'authorizeTumblrApp'));
+            add_action('init', array($this, 'authorizeApp'));
         } else if (isset($_GET['tumblr_crosspostr_callback']) && !empty($_GET['oauth_verifier'])) {
             // Unless we're just saving the options, hook the final step in OAuth authorization.
             if (!isset($_GET['settings-updated'])) {
@@ -106,25 +107,24 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
         add_theme_support('post-formats', array_merge($f, $diff));
     }
 
-    public function authorizeTumblrApp () {
+    public function authorizeApp () {
         check_admin_referer('tumblr-authorize');
 
-        $this->tumblr->getRequestToken(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback'));
-        wp_redirect($this->tumblr->getAuthorizeUrl());
-        exit();
+        $this->tumblr->client->redirect_uri = admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback');
+        $this->tumblr->client->Process();
+        if ($this->tumblr->client->exit) {
+            $this->tumblr->client->Finalize();
+            exit();
+        }
     }
 
     public function completeAuthorization () {
+        $this->tumblr->client->Process();
         $options = get_option('tumblr_crosspostr_settings');
-        $this->tumblr = new Tumblr_Crosspostr_API_Client(
-            $options['consumer_key'],
-            $options['consumer_secret'],
-            $_SESSION['tumblr_crosspostr_oauth_token'],
-            $_SESSION['tumblr_crosspostr_oauth_token_secret']
-        );
-        $this->tumblr->getAccessToken($_GET['oauth_verifier']); // Puts new tokens in $_SESSION.
-        $options['access_token'] = $_SESSION['tumblr_crosspostr_oauth_token'];
-        $options['access_token_secret'] = $_SESSION['tumblr_crosspostr_oauth_token_secret'];
+        if (!empty($this->tumblr->client->access_token) && !empty($this->tumblr->client->access_token_secret)) {
+            $options['access_token'] = $this->tumblr->client->access_token;
+            $options['access_token_secret'] = $this->tumblr->client->access_token_secret;
+        }
         update_option('tumblr_crosspostr_settings', $options);
     }
 
@@ -793,6 +793,7 @@ END_HTML;
         }
         $options = get_option('tumblr_crosspostr_settings');
         if (isset($_GET['disconnect']) && wp_verify_nonce($_GET['tumblr_crosspostr_nonce'], 'disconnect_from_tumblr')) {
+            @$this->tumblr->client->ResetAccessToken(); // Suppress session_start() warning.
             unset($options['access_token']);
             if (update_option('tumblr_crosspostr_settings', $options)) {
 ?>
@@ -1205,14 +1206,15 @@ END_HTML;
     }
 
     private function getTumblrAppRegistrationUrl () {
-        $url = 'http://www.tumblr.com/oauth/register?';
-        $url .= 'oac[title]=' . get_bloginfo('name');
-        $url .= '&oac[url]=' . urlencode(home_url());
-        // Max 400 chars for Tumblr
-        $url .= '&oac[description]=' . mb_substr(get_bloginfo('description'), 0, 400, get_bloginfo('charset'));
-        $url .= '&oac[admin_contact_email]=' . get_bloginfo('admin_email');
-        $url .= '&oac[default_callback_url]=' . urlencode(plugins_url('/oauth-callback.php', __FILE__));
-        return $url;
+        $params = array(
+            'title' => get_bloginfo('name'),
+            // Max 400 chars for Tumblr
+            'description' => mb_substr(get_bloginfo('description'), 0, 400, get_bloginfo('charset')),
+            'url' => home_url(),
+            'admin_contact_email' => get_bloginfo('admin_email'),
+            'default_callback_url' => plugins_url('/oauth-callback.php', __FILE__)
+        );
+        return $this->tumblr->getAppRegistrationUrl($params);
     }
 
     private function tumblrBlogsSelectField ($attributes = array(), $selected = false) {
