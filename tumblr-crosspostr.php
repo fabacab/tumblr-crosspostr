@@ -965,7 +965,7 @@ END_HTML;
                     name="tumblr_crosspostr_settings[additional_markup]"
                     placeholder="<?php esc_attr_e('Anything you type in this box will be added to every crosspost.', 'tumblr-crosspostr');?>"><?php
         if (isset($options['additional_markup'])) {
-            print esc_html($options['additional_markup']);
+            print esc_textarea($options['additional_markup']);
         } else {
             print '<p class="tumblr-crosspostr-linkback"><a href="%permalink%" title="' . esc_html__('Go to the original post.', 'tumblr-crosspostr') . '" rel="bookmark">%the_title%</a> ' . esc_html__('was originally published on', 'tumblr_crosspostr') . ' <a href="%blog_url%">%blog_name%</a></p>';
         }
