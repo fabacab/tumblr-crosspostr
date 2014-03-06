@@ -47,54 +47,20 @@ See also the [Screenshots](https://wordpress.org/plugins/tumblr-crosspostr/scree
 
 = Installation notes and troubleshooting =
 
-Tumblr Crosspostr makes use of the [PHP Extension and Application Repository (PEAR)](http://pear.php.net/) for some core functions. Most systems have the required PEAR packages installed already and, if so, Tumblr Crosspostr prefers to use those. However, I also ship Tumblr Crosspostr with the required PEAR packages inside the `lib/pear/php` directory of the plugin, as a fallback.
-
-If you notice any errors upon plugin activation, first check to ensure your system's [PHP include path](http://php.net/manual/ini.core.php#ini.include-path) is set correctly. If one of the paths in this variable does not contain the required PEAR components, Tumblr Crosspostr won't work. The `lib` directory and its required files look like this:
+Tumblr Crosspostr makes use of Manuel Lemos's `oauth_client_class` for some core functions. Most systems have the required packages installed already, but if you notice any errors upon plugin activation, first check to ensure your system's [PHP include path](http://php.net/manual/ini.core.php#ini.include-path) is set correctly. The `lib` directory and its required files look like this:
 
     lib
+    ├── OAuthWP.php
+    ├── OAuthWP_Tumblr.php
     ├── TumblrCrosspostrAPIClient.php
-    └── pear
-        └── php
-            ├── HTTP
-            │   ├── OAuth
-            │   │   ├── Consumer
-            │   │   │   ├── Exception
-            │   │   │   │   └── InvalidResponse.php
-            │   │   │   ├── Request.php
-            │   │   │   └── Response.php
-            │   │   ├── Consumer.php
-            │   │   ├── Exception
-            │   │   │   └── NotImplemented.php
-            │   │   ├── Exception.php
-            │   │   ├── Message.php
-            │   │   ├── Signature
-            │   │   │   ├── Common.php
-            │   │   │   └── HMAC
-            │   │   │       └── SHA1.php
-            │   │   └── Signature.php
-            │   ├── OAuth.php
-            │   ├── Request2
-            │   │   ├── Adapter
-            │   │   │   ├── Curl.php
-            │   │   │   ├── Mock.php
-            │   │   │   └── Socket.php
-            │   │   ├── Adapter.php
-            │   │   ├── CookieJar.php
-            │   │   ├── Exception.php
-            │   │   ├── MultipartBody.php
-            │   │   ├── Observer
-            │   │   │   └── Log.php
-            │   │   ├── Response.php
-            │   │   └── SocketWrapper.php
-            │   └── Request2.php
-            ├── Net
-            │   └── URL2.php
-            ├── PEAR
-            │   └── Exception.php
-            ├── PEAR.php
-            └── PEAR5.php
+    ├── httpclient
+    │   ├── LICENSE.txt
+    │   └── http.php
+    └── oauth_api
+        ├── LICENSE
+        └── oauth_client.php
 
-It's also possible that your system administrator will apply updates to one or more of these PEAR packages without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, Tumblr Crosspostr may begin to issue errors. If this happens, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/meitar/tumblr-crosspostr/issues/new).
+It's also possible that your system administrator will apply updates to one or more of the core system packages this plugin uses without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, the plugin may begin to issue errors. Should this occur, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/meitar/tumblr-crosspostr/issues/new).
 
 == Frequently Asked Questions ==
 
