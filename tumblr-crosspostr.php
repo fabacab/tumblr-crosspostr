@@ -346,7 +346,8 @@ END_HTML;
             'state' => $state,
             'tags' => implode(',', $tags),
             'date' => get_post_time('Y-m-d H:i:s', true, $post_id) . ' GMT',
-            'format' => 'html' // Tumblr's "formats" are always either 'html' or 'markdown'
+            'format' => 'html', // Tumblr's "formats" are always either 'html' or 'markdown'
+            'slug' => get_post_field('post_name', $post_id)
         );
         if ($source_url) { $common_params['source_url'] = $source_url; }
 
