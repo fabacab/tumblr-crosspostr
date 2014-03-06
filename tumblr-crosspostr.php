@@ -109,22 +109,14 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
 
     public function authorizeApp () {
         check_admin_referer('tumblr-authorize');
-
-        $this->tumblr->client->redirect_uri = admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback');
-        $this->tumblr->client->Process();
-        if ($this->tumblr->client->exit) {
-            $this->tumblr->client->Finalize();
-            exit();
-        }
+        $this->tumblr->authorize(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback'));
     }
 
     public function completeAuthorization () {
-        $this->tumblr->client->Process();
+        $tokens = $this->tumblr->completeAuthorization(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback'));
         $options = get_option('tumblr_crosspostr_settings');
-        if (!empty($this->tumblr->client->access_token) && !empty($this->tumblr->client->access_token_secret)) {
-            $options['access_token'] = $this->tumblr->client->access_token;
-            $options['access_token_secret'] = $this->tumblr->client->access_token_secret;
-        }
+        $options['access_token'] = $tokens['value'];
+        $options['access_token_secret'] = $tokens['secret'];
         update_option('tumblr_crosspostr_settings', $options);
     }
 
@@ -139,7 +131,6 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
             array($this, 'validateSettings')
         );
     }
-
 
     public function doAdminHeadActions () {
         $this->registerContextualHelp();
@@ -847,7 +838,7 @@ END_HTML;
                 <label for="tumblr_crosspostr_oauth_authorize"><?php esc_html_e('Connect to Tumblr:', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_oauth_authorize'), 'tumblr-authorize');?>" class="button button-primary"><?php esc_html_e('Click here to connect to Tumblr','tumblr-crosspostr');?></a>
+                <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_oauth_authorize'), 'tumblr-authorize');?>" class="button button-primary"><?php esc_html_e('Click here to connect to Tumblr', 'tumblr-crosspostr');?></a>
             </td>
         </tr>
         <?php } else if (isset($options['access_token'])) { ?>

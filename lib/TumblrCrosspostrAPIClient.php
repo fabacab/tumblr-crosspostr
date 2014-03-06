@@ -6,7 +6,7 @@
 // Loads OAuth consumer class via OAuthWP class.
 require_once 'OAuthWP_Tumblr.php';
 
-class Tumblr_Crosspostr_API_Client {
+class Tumblr_Crosspostr_API_Client extends Tumblr_OAuthWP_Plugin {
     private $api_key; //< Also the "Consumer key" the user entered.
 
     function __construct ($consumer_key = '', $consumer_secret = '') {
@@ -25,13 +25,13 @@ class Tumblr_Crosspostr_API_Client {
     }
 
     public function getUserBlogs () {
-        $data = $this->talkToTumblr('/user/info');
+        $data = $this->talkToService('/user/info');
         // TODO: This could use some error handling?
         return $data->response->user->blogs;
     }
 
     public function getBlogInfo ($base_hostname) {
-        $data = $this->talkToTumblr("/blog/$base_hostname/info?api_key={$this->api_key}", array(), 'GET');
+        $data = $this->talkToService("/blog/$base_hostname/info?api_key={$this->api_key}", array(), 'GET');
         // TODO: Handle error?
         return $data->response->blog;
     }
@@ -43,32 +43,21 @@ class Tumblr_Crosspostr_API_Client {
                 $url .= "&$k=$v";
             }
         }
-        $data = $this->talkToTumblr($url, array(), 'GET');
+        $data = $this->talkToService($url, array(), 'GET');
         return $data->response;
     }
 
     public function postToTumblrBlog ($blog, $params) {
         $api_method = "/blog/$blog/post";
-        return $this->talkToTumblr($api_method, $params);
+        return $this->talkToService($api_method, $params);
     }
     public function editOnTumblrBlog ($blog, $params) {
         $api_method = "/blog/$blog/post/edit";
-        return $this->talkToTumblr($api_method, $params);
+        return $this->talkToService($api_method, $params);
     }
     public function deleteFromTumblrBlog($blog, $params) {
         $api_method = "/blog/$blog/post/delete";
-        return $this->talkToTumblr($api_method, $params);
+        return $this->talkToService($api_method, $params);
     }
 
-    private function talkToTumblr ($path, $params = array(), $method = 'POST') {
-        $resp = null;
-        if ($s = $this->client->CallAPI($path, $method, $params, array(), $resp)) {
-            $this->client->Finalize($s);
-        }
-        return $resp;
-    }
-
-    public function getAppRegistrationUrl ($params) {
-        return $this->client->getAppRegistrationUrl($params);
-    }
 }
