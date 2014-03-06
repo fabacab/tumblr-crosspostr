@@ -539,7 +539,7 @@ END_HTML;
                     ? apply_filters('the_excerpt', $post_excerpt)
                     : apply_filters('the_content', $this->strip_only($post_body, 'iframe', true, 1));
 
-                $pattern_youtube = '/youtube\.com\/(?:v|embed)\/([\w\-]+)/';
+                $pattern_youtube = '/youtube(?:-nocookie)\.com\/(?:v|embed)\/([\w\-]+)/';
                 $pattern_vimeo = '/player\.vimeo\.com\/video\/([0-9]+)/';
                 if (preg_match($pattern_youtube, $post_body)) {
                     $r['embed'] = 'https://www.youtube.com/watch?v='
