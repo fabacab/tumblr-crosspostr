@@ -538,8 +538,17 @@ END_HTML;
                 $r['caption'] = ($e)
                     ? apply_filters('the_excerpt', $post_excerpt)
                     : apply_filters('the_content', $this->strip_only($post_body, 'iframe', true, 1));
-                $r['embed'] = 'https://www.youtube.com/watch?v='
-                    . $this->extractByRegex('/youtube\.com\/(?:v|embed)\/([\w\-]+)/', $post_body, 1);
+
+                $pattern_youtube = '/youtube\.com\/(?:v|embed)\/([\w\-]+)/';
+                $pattern_vimeo = '/player\.vimeo\.com\/video\/([0-9]+)/';
+                if (preg_match($pattern_youtube, $post_body)) {
+                    $r['embed'] = 'https://www.youtube.com/watch?v='
+                        . $this->extractByRegex($pattern_youtube, $post_body, 1);
+                } else if (preg_match($pattern_vimeo, $post_body)) {
+                    $r['embed'] = '<iframe src="//' . $this->extractByRegex($pattern_vimeo, $post_body, 0) . '">'
+                        . '<a href="//vimeo.com/' . $this->extractByRegex($pattern_vimeo, $post_body, 1). '">'
+                        . esc_html__('Watch this video.', 'tumblr-crosspostr') . '</a></iframe>';
+                }
                 break;
             case 'text':
                 $r['title'] = get_post_field('post_title', $post_id);
