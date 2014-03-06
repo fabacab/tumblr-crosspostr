@@ -338,7 +338,8 @@ END_HTML;
         $tags = array();
         if ($t = get_the_tags($post_id)) {
             foreach ($t as $tag) {
-                $tags[] = $tag->name;
+                // Decode manually so that's the ONLY decoded entity.
+                $tags[] = str_replace('&amp;', '&', $tag->name);
             }
         }
         $common_params = array(
