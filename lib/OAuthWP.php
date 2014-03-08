@@ -20,9 +20,9 @@ abstract class OAuthWP extends oauth_client_class {
 
     public function authorize ($redirect_uri) {
         $this->redirect_uri = $redirect_uri;
-        $this->Process();
+        $s = $this->Process();
         if ($this->exit) {
-            $this->Finalize();
+            $this->Finalize($s);
             exit();
         }
     }
