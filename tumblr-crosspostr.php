@@ -421,10 +421,20 @@ END_HTML;
                         esc_html__('Post crossposted.', 'tumblr-crosspostr')
                         . ' <a href="' . $url . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>'
                     );
-                    update_option('_tumblr_crosspostr_admin_notices', $msg);
+                    $this->addAdminNotices($msg);
                 }
             }
         }
+    }
+
+    private function addAdminNotices ($msgs) {
+        if (is_string($msgs)) { $msgs = array($msgs); }
+        $notices = get_option('_tumblr_crosspostr_admin_notices');
+        if (empty($notices)) {
+            $notices = array();
+        }
+        $notices = array_merge($notices, $msgs);
+        update_option('_tumblr_crosspostr_admin_notices', $notices);
     }
 
     private function showAdminNotices () {
