@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.7
+Stable tag: 0.7.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,7 +12,11 @@ Tumblr Crosspostr cross-posts your WordPress entries to Tumblr. Changes to your 
 
 == Description ==
 
-Tumblr Crosspostr posts to Tumblr whenever you hit the "Publish" (or "Save Draft") button. It uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post. Private WordPress posts become private Tumblr posts, deleting a post from WordPress that you've previously cross-posted to Tumblr deletes it from Tumblr, too, and so on. Scheduling a WordPress post to be published any time in the future will add it to the Tumblr blog's Queue. (However, the publishing schedule of your Tumblr queue will take precedence, so be careful!)
+Tumblr Crosspostr posts to Tumblr whenever you hit the "Publish" (or "Save Draft") button. It can import your reblogs on Tumblr as native WordPress posts. It even downloads the images in your Photo posts and saves them in the WordPress Media Library.
+
+**Transform your WordPress website into a back-end for Tumblr. Create original posts using WordPress, but publish them to Tumblr. Import your Tumblr reblogs. [Always have a portable copy (a running backup) of your entire Tumblr blog](http://maymay.net/blog/2014/02/17/keep-a-running-backup-of-your-tumblr-reblogs-with-tumblr-crosspostr/).**
+
+Tumblr Crosspostr uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post. Private WordPress posts become private Tumblr posts, deleting a post from WordPress that you've previously cross-posted to Tumblr deletes it from Tumblr, too, and so on. Scheduling a WordPress post to be published any time in the future will add it to the Tumblr blog's Queue. (However, the publishing schedule of your Tumblr queue will take precedence, so be careful!)
 
 Tumblr Crosspostr is very lightweight. It just requires you to connect to your Tumblr account from the plugin options screen. After that, you're ready to cross-post!
 
@@ -29,9 +33,7 @@ The WordPress post format to Tumblr post type mapping looks like this:
 * WordPress's `Chat` post format becomes Tumblr's `Chat` post type
 * WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type (sadly this is not yet implemented, but maybe one day soon!!)
 
-Other options and features enable tweaking additional metadata from your WordPress entry (notably tags and "Content source" attributions) to Tumblr, sending all your post archives to Tumblr in one click, and more.
-
-Tumblr Crosspostr transforms your WordPress website into a back-end for Tumblr. Create your posts using WordPress, but publish to Tumblr. This means you'll always have a portable copy of your entire Tumblr blog.
+Other options enable tweaking additional metadata from your WordPress entry (notably tags and "Content source" attributions) to Tumblr, sending all your post archives to Tumblr in one click, and more.
 
 == Installation ==
 
@@ -120,6 +122,10 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.8 =
+
+* Feature: "Sync posts from Tumblr" now downloads the images in your Photo posts on Tumblr as [WordPress attachments](http://codex.wordpress.org/Attachments) and associates them with the newly-imported post (unless your WordPress uploads directory is not writable).
 
 = Version 0.7.7 =
 

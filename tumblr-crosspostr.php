@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.7
+ * Version: 0.7.8
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -1215,6 +1215,58 @@ END_HTML;
             update_post_meta($wp_id, 'tumblr_reblog_key', $post->reblog_key);
             if (isset($post->source_url)) {
                 update_post_meta($wp_id, 'tumblr_source_url', $post->source_url);
+            }
+
+            // Import image files from photo post types as WordPress attachments.
+            if ('photo' === $post->type) {
+                $wp_subdir_from_post_timestamp = date('Y/m', $post->timestamp);
+                $wp_upload_dir = wp_upload_dir($wp_subdir_from_post_timestamp);
+                if (!is_writable($wp_upload_dir['path'])) {
+                    $msg = sprintf(
+                        esc_html__('Your WordPress uploads directory (%s) is not writeable, so Tumblr Crosspostr could not import some media files directly into your Media Library. Media (such as images) will be referenced from their remote source rather than imported and referenced locally.', 'tumblr-crosspostr'),
+                        $wp_upload_dir['path']
+                    );
+                    error_log($msg);
+                } else {
+                    foreach ($post->photos as $photo) {
+                        $data = wp_remote_get($photo->original_size->url);
+                        if ($data['response']['code'] !== 200) {
+                            $msg = sprintf(
+                                esc_html__('Failed to get Tumblr photo (%1$s) from post (%2$s). Server responded: %3$s', 'tumblr-crosspostr'),
+                                $photo->original_size->url,
+                                $post->post_url,
+                                print_r($data, true)
+                            );
+                            error_log($msg);
+                        } else {
+                            $f = wp_upload_bits(basename($photo->original_size->url), null, $data['body'], $wp_subdir_from_post_timestamp);
+                            if ($f['error']) {
+                                $msg = sprintf(
+                                    esc_html__('Error saving file (%s): ', 'tumblr-crosspostr'),
+                                    basename($photo->original_size->url)
+                                );
+                                error_log($msg);
+                            } else {
+                                $wp_filetype = wp_check_filetype(basename($f['file']));
+                                $wp_file_id = wp_insert_attachment(array(
+                                    'post_title' => basename($f['file'], ".{$wp_filetype['ext']}"),
+                                    'post_content' => '', // Always empty string.
+                                    'post_status' => 'inherit',
+                                    'post_mime_type' => $wp_filetype['type'],
+                                    'guid' => $wp_upload_dir['url'] . '/' . basename($f['file'])
+                                ), $f['file'], $wp_id);
+                                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                                $metadata = wp_generate_attachment_metadata($wp_file_id, $f['file']);
+                                wp_update_attachment_metadata($wp_file_id, $metadata);
+                                $new_content = str_replace($photo->original_size->url, $f['url'], get_post_field('post_content', $wp_id));
+                                wp_update_post(array(
+                                    'ID' => $wp_id,
+                                    'post_content' => $new_content
+                                ));
+                            }
+                        }
+                    }
+                }
             }
         }
         return $wp_id;
