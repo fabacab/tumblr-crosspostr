@@ -123,6 +123,10 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 == Changelog ==
 
+= Version 0.7.8.1 =
+
+* Bugfix: Fix [fatal error on activation for some PHP installations](https://wordpress.org/support/topic/fatal-error-on-activation-31?replies=1#post-5318136).
+
 = Version 0.7.8 =
 
 * Feature: "Sync posts from Tumblr" now downloads the images in your Photo posts on Tumblr as [WordPress attachments](http://codex.wordpress.org/Attachments) and associates them with the newly-imported post (unless your WordPress uploads directory is not writable).
