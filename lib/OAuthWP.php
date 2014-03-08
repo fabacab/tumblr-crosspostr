@@ -45,7 +45,7 @@ abstract class Plugin_OAuthWP {
 
     abstract public function __construct ($consumer_key = '', $consumer_secret = '');
 
-    abstract public function getAppRegistrationUrl ($params);
+    abstract public function getAppRegistrationUrl ($params = array());
 
     protected function appRegistrationUrl ($base_url, $params = array()) {
         if (empty($base_url)) {
