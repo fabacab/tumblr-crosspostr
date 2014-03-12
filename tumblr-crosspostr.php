@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.8.1
+ * Version: 0.7.8.2
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -1230,7 +1230,7 @@ END_HTML;
                 } else {
                     foreach ($post->photos as $photo) {
                         $data = wp_remote_get($photo->original_size->url);
-                        if ($data['response']['code'] !== 200) {
+                        if (200 != $data['response']['code']) {
                             $msg = sprintf(
                                 esc_html__('Failed to get Tumblr photo (%1$s) from post (%2$s). Server responded: %3$s', 'tumblr-crosspostr'),
                                 $photo->original_size->url,
