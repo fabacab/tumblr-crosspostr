@@ -737,7 +737,7 @@ END_HTML;
         $s = get_post_meta($post->ID, 'tumblr_source_url', true);
 ?>
 <fieldset>
-    <legend><?php esc_html_e('Send this post to Tumblr?', 'tumblr-crosspostr');?></legend>
+    <legend style="display:block;"><?php esc_html_e('Send this post to Tumblr?', 'tumblr-crosspostr');?></legend>
     <p class="description" style="float: right; width: 75%;"><?php esc_html_e('If this post is in a category that Tumblr Crosspostr excludes, this will be ignored.', 'tumblr-crosspostr');?></p>
     <ul>
         <li><label><input type="radio" name="tumblr_crosspostr_crosspost" value="Y"<?php if ('N' !== $x) { print ' checked="checked"'; }?>> <?php esc_html_e('Yes', 'tumblr-crosspostr');?></label></li>
