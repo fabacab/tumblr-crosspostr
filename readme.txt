@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.8.3
+Stable tag: 0.7.8.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -122,6 +122,10 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.8.4 =
+
+* Troubleshooting: New "Enable detailed debugging information?" option shows you a lot more information about errors. Use in conjunction with WordPress's built-in [`WP_DEBUG`](https://codex.wordpress.org/Debugging_in_WordPress#WP_DEBUG) and [`WP_DEBUG_LOG`](https://codex.wordpress.org/Debugging_in_WordPress#WP_DEBUG_LOG) to get even more information in your `wp-content/debug.log` file.
 
 = Version 0.7.8.3 =
 
