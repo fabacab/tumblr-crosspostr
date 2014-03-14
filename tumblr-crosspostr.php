@@ -42,6 +42,11 @@ class Tumblr_Crosspostr {
             add_action('admin_notices', array($this, 'showMissingConfigNotice'));
         }
 
+        if (isset($options['debug'])) {
+            $this->tumblr->client->debug = 1;
+            $this->tumblr->client->debug_http = 1;
+        }
+
         // OAuth connection workflow.
         if (isset($_GET['tumblr_crosspostr_oauth_authorize'])) {
             add_action('init', array($this, 'authorizeApp'));
@@ -414,12 +419,17 @@ END_HTML;
             }
             $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
             if (empty($data->response->id)) {
-                $msg = esc_html__('Crossposting to Tumblr failed. Tumblr said: ', 'tumblr-crosspostr') . '<blockquote>';
-                $msg .= esc_html__('Response code: ', 'tumblr-crosspostr') . $data->meta->status . '<br />';
-                $msg .= esc_html__('Response message: ', 'tumblr-crosspostr') . $data->meta->msg . '<br />';
-                $msg .= '</blockquote>';
+                $msg = esc_html__('Crossposting to Tumblr failed.', 'tumblr-crosspostr');
+                if (isset($data->meta)) {
+                    $msg .= esc_html__('Tumblr said:', 'tumblr-crosspostr');
+                    $msg .= '<blockquote>';
+                    $msg .= esc_html__('Response code:', 'tumblr-crosspostr') . " {$data->meta->status}<br />";
+                    $msg .= esc_html__('Response message:', 'tumblr-crosspostr') . " {$data->meta->msg}<br />";
+                    $msg .= '</blockquote>';
+                }
                 switch ($data->meta->status) {
                     case 401:
+                        $msg .= ' ' . $this->maybeCaptureDebugOf($data);
                         $msg .= sprintf(
                             esc_html__('This might mean your %1$s are invalid or have been revoked by Tumblr. If everything looks fine on your end, you may want to ask %2$s to confirm your app is still allowed to use their API.', 'tumblr-crosspostr'),
                             '<a href="' . admin_url('options-general.php?page=tumblr_crosspostr_settings') . '">' . esc_html__('OAuth credentials', 'tumblr-crosspostr') . '</a>',
@@ -427,6 +437,7 @@ END_HTML;
                         );
                         break;
                     default:
+                        $msg .= ' ' . $this->maybeCaptureDebugOf($data);
                         $msg .= sprintf(
                             esc_html__('Unfortunately, I have no idea what Tumblr is talking about. Consider asking %1$s for help. Tell them you are using %2$s, that you got the error shown above, and ask them to please support this tool. \'Cause, y\'know, it\'s not like you don\'t already have a WordPress blog, and don\'t they want you to use Tumblr, too?', 'tumblr-crosspostr'),
                             $this->linkToTumblrSupport(),
@@ -434,19 +445,43 @@ END_HTML;
                         );
                         break;
                 }
+                if (!isset($options['debug'])) {
+                    $msg .= '<br /><br />' . sprintf(
+                        esc_html__('Additionally, you may want to turn on Tumblr Crosspostr\'s "%s" option to get more information about this error the next time it happens.', 'tumblr-crosspostr'),
+                        '<a href="' . admin_url('options-general.php?page=tumblr_crosspostr_settings#tumblr_crosspostr_debug') . '">'
+                        . esc_html__('Enable detailed debugging information?', 'tumblr-crosspostr') . '</a>'
+                    );
+                }
                 $this->addAdminNotices($msg);
             } else {
                 update_post_meta($post_id, 'tumblr_post_id', $data->response->id);
                 if ($prepared_post->params['state'] === 'published') {
                     $url = 'http://' . $this->getTumblrBasename($post_id) . '/post/' . get_post_meta($post_id, 'tumblr_post_id', true);
-                    $msg = array(
-                        esc_html__('Post crossposted.', 'tumblr-crosspostr')
-                        . ' <a href="' . $url . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>'
+                    $this->addAdminNotices(
+                        esc_html__('Post crossposted.', 'tumblr-crosspostr') . ' <a href="' . $url . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>'
                     );
-                    $this->addAdminNotices($msg);
+                    if ($msg = $this->maybeCaptureDebugOf($data)) { $this->addAdminNotices($msg); }
                 }
             }
         }
+    }
+
+    private function captureDebugOf ($var) {
+        ob_start();
+        var_dump($var);
+        $str = ob_get_contents();
+        ob_end_clean();
+        return $str;
+    }
+
+    private function maybeCaptureDebugOf ($var) {
+        $msg = '';
+        $options = get_option('tumblr_crosspostr_settings');
+        if (isset($options['debug'])) {
+            $msg .= esc_html__('Debug output:', 'tumblr-crosspostr');
+            $msg .= '<pre>' . $this->captureDebugOf($var) . '</pre>';
+        }
+        return $msg;
     }
 
     private function linkToTumblrSupport () {
@@ -693,6 +728,7 @@ END_HTML;
                 break;
                 case 'use_excerpt':
                 case 'exclude_tags':
+                case 'debug':
                     $safe_input[$k] = intval($v);
                 break;
                 case 'additional_tags':
@@ -1030,6 +1066,24 @@ END_HTML;
             <td>
                 <input id="tumblr_crosspostr_additional_tags" value="<?php if (isset($options['additional_tags'])) : print esc_attr(implode(', ', $options['additional_tags'])); endif;?>" name="tumblr_crosspostr_settings[additional_tags]" placeholder="<?php esc_attr_e('crosspost, magic', 'tumblr-crosspostr');?>" />
                 <p class="description"><?php print sprintf(esc_html__('Comma-separated list of additional tags that will be added to every post sent to Tumblr. Useful if only some posts on your Tumblr blog are cross-posted and you want to know which of your Tumblr posts were generated by this plugin. (These tags will always be applied regardless of the value of the "%s" option.)', 'tumblr-crosspostr'), esc_html__('Do not send post tags to Tumblr', 'tumblr-crosspostr'));?></p>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="tumblr_crosspostr_debug">
+                    <?php esc_html_e('Enable detailed debugging information?', 'tumblr-crosspostr');?>
+                </label>
+            </th>
+            <td>
+                <input type="checkbox" <?php if (isset($options['debug'])) : print 'checked="checked"'; endif; ?> value="1" id="tumblr_crosspostr_debug" name="tumblr_crosspostr_settings[debug]" />
+                <label for="tumblr_crosspostr_debug"><span class="description"><?php
+        print sprintf(
+            esc_html__('Turn this on only if you are experiencing problems using this plugin, or if you were told to do so by someone helping you fix a problem (or if you really know what you are doing). When enabled, extremely detailed technical information is displayed as a WordPress admin notice when you take actions like sending a crosspost. If you have also enabled WordPress\'s built-in debugging (%1$s) and debug log (%2$s) feature, additional information will be sent to a log file (%3$s). This file may contain sensitive information, so turn this off and erase the debug log file when you have resolved the issue.', 'tumblr-crosspostr'),
+            '<a href="https://codex.wordpress.org/Debugging_in_WordPress#WP_DEBUG"><code>WP_DEBUG</code></a>',
+            '<a href="https://codex.wordpress.org/Debugging_in_WordPress#WP_DEBUG_LOG"><code>WP_DEBUG_LOG</code></a>',
+            '<code>' . content_url() . '/debug.log' . '</code>'
+        );
+                ?></span></label>
             </td>
         </tr>
     </tbody>
