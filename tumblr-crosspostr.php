@@ -413,7 +413,29 @@ END_HTML;
                 $prepared_post->params['tweet'] = 'off';
             }
             $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
-            if (!empty($data->response->id)) {
+            if (empty($data->response->id)) {
+                $msg = esc_html__('Crossposting to Tumblr failed. Tumblr said: ', 'tumblr-crosspostr') . '<blockquote>';
+                $msg .= esc_html__('Response code: ', 'tumblr-crosspostr') . $data->meta->status . '<br />';
+                $msg .= esc_html__('Response message: ', 'tumblr-crosspostr') . $data->meta->msg . '<br />';
+                $msg .= '</blockquote>';
+                switch ($data->meta->status) {
+                    case 401:
+                        $msg .= sprintf(
+                            esc_html__('This might mean your %1$s are invalid or have been revoked by Tumblr. If everything looks fine on your end, you may want to ask %2$s to confirm your app is still allowed to use their API.', 'tumblr-crosspostr'),
+                            '<a href="' . admin_url('options-general.php?page=tumblr_crosspostr_settings') . '">' . esc_html__('OAuth credentials', 'tumblr-crosspostr') . '</a>',
+                            $this->linkToTumblrSupport()
+                        );
+                        break;
+                    default:
+                        $msg .= sprintf(
+                            esc_html__('Unfortunately, I have no idea what Tumblr is talking about. Consider asking %1$s for help. Tell them you are using %2$s, that you got the error shown above, and ask them to please support this tool. \'Cause, y\'know, it\'s not like you don\'t already have a WordPress blog, and don\'t they want you to use Tumblr, too?', 'tumblr-crosspostr'),
+                            $this->linkToTumblrSupport(),
+                            '<a href="https://wordpress.org/plugins/tumblr-crosspostr/">' . esc_html__('Tumblr Crosspostr', 'tumblr-crosspostr') . '</a>'
+                        );
+                        break;
+                }
+                $this->addAdminNotices($msg);
+            } else {
                 update_post_meta($post_id, 'tumblr_post_id', $data->response->id);
                 if ($prepared_post->params['state'] === 'published') {
                     $url = 'http://' . $this->getTumblrBasename($post_id) . '/post/' . get_post_meta($post_id, 'tumblr_post_id', true);
@@ -425,6 +447,10 @@ END_HTML;
                 }
             }
         }
+    }
+
+    private function linkToTumblrSupport () {
+        return '<a href="http://www.tumblr.com/help?form">' . esc_html__('Tumblr Support', 'tumblr-crosspostr') . '</a>';
     }
 
     private function addAdminNotices ($msgs) {
