@@ -12,6 +12,7 @@
 
 class Tumblr_Crosspostr {
     private $tumblr; //< Tumblr API manipulation wrapper.
+    private $prefix = 'tumblr_crosspostr'; //< String to prefix plugin options, settings, etc.
 
     public function __construct () {
         add_action('plugins_loaded', array($this, 'registerL10n'));
@@ -391,28 +392,28 @@ END_HTML;
 
     public function savePost ($post_id) {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
-        if (!isset($_POST['tumblr_crosspostr_meta_box_nonce']) || !wp_verify_nonce($_POST['tumblr_crosspostr_meta_box_nonce'], 'editing_tumblr_crosspostr')) {
+        if (!isset($_POST[$this->prefix . '_meta_box_nonce']) || !wp_verify_nonce($_POST[$this->prefix . '_meta_box_nonce'], 'editing_' . $this->prefix)) {
             return;
         }
         if (!$this->isConnectedToTumblr()) { return; }
 
-        if ('N' === $_POST['tumblr_crosspostr_crosspost']) {
-            update_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N'); // 'N' means "no"
-            return;
+        if (isset($_POST[$this->prefix . '_use_excerpt'])) {
+            update_post_meta($post_id, $this->prefix . '_use_excerpt', 1);
         } else {
-            delete_post_meta($post_id, 'tumblr_crosspostr_crosspost', 'N');
+            delete_post_meta($post_id, $this->prefix . '_use_excerpt');
         }
 
-        if (isset($_POST['tumblr_crosspostr_use_excerpt'])) {
-            update_post_meta($post_id, 'tumblr_crosspostr_use_excerpt', 1);
+        if ('N' === $_POST[$this->prefix . '_crosspost']) {
+            update_post_meta($post_id, $this->prefix . '_crosspost', 'N'); // 'N' means "no"
+            return;
         } else {
-            delete_post_meta($post_id, 'tumblr_crosspostr_use_excerpt');
+            delete_post_meta($post_id, $this->prefix . '_crosspost', 'N');
         }
 
         if ($prepared_post = $this->prepareForTumblr($post_id)) {
-            if (isset($_POST['tumblr_crosspostr_send_tweet'])) {
-                if (!empty($_POST['tumblr_crosspostr_tweet_text'])) {
-                    $prepared_post->params['tweet'] = sanitize_text_field($_POST['tumblr_crosspostr_tweet_text']);
+            if (isset($_POST[$this->prefix . '_send_tweet'])) {
+                if (!empty($_POST[$this->prefix . '_tweet_text'])) {
+                    $prepared_post->params['tweet'] = sanitize_text_field($_POST[$this->prefix . '_tweet_text']);
                 }
             } else {
                 $prepared_post->params['tweet'] = 'off';
@@ -421,7 +422,7 @@ END_HTML;
             if (empty($data->response->id)) {
                 $msg = esc_html__('Crossposting to Tumblr failed.', 'tumblr-crosspostr');
                 if (isset($data->meta)) {
-                    $msg .= esc_html__('Tumblr said:', 'tumblr-crosspostr');
+                    $msg .= esc_html__(' Remote service said:', 'tumblr-crosspostr');
                     $msg .= '<blockquote>';
                     $msg .= esc_html__('Response code:', 'tumblr-crosspostr') . " {$data->meta->status}<br />";
                     $msg .= esc_html__('Response message:', 'tumblr-crosspostr') . " {$data->meta->msg}<br />";
@@ -812,21 +813,21 @@ END_HTML;
         <summary><?php esc_html_e('Destination & content', 'tumblr-crosspostr');?></summary>
         <p><label>
             <?php esc_html_e('Send to my Tumblr blog titled', 'tumblr-crosspostr');?>
-            <?php print $this->tumblrBlogsSelectField(array('name' => 'tumblr_crosspostr_destination'), $d);?>
+            <?php print $this->tumblrBlogsSelectField(array('name' => $this->prefix . '_destination'), $d);?>
         </label></p>
         <p><label>
             <?php esc_html_e('Send excerpt instead of main content?', 'tumblr-crosspostr');?>
-                <input type="checkbox" name="tumblr_crosspostr_use_excerpt" value="1"
+                <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_use_excerpt" value="1"
                     <?php if (1 === $e) { print 'checked="checked"'; } ?>
-                    title="<?php esc_html_e('Uncheck to disable the auto-tweet.', 'tumblr-crosspostr');?>"
+                    title="<?php esc_html_e('Uncheck to send post content as crosspost content.', 'tumblr-crosspostr');?>"
                     />
         </label></p>
         <p>
             <label><?php esc_html_e('Content source:', 'tumblr-crosspostr');?>
-                <input id="tumblr_crosspostr_meta_source_url" type="text"
-                    name="tumblr_crosspostr_meta_source_url"
+                <input id="<?php esc_attr_e($this->prefix);?>_meta_source_url" type="text"
+                    name="<?php esc_attr_e($this->prefix);?>_meta_source_url"
                     title="<?php esc_attr_e('Set the content source of this post on Tumblr by pasting the URL where you found the content you are blogging about.', 'tumblr-crosspostr'); if ($options['auto_source'] === 'Y') { print ' ' . esc_attr__('Leave this blank to set the content source URL of your Tumblr post to the permalink of this WordPress post.', 'tumblr-crosspostr'); } ?>"
-                    value="<?php print esc_attr($s);?>"
+                    value="<?php esc_attr_e($s);?>"
                     placeholder="<?php esc_attr_e('//original-source.com/', 'tumblr-crosspostr');?>" />
                 <span class="description"><?php esc_html_e('Provide source attribution, if relevant.', 'tumblr-crosspostr');?></span>
             </label>
