@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.8.4
+ * Version: 0.7.8.5
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -27,9 +27,9 @@ class Tumblr_Crosspostr {
         // run late, so themes have a chance to register support
         add_action('after_setup_theme', array($this, 'registerThemeSupport'), 700);
 
-        add_action('tumblr_crosspostr_sync_tumblr', array($this, 'syncFromTumblrBlog'));
+        add_action($this->prefix . '_sync_tumblr', array($this, 'syncFromTumblrBlog'));
 
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         // Initialize consumer if we can, set up authroization flow if we can't.
         require_once 'lib/TumblrCrosspostrAPIClient.php';
         if (isset($options['consumer_key']) && isset($options['consumer_secret'])) {
@@ -49,9 +49,9 @@ class Tumblr_Crosspostr {
         }
 
         // OAuth connection workflow.
-        if (isset($_GET['tumblr_crosspostr_oauth_authorize'])) {
+        if (isset($_GET[$this->prefix . '_oauth_authorize'])) {
             add_action('init', array($this, 'authorizeApp'));
-        } else if (isset($_GET['tumblr_crosspostr_callback']) && !empty($_GET['oauth_verifier'])) {
+        } else if (isset($_GET[$this->prefix . '_callback']) && !empty($_GET['oauth_verifier'])) {
             // Unless we're just saving the options, hook the final step in OAuth authorization.
             if (!isset($_GET['settings-updated'])) {
                 add_action('init', array($this, 'completeAuthorization'));
@@ -64,7 +64,7 @@ class Tumblr_Crosspostr {
         if ($screen->base === 'plugins') {
 ?>
 <div class="updated">
-    <p><a href="<?php print admin_url('options-general.php?page=tumblr_crosspostr_settings');?>" class="button"><?php esc_html_e('Connect to Tumblr', 'tumblr-crosspostr');?></a> &mdash; <?php esc_html_e('Almost done! Connect your blog to Tumblr to begin crossposting with Tumblr Crosspostr.', 'tumblr-crosspostr');?></p>
+    <p><a href="<?php print admin_url('options-general.php?page=' . $this->prefix . '_settings');?>" class="button"><?php esc_html_e('Connect to Tumblr', 'tumblr-crosspostr');?></a> &mdash; <?php esc_html_e('Almost done! Connect your blog to Tumblr to begin crossposting with Tumblr Crosspostr.', 'tumblr-crosspostr');?></p>
 </div>
 <?php
         }
@@ -115,15 +115,15 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
 
     public function authorizeApp () {
         check_admin_referer('tumblr-authorize');
-        $this->tumblr->authorize(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback'));
+        $this->tumblr->authorize(admin_url('options-general.php?page=' . $this->prefix . '_settings&' . $this->prefix . '_callback'));
     }
 
     public function completeAuthorization () {
-        $tokens = $this->tumblr->completeAuthorization(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_callback'));
-        $options = get_option('tumblr_crosspostr_settings');
+        $tokens = $this->tumblr->completeAuthorization(admin_url('options-general.php?page=' . $this->prefix . '_settings&' . $this->prefix . '_callback'));
+        $options = get_option($this->prefix . '_settings');
         $options['access_token'] = $tokens['value'];
         $options['access_token_secret'] = $tokens['secret'];
-        update_option('tumblr_crosspostr_settings', $options);
+        update_option($this->prefix . '_settings', $options);
     }
 
     public function registerL10n () {
@@ -132,8 +132,8 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
 
     public function registerSettings () {
         register_setting(
-            'tumblr_crosspostr_settings',
-            'tumblr_crosspostr_settings',
+            $this->prefix . '_settings',
+            $this->prefix . '_settings',
             array($this, 'validateSettings')
         );
     }
@@ -167,7 +167,7 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
         ob_end_clean();
         $html .= $x;
         $screen->add_help_tab(array(
-            'id' => 'tumblr_crosspostr-' . $screen->base . '-help',
+            'id' => $this->prefix . '-' . $screen->base . '-help',
             'title' => __('Crossposting to Tumblr', 'tumblr-crosspostr'),
             'content' => $html
         ));
@@ -275,9 +275,8 @@ END_HTML;
         return $status;
     }
 
-
     private function isPostCrosspostable ($post_id) {
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         $crosspostable = true;
 
         // Do not crosspost if this post is excluded by a certain category.
@@ -286,7 +285,7 @@ END_HTML;
         }
 
         // Do not crosspost if this specific post was excluded.
-        if ('N' === get_post_meta($post_id, 'tumblr_crosspostr_crosspost', true)) {
+        if ('N' === get_post_meta($post_id, $this->prefix . '_crosspost', true)) {
             $crosspostable = false;
         }
 
@@ -307,15 +306,15 @@ END_HTML;
     private function prepareForTumblr ($post_id) {
         if (!$this->isPostCrosspostable($post_id)) { return false; }
 
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         $custom = get_post_custom($post_id);
 
         $prepared_post = new stdClass();
 
         // Set the post's Tumblr destination.
         $base_hostname = false;
-        if (!empty($_POST['tumblr_crosspostr_destination'])) {
-            $base_hostname = sanitize_text_field($_POST['tumblr_crosspostr_destination']);
+        if (!empty($_POST[$this->prefix . '_destination'])) {
+            $base_hostname = sanitize_text_field($_POST[$this->prefix . '_destination']);
         } else if (!empty($custom['tumblr_base_hostname'][0])) {
             $base_hostname = sanitize_text_field($custom['tumblr_base_hostname'][0]);
         } else {
@@ -327,8 +326,8 @@ END_HTML;
         $prepared_post->base_hostname = $base_hostname;
 
         // Set "Content source" meta field.
-        if (!empty($_POST['tumblr_crosspostr_meta_source_url'])) {
-            $source_url = sanitize_text_field($_POST['tumblr_crosspostr_meta_source_url']);
+        if (!empty($_POST[$this->prefix . '_meta_source_url'])) {
+            $source_url = sanitize_text_field($_POST[$this->prefix . '_meta_source_url']);
             update_post_meta($post_id, 'tumblr_source_url', $source_url);
         } else if (!empty($custom['tumblr_source_url'][0])) {
             $source_url = sanitize_text_field($custom['tumblr_source_url'][0]);
@@ -433,7 +432,7 @@ END_HTML;
                         $msg .= ' ' . $this->maybeCaptureDebugOf($data);
                         $msg .= sprintf(
                             esc_html__('This might mean your %1$s are invalid or have been revoked by Tumblr. If everything looks fine on your end, you may want to ask %2$s to confirm your app is still allowed to use their API.', 'tumblr-crosspostr'),
-                            '<a href="' . admin_url('options-general.php?page=tumblr_crosspostr_settings') . '">' . esc_html__('OAuth credentials', 'tumblr-crosspostr') . '</a>',
+                            '<a href="' . admin_url('options-general.php?page=' . $this->prefix . '_settings') . '">' . esc_html__('OAuth credentials', 'tumblr-crosspostr') . '</a>',
                             $this->linkToTumblrSupport()
                         );
                         break;
@@ -449,7 +448,7 @@ END_HTML;
                 if (!isset($options['debug'])) {
                     $msg .= '<br /><br />' . sprintf(
                         esc_html__('Additionally, you may want to turn on Tumblr Crosspostr\'s "%s" option to get more information about this error the next time it happens.', 'tumblr-crosspostr'),
-                        '<a href="' . admin_url('options-general.php?page=tumblr_crosspostr_settings#tumblr_crosspostr_debug') . '">'
+                        '<a href="' . admin_url('options-general.php?page=' . $this->prefix . '_settings#' . $this->prefix . '_debug') . '">'
                         . esc_html__('Enable detailed debugging information?', 'tumblr-crosspostr') . '</a>'
                     );
                 }
@@ -477,7 +476,7 @@ END_HTML;
 
     private function maybeCaptureDebugOf ($var) {
         $msg = '';
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         if (isset($options['debug'])) {
             $msg .= esc_html__('Debug output:', 'tumblr-crosspostr');
             $msg .= '<pre>' . $this->captureDebugOf($var) . '</pre>';
@@ -491,21 +490,21 @@ END_HTML;
 
     private function addAdminNotices ($msgs) {
         if (is_string($msgs)) { $msgs = array($msgs); }
-        $notices = get_option('_tumblr_crosspostr_admin_notices');
+        $notices = get_option('_' . $this->prefix . '_admin_notices');
         if (empty($notices)) {
             $notices = array();
         }
         $notices = array_merge($notices, $msgs);
-        update_option('_tumblr_crosspostr_admin_notices', $notices);
+        update_option('_' . $this->prefix . '_admin_notices', $notices);
     }
 
     private function showAdminNotices () {
-        $notices = get_option('_tumblr_crosspostr_admin_notices');
+        $notices = get_option('_' . $this->prefix . '_admin_notices');
         if ($notices) {
             foreach ($notices as $msg) {
                 $this->showNotice($msg);
             }
-            delete_option('_tumblr_crosspostr_admin_notices');
+            delete_option('_' . $this->prefix . '_admin_notices');
         }
     }
 
@@ -658,23 +657,23 @@ END_HTML;
     private function getTumblrBasename ($post_id) {
         $d = get_post_meta($post_id, 'tumblr_base_hostname', true);
         if (empty($d)) {
-            $options = get_option('tumblr_crosspostr_settings');
+            $options = get_option($this->prefix . '_settings');
             $d = (isset($options['default_hostname'])) ? $options['default_hostname'] : '';
         }
         return $d;
     }
 
     private function getTumblrUseExcerpt ($post_id) {
-        $e = get_post_meta($post_id, 'tumblr_crosspostr_use_excerpt', true);
+        $e = get_post_meta($post_id, $this->prefix . '_use_excerpt', true);
         if (empty($e)) {
-            $options = get_option('tumblr_crosspostr_settings');
+            $options = get_option($this->prefix . '_settings');
             $e = (isset($options['use_excerpt'])) ? $options['use_excerpt'] : 0;
         }
         return intval($e);
     }
 
     public function removeFromTumblr ($post_id) {
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         $tumblr_id = get_post_meta($post_id, 'tumblr_post_id', true);
         $this->crosspostToTumblr($this->getTumblrBasename($post_id), array(), $tumblr_id, true);
     }
@@ -690,14 +689,14 @@ END_HTML;
                 case 'consumer_key':
                     if (empty($v)) {
                         $errmsg = __('Consumer key cannot be empty.', 'tumblr-crosspostr');
-                        add_settings_error('tumblr_crosspostr_settings', 'empty-consumer-key', $errmsg);
+                        add_settings_error($this->prefix . '_settings', 'empty-consumer-key', $errmsg);
                     }
                     $safe_input[$k] = sanitize_text_field($v);
                 break;
                 case 'consumer_secret':
                     if (empty($v)) {
                         $errmsg = __('Consumer secret cannot be empty.', 'tumblr-crosspostr');
-                        add_settings_error('tumblr_crosspostr_settings', 'empty-consumer-secret', $errmsg);
+                        add_settings_error($this->prefix . '_settings', 'empty-consumer-secret', $errmsg);
                     }
                     $safe_input[$k] = sanitize_text_field($v);
                 break;
@@ -752,7 +751,7 @@ END_HTML;
             __('Tumblr Crosspostr Settings', 'tumblr-crosspostr'),
             __('Tumblr Crosspostr', 'tumblr-crosspostr'),
             'manage_options',
-            'tumblr_crosspostr_settings',
+            $this->prefix . '_settings',
             array($this, 'renderOptionsPage')
         );
 
@@ -760,7 +759,7 @@ END_HTML;
             __('Tumblrize Archives', 'tumblr-crosspostr'),
             __('Tumblrize Archives', 'tumblr-crosspostr'),
             'manage_options',
-            'tumblr_crosspostr_crosspost_archives',
+            $this->prefix . '_crosspost_archives',
             array($this, 'dispatchTumblrizeArchivesPages')
         );
     }
@@ -781,20 +780,20 @@ END_HTML;
     }
 
     private function isConnectedToTumblr () {
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         return isset($this->tumblr) && isset($options['access_token']);
     }
 
     public function renderMetaBox ($post) {
-        wp_nonce_field('editing_tumblr_crosspostr', 'tumblr_crosspostr_meta_box_nonce');
+        wp_nonce_field('editing_' . $this->prefix, $this->prefix . '_meta_box_nonce');
         if (!$this->isConnectedToTumblr()) {
             $this->showError(__('Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure you connected Tumblr Crosspostr to your Tumblr account?', 'tumblr-crosspostr'));
             return;
         }
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
 
         // Set default crossposting options for this post.
-        $x = get_post_meta($post->ID, 'tumblr_crosspostr_crosspost', true);
+        $x = get_post_meta($post->ID, $this->prefix . '_crosspost', true);
         $d = $this->getTumblrBasename($post->ID);
         $e = $this->getTumblrUseExcerpt($post->ID);
         $s = get_post_meta($post->ID, 'tumblr_source_url', true);
@@ -803,8 +802,8 @@ END_HTML;
     <legend style="display:block;"><?php esc_html_e('Send this post to Tumblr?', 'tumblr-crosspostr');?></legend>
     <p class="description" style="float: right; width: 75%;"><?php esc_html_e('If this post is in a category that Tumblr Crosspostr excludes, this will be ignored.', 'tumblr-crosspostr');?></p>
     <ul>
-        <li><label><input type="radio" name="tumblr_crosspostr_crosspost" value="Y"<?php if ('N' !== $x) { print ' checked="checked"'; }?>> <?php esc_html_e('Yes', 'tumblr-crosspostr');?></label></li>
-        <li><label><input type="radio" name="tumblr_crosspostr_crosspost" value="N"<?php if ('N' === $x) { print ' checked="checked"'; }?>> <?php esc_html_e('No', 'tumblr-crosspostr');?></label></li>
+        <li><label><input type="radio" name="<?php esc_attr_e($this->prefix);?>_crosspost" value="Y"<?php if ('N' !== $x) { print ' checked="checked"'; }?>> <?php esc_html_e('Yes', 'tumblr-crosspostr');?></label></li>
+        <li><label><input type="radio" name="<?php esc_attr_e($this->prefix);?>_crosspost" value="N"<?php if ('N' === $x) { print ' checked="checked"'; }?>> <?php esc_html_e('No', 'tumblr-crosspostr');?></label></li>
     </ul>
 </fieldset>
 <fieldset>
@@ -842,13 +841,13 @@ END_HTML;
         <p>
             <label>
                 <?php esc_html_e('Send tweet?', 'tumblr-crosspostr');?>
-                <input type="checkbox" name="tumblr_crosspostr_send_tweet" value="1" checked="checked"
+                <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_send_tweet" value="1" checked="checked"
                     title="<?php esc_html_e('Uncheck to disable the auto-tweet.', 'tumblr-crosspostr');?>"
                     />
             </label>
             <label>
-                <input id="tumblr_crosspostr_tweet_text" type="text"
-                    name="tumblr_crosspostr_tweet_text"
+                <input id="<?php esc_attr_e($this->prefix);?>_tweet_text" type="text"
+                    name="<?php esc_attr_e($this->prefix);?>_tweet_text"
                     title="<?php esc_attr_e('If your Tumblr automatically tweets new posts to your Twitter account, you can customize the default tweet text by entering it here.', 'tumblr-crosspostr');?>"
                     placeholder="<?php print sprintf(esc_attr__('New post: %s :)', 'tumblr-crosspostr'), '[URL]');?>"
                     maxlength="140" />
@@ -869,11 +868,11 @@ END_HTML;
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'tumblr-crosspostr'));
         }
-        $options = get_option('tumblr_crosspostr_settings');
-        if (isset($_GET['disconnect']) && wp_verify_nonce($_GET['tumblr_crosspostr_nonce'], 'disconnect_from_tumblr')) {
+        $options = get_option($this->prefix . '_settings');
+        if (isset($_GET['disconnect']) && wp_verify_nonce($_GET[$this->prefix . '_nonce'], 'disconnect_from_tumblr')) {
             @$this->tumblr->client->ResetAccessToken(); // Suppress session_start() warning.
             unset($options['access_token']);
-            if (update_option('tumblr_crosspostr_settings', $options)) {
+            if (update_option($this->prefix . '_settings', $options)) {
 ?>
 <div class="updated">
     <p>
@@ -887,16 +886,16 @@ END_HTML;
 ?>
 <h2><?php esc_html_e('Tumblr Crosspostr Settings', 'tumblr-crosspostr');?></h2>
 <form method="post" action="options.php">
-<?php settings_fields('tumblr_crosspostr_settings');?>
+<?php settings_fields($this->prefix . '_settings');?>
 <fieldset><legend><?php esc_html_e('Connection to Tumblr', 'tumblr-crosspostr');?></legend>
 <table class="form-table" summary="<?php esc_attr_e('Required settings to connect to Tumblr.', 'tumblr-crosspostr');?>">
     <tbody>
         <tr<?php if (isset($options['access_token'])) : print ' style="display: none;"'; endif;?>>
             <th>
-                <label for="tumblr_crosspostr_consumer_key"><?php esc_html_e('Tumblr API key/OAuth consumer key', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_consumer_key"><?php esc_html_e('Tumblr API key/OAuth consumer key', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input id="tumblr_crosspostr_consumer_key" name="tumblr_crosspostr_settings[consumer_key]" value="<?php print esc_attr($options['consumer_key']);?>" placeholder="<?php esc_attr_e('Paste your API key here', 'tumblr-crosspostr');?>" />
+                <input id="<?php esc_attr_e($this->prefix);?>_consumer_key" name="<?php esc_attr_e($this->prefix);?>_settings[consumer_key]" value="<?php esc_attr_e($options['consumer_key']);?>" placeholder="<?php esc_attr_e('Paste your API key here', 'tumblr-crosspostr');?>" />
                 <p class="description">
                     <?php esc_html_e('Your Tumblr API key is also called your consumer key.', 'tumblr-crosspostr');?>
                     <?php print sprintf(
@@ -910,10 +909,10 @@ END_HTML;
         </tr>
         <tr<?php if (isset($options['access_token'])) : print ' style="display: none;"'; endif;?>>
             <th>
-                <label for="tumblr_crosspostr_consumer_secret"><?php esc_html_e('OAuth consumer secret', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_consumer_secret"><?php esc_html_e('OAuth consumer secret', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input id="tumblr_crosspostr_consumer_secret" name="tumblr_crosspostr_settings[consumer_secret]" value="<?php print esc_attr($options['consumer_secret']);?>" placeholder="<?php esc_attr_e('Paste your consumer secret here', 'tumblr-crosspostr');?>" />
+                <input id="<?php esc_attr_e($this->prefix);?>_consumer_secret" name="<?php esc_attr_e($this->prefix);?>_settings[consumer_secret]" value="<?php esc_attr_e($options['consumer_secret']);?>" placeholder="<?php esc_attr_e('Paste your consumer secret here', 'tumblr-crosspostr');?>" />
                 <p class="description">
                     <?php esc_html_e('Your consumer secret is like your app password. Never share this with anyone.', 'tumblr-crosspostr');?>
                 </p>
@@ -922,10 +921,10 @@ END_HTML;
         <?php if (!isset($options['access_token']) && isset($options['consumer_key']) && isset($options['consumer_secret'])) { ?>
         <tr>
             <th class="wp-ui-notification" style="border-radius: 5px; padding: 10px;">
-                <label for="tumblr_crosspostr_oauth_authorize"><?php esc_html_e('Connect to Tumblr:', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_oauth_authorize"><?php esc_html_e('Connect to Tumblr:', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=tumblr_crosspostr_settings&tumblr_crosspostr_oauth_authorize'), 'tumblr-authorize');?>" class="button button-primary"><?php esc_html_e('Click here to connect to Tumblr', 'tumblr-crosspostr');?></a>
+                <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=' . $this->prefix . '_settings&' . $this->prefix . '_oauth_authorize'), 'tumblr-authorize');?>" class="button button-primary"><?php esc_html_e('Click here to connect to Tumblr', 'tumblr-crosspostr');?></a>
             </td>
         </tr>
         <?php } else if (isset($options['access_token'])) { ?>
@@ -934,13 +933,13 @@ END_HTML;
                 <div class="updated">
                     <p>
                         <?php esc_html_e('Connected to Tumblr!', 'tumblr-crosspostr');?>
-                        <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=tumblr_crosspostr_settings&disconnect'), 'disconnect_from_tumblr', 'tumblr_crosspostr_nonce');?>" class="button"><?php esc_html_e('Disconnect', 'tumblr-crosspostr');?></a>
+                        <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=' . $this->prefix . '_settings&disconnect'), 'disconnect_from_tumblr', $this->prefix . '_nonce');?>" class="button"><?php esc_html_e('Disconnect', 'tumblr-crosspostr');?></a>
                         <span class="description"><?php esc_html_e('Disconnecting will stop cross-posts from appearing on or being imported from your Tumblr blog(s), and will reset the options below to their defaults. You can re-connect at any time.', 'tumblr-crosspostr');?></span>
                     </p>
                 </div>
                 <?php // TODO: Should the access tokens never be revealed to the client? ?>
-                <input type="hidden" name="tumblr_crosspostr_settings[access_token]" value="<?php print esc_attr($options['access_token']);?>" />
-                <input type="hidden" name="tumblr_crosspostr_settings[access_token_secret]" value="<?php print esc_attr($options['access_token_secret']);?>" />
+                <input type="hidden" name="<?php esc_attr_e($this->prefix);?>_settings[access_token]" value="<?php esc_attr_e($options['access_token']);?>" />
+                <input type="hidden" name="<?php esc_attr_e($this->prefix);?>_settings[access_token_secret]" value="<?php esc_attr_e($options['access_token_secret']);?>" />
             </th>
         </tr>
         <?php } ?>
@@ -953,39 +952,39 @@ END_HTML;
     <tbody>
         <tr<?php if (!isset($options['default_hostname'])) : print ' class="wp-ui-highlight"'; endif;?>>
             <th>
-                <label for="tumblr_crosspostr_default_hostname"><?php esc_html_e('Default Tumblr blog for crossposts', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_default_hostname"><?php esc_html_e('Default Tumblr blog for crossposts', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <?php print $this->tumblrBlogsSelectField(array('id' => 'tumblr_crosspostr_default_hostname', 'name' => 'tumblr_crosspostr_settings[default_hostname]'), $this->getTumblrBasename(0));?>
+                <?php print $this->tumblrBlogsSelectField(array('id' => $this->prefix . '_default_hostname', 'name' => $this->prefix . '_settings[default_hostname]'), $this->getTumblrBasename(0));?>
                 <p class="description"><?php esc_html_e('Choose which Tumblr blog you want to send your posts to by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_sync_from_tumblr"><?php esc_html_e('Sync posts from Tumblr', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_sync_from_tumblr"><?php esc_html_e('Sync posts from Tumblr', 'tumblr-crosspostr');?></label>
                 <p class="description"><?php esc_html_e('(This feature is experimental. Please backup your website before you turn this on.)', 'tumblr-crosspostr');?></p>
             </th>
             <td>
-                <ul id="tumblr_crosspostr_sync_tumblr">
-                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => 'tumblr_crosspostr_sync_tumblr', 'name' => 'tumblr_crosspostr_settings[sync_tumblr][]'), $options['sync_tumblr']);?>
+                <ul id="<?php esc_attr_e($this->prefix);?>_sync_tumblr">
+                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => $this->prefix . '_sync_tumblr', 'name' => $this->prefix . '_settings[sync_tumblr][]'), $options['sync_tumblr']);?>
                 </ul>
                 <p class="description"><?php esc_html_e('Content you create on the Tumblr blogs you select will automatically be copied to this blog.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspost_exclude_categories"><?php esc_html_e('Do not crosspost entries in these categories:');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_exclude_categories"><?php esc_html_e('Do not crosspost entries in these categories:');?></label>
             </th>
             <td>
-                <ul id="tumblr_crosspost_exclude_categories">
+                <ul id="<?php esc_attr_e($this->prefix);?>_exclude_categories">
                 <?php foreach (get_categories(array('hide_empty' => 0)) as $cat) : ?>
                     <li>
                         <label>
                             <input
                                 type="checkbox"
                                 <?php if (isset($options['exclude_categories']) && in_array($cat->slug, $options['exclude_categories'])) : print 'checked="checked"'; endif;?>
-                                value="<?php print esc_attr($cat->slug);?>"
-                                name="tumblr_crosspostr_settings[exclude_categories][]">
+                                value="<?php esc_attr_e($cat->slug);?>"
+                                name="<?php esc_attr_e($this->prefix);?>_settings[exclude_categories][]">
                             <?php print esc_html($cat->name);?>
                         </label>
                     </li>
@@ -996,14 +995,14 @@ END_HTML;
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_auto_source_yes"><?php esc_html_e('Use permalinks from this blog as the "Content source" for crossposts on Tumblr?');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_auto_source_yes"><?php esc_html_e('Use permalinks from this blog as the "Content source" for crossposts on Tumblr?');?></label>
             </th>
             <td>
                 <ul style="float: left;">
                     <li>
                         <label>
-                            <input type="radio" id="tumblr_crosspostr_auto_source_yes"
-                                name="tumblr_crosspostr_settings[auto_source]"
+                            <input type="radio" id="<?php esc_attr_e($this->prefix);?>_auto_source_yes"
+                                name="<?php esc_attr_e($this->prefix);?>_settings[auto_source]"
                                 <?php if (!isset($options['auto_source']) || $options['auto_source'] === 'Y') { print 'checked="checked"'; } ?>
                                 value="Y" />
                             <?php esc_html_e('Yes', 'tumblr-crosspostr');?>
@@ -1011,8 +1010,8 @@ END_HTML;
                     </li>
                     <li>
                         <label>
-                            <input type="radio" id="tumblr_crosspostr_auto_source_no"
-                                name="tumblr_crosspostr_settings[auto_source]"
+                            <input type="radio" id="<?php esc_attr_e($this->prefix);?>_auto_source_no"
+                                name="<?php esc_attr_e($this->prefix);?>_settings[auto_source]"
                                 <?php if (isset($options['auto_source']) && $options['auto_source'] === 'N') { print 'checked="checked"'; } ?>
                                 value="N" />
                             <?php esc_html_e('No', 'tumblr-crosspostr');?>
@@ -1024,26 +1023,26 @@ END_HTML;
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_use_excerpt"><?php esc_html_e('Send excerpts instead of main content?', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_use_excerpt"><?php esc_html_e('Send excerpts instead of main content?', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input type="checkbox" <?php if (isset($options['use_excerpt'])) : print 'checked="checked"'; endif; ?> value="1" id="tumblr_crosspostr_use_excerpt" name="tumblr_crosspostr_settings[use_excerpt]" />
-                <label for="tumblr_crosspostr_use_excerpt"><span class="description"><?php esc_html_e('When enabled, the excerpts (as opposed to the body) of your WordPress posts will be used as the main content of your Tumblr posts. Useful if you prefer to crosspost summaries instead of the full text of your entires to Tumblr by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></span></label>
+                <input type="checkbox" <?php if (isset($options['use_excerpt'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_use_excerpt" name="<?php esc_attr_e($this->prefix);?>_settings[use_excerpt]" />
+                <label for="<?php esc_attr_e($this->prefix);?>_use_excerpt"><span class="description"><?php esc_html_e('When enabled, the excerpts (as opposed to the body) of your WordPress posts will be used as the main content of your Tumblr posts. Useful if you prefer to crosspost summaries instead of the full text of your entires to Tumblr by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></span></label>
             </td>
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_additional_markup"><?php esc_html_e('Add the following markup to each crossposted entry:', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_additional_markup"><?php esc_html_e('Add the following markup to each crossposted entry:', 'tumblr-crosspostr');?></label>
             </th>
             <td>
                 <textarea
-                    id="tumblr_crosspostr_additional_markup"
-                    name="tumblr_crosspostr_settings[additional_markup]"
+                    id="<?php esc_attr_e($this->prefix);?>_additional_markup"
+                    name="<?php esc_attr_e($this->prefix);?>_settings[additional_markup]"
                     placeholder="<?php esc_attr_e('Anything you type in this box will be added to every crosspost.', 'tumblr-crosspostr');?>"><?php
         if (isset($options['additional_markup'])) {
             print esc_textarea($options['additional_markup']);
         } else {
-            print '<p class="tumblr-crosspostr-linkback"><a href="%permalink%" title="' . esc_html__('Go to the original post.', 'tumblr-crosspostr') . '" rel="bookmark">%the_title%</a> ' . esc_html__('was originally published on', 'tumblr_crosspostr') . ' <a href="%blog_url%">%blog_name%</a></p>';
+            print '<p class="tumblr-crosspostr-linkback"><a href="%permalink%" title="' . esc_html__('Go to the original post.', 'tumblr-crosspostr') . '" rel="bookmark">%the_title%</a> ' . esc_html__('was originally published on', $this->prefix . '') . ' <a href="%blog_url%">%blog_name%</a></p>';
         }
 ?></textarea>
                 <p class="description"><?php _e('Text or HTML you want to add to each post. Useful for things like a link back to your original post. You can use <code>%permalink%</code>, <code>%the_title%</code>, <code>%blog_url%</code>, and <code>%blog_name%</code> as placeholders for the cross-posted post\'s link, its title, the link to the homepage for this site, and the name of this blog, respectively. Leave this blank or use this field for a different purpose if you prefer to use only the Tumblr "Content source" meta field for links back to your main blog.', 'tumblr-crosspostr');?></p>
@@ -1051,33 +1050,33 @@ END_HTML;
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_exclude_tags"><?php esc_html_e('Do not send post tags to Tumblr', 'tumblr-crosspostr');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_exclude_tags"><?php esc_html_e('Do not send post tags to Tumblr', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input type="checkbox" <?php if (isset($options['exclude_tags'])) : print 'checked="checked"'; endif; ?> value="1" id="tumblr_crosspostr_exclude_tags" name="tumblr_crosspostr_settings[exclude_tags]" />
-                <label for="tumblr_crosspostr_exclude_tags"><span class="description"><?php esc_html_e('When enabled, tags on your WordPress posts are not applied to your Tumblr posts. Useful if you maintain different taxonomies on your different sites.', 'tumblr-crosspostr');?></span></label>
+                <input type="checkbox" <?php if (isset($options['exclude_tags'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_exclude_tags" name="<?php esc_attr_e($this->prefix);?>_settings[exclude_tags]" />
+                <label for="<?php esc_attr_e($this->prefix);?>_exclude_tags"><span class="description"><?php esc_html_e('When enabled, tags on your WordPress posts are not applied to your Tumblr posts. Useful if you maintain different taxonomies on your different sites.', 'tumblr-crosspostr');?></span></label>
             </td>
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_additional_tags">
+                <label for="<?php esc_attr_e($this->prefix);?>_additional_tags">
                     <?php esc_html_e('Automatically add these tags to all crossposts:', 'tumblr-crosspostr');?>
                 </label>
             </th>
             <td>
-                <input id="tumblr_crosspostr_additional_tags" value="<?php if (isset($options['additional_tags'])) : print esc_attr(implode(', ', $options['additional_tags'])); endif;?>" name="tumblr_crosspostr_settings[additional_tags]" placeholder="<?php esc_attr_e('crosspost, magic', 'tumblr-crosspostr');?>" />
+                <input id="<?php esc_attr_e($this->prefix);?>_additional_tags" value="<?php if (isset($options['additional_tags'])) : esc_attr_e(implode(', ', $options['additional_tags'])); endif;?>" name="<?php esc_attr_e($this->prefix);?>_settings[additional_tags]" placeholder="<?php esc_attr_e('crosspost, magic', 'tumblr-crosspostr');?>" />
                 <p class="description"><?php print sprintf(esc_html__('Comma-separated list of additional tags that will be added to every post sent to Tumblr. Useful if only some posts on your Tumblr blog are cross-posted and you want to know which of your Tumblr posts were generated by this plugin. (These tags will always be applied regardless of the value of the "%s" option.)', 'tumblr-crosspostr'), esc_html__('Do not send post tags to Tumblr', 'tumblr-crosspostr'));?></p>
             </td>
         </tr>
         <tr>
             <th>
-                <label for="tumblr_crosspostr_debug">
+                <label for="<?php esc_attr_e($this->prefix);?>_debug">
                     <?php esc_html_e('Enable detailed debugging information?', 'tumblr-crosspostr');?>
                 </label>
             </th>
             <td>
-                <input type="checkbox" <?php if (isset($options['debug'])) : print 'checked="checked"'; endif; ?> value="1" id="tumblr_crosspostr_debug" name="tumblr_crosspostr_settings[debug]" />
-                <label for="tumblr_crosspostr_debug"><span class="description"><?php
+                <input type="checkbox" <?php if (isset($options['debug'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_debug" name="<?php esc_attr_e($this->prefix);?>_settings[debug]" />
+                <label for="<?php esc_attr_e($this->prefix);?>_debug"><span class="description"><?php
         print sprintf(
             esc_html__('Turn this on only if you are experiencing problems using this plugin, or if you were told to do so by someone helping you fix a problem (or if you really know what you are doing). When enabled, extremely detailed technical information is displayed as a WordPress admin notice when you take actions like sending a crosspost. If you have also enabled WordPress\'s built-in debugging (%1$s) and debug log (%2$s) feature, additional information will be sent to a log file (%3$s). This file may contain sensitive information, so turn this off and erase the debug log file when you have resolved the issue.', 'tumblr-crosspostr'),
             '<a href="https://codex.wordpress.org/Debugging_in_WordPress#WP_DEBUG"><code>WP_DEBUG</code></a>',
@@ -1098,11 +1097,11 @@ END_HTML;
     } // end public function renderOptionsPage
 
     public function dispatchTumblrizeArchivesPages () {
-        if (!isset($_GET['tumblr_crosspostr_nonce']) || !wp_verify_nonce($_GET['tumblr_crosspostr_nonce'], 'tumblrize_everything')) {
+        if (!isset($_GET[$this->prefix . '_nonce']) || !wp_verify_nonce($_GET[$this->prefix . '_nonce'], 'tumblrize_everything')) {
             $this->renderManagementPage();
         } else {
             if (!$this->isConnectedToTumblr()) {
-                wp_redirect(admin_url('options-general.php?page=tumblr_crosspostr_settings'));
+                wp_redirect(admin_url('options-general.php?page=' . $this->prefix . '_settings'));
                 exit();
             }
             $posts = get_posts(array(
@@ -1144,11 +1143,11 @@ END_HTML;
     }
 
     private function renderManagementPage () {
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
 ?>
 <h2><?php esc_html_e('Crosspost Archives to Tumblr', 'tumblr-crosspostr');?></h2>
 <p><?php esc_html_e('If you have post archives on this website, Tumblr Crosspostr can copy them to your Tumblr blog.', 'tumblr-crosspostr');?></p>
-<p><a href="<?php print wp_nonce_url(admin_url('tools.php?page=tumblr_crosspostr_crosspost_archives'), 'tumblrize_everything', 'tumblr_crosspostr_nonce');?>" class="button button-primary">Tumblrize Everything!</a></p>
+<p><a href="<?php print wp_nonce_url(admin_url('tools.php?page=' . $this->prefix . '_crosspost_archives'), 'tumblrize_everything', $this->prefix . '_nonce');?>" class="button button-primary">Tumblrize Everything!</a></p>
 <p class="description"><?php print sprintf(esc_html__('Copies all posts from your archives to your default Tumblr blog (%s). This may take some time if you have a lot of content. If you do not want to crosspost a specific post, set the answer to the "Send this post to Tumblr?" question to "No" when editing those posts before taking this action. If you have previously crossposted some posts, this will update that content on your Tumblr blog(s).', 'tumblr-crosspostr'), '<code>' . esc_html($options['default_hostname']) . '</code>');?></p>
 <?php
         $this->showDonationAppeal();
@@ -1156,13 +1155,13 @@ END_HTML;
 
     public function setTumblrSyncSchedules () {
         if (!$this->isConnectedToTumblr()) { return; }
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         $blogs_to_sync = (empty($options['sync_tumblr'])) ? array() : $options['sync_tumblr'];
         // If we are being asked to sync, set up a daily schedule for that.
         if (!empty($blogs_to_sync)) {
             foreach ($blogs_to_sync as $x) {
-                if (!wp_get_schedule('tumblr_crosspostr_sync_tumblr', array($x))) {
-                    wp_schedule_event(time(), 'daily', 'tumblr_crosspostr_sync_tumblr', array($x));
+                if (!wp_get_schedule($this->prefix . '_sync_tumblr', array($x))) {
+                    wp_schedule_event(time(), 'daily', $this->prefix . '_sync_tumblr', array($x));
                 }
             }
         }
@@ -1176,15 +1175,15 @@ END_HTML;
             // check to see if there's a scheduled event to sync it, and,
             // if so, unschedule it.
             wp_unschedule_event(
-                wp_next_scheduled('tumblr_crosspostr_sync_tumblr', array($x)),
-                'tumblr_crosspostr_sync_tumblr',
+                wp_next_scheduled($this->prefix . '_sync_tumblr', array($x)),
+                $this->prefix . '_sync_tumblr',
                 array($x)
             );
         }
     }
 
     public function syncFromTumblrBlog ($base_hostname) {
-        $options = get_option('tumblr_crosspostr_settings');
+        $options = get_option($this->prefix . '_settings');
         if (!isset($options['last_synced_ids'])) {
             $options['last_synced_ids'] = array();
         }
@@ -1235,7 +1234,7 @@ END_HTML;
         $options['last_synced_ids'][$base_hostname] = ($latest_synced_id > max($ids_synced))
             ? $latest_synced_id
             : max($ids_synced);
-        update_option('tumblr_crosspostr_settings', $options);
+        update_option($this->prefix . '_settings', $options);
     }
 
     private function translateTumblrPostContent ($post) {

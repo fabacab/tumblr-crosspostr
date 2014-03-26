@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Tumblr Crosspostr package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Tumblr Crosspostr 0.7.8.4\n"
+"Project-Id-Version: Tumblr Crosspostr 0.7.8.5\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/tumblr-crosspostr\n"
-"POT-Creation-Date: 2014-03-14 21:25:25+00:00\n"
+"POT-Creation-Date: 2014-03-26 02:05:18+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,86 +12,86 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: tumblr-crosspostr.php:66
+#: tumblr-crosspostr.php:67
 msgid "Connect to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:66
+#: tumblr-crosspostr.php:67
 msgid ""
 "Almost done! Connect your blog to Tumblr to begin crossposting with Tumblr "
 "Crosspostr."
 msgstr ""
 
-#: tumblr-crosspostr.php:92
+#: tumblr-crosspostr.php:93
 msgid ""
 "Tumblr Crosspostr is provided as free software, but sadly grocery stores do "
 "not offer free food. If you like this plugin, please consider %1$s to its "
 "%2$s. &hearts; Thank you!"
 msgstr ""
 
-#: tumblr-crosspostr.php:93
+#: tumblr-crosspostr.php:94
 msgid "making a donation"
 msgstr ""
 
-#: tumblr-crosspostr.php:94
+#: tumblr-crosspostr.php:95
 msgid "houseless, jobless, nomadic developer"
 msgstr ""
 
-#: tumblr-crosspostr.php:148
+#: tumblr-crosspostr.php:149
 msgid "You can automatically copy this post to your Tumblr blog:"
 msgstr ""
 
-#: tumblr-crosspostr.php:151
+#: tumblr-crosspostr.php:152
 msgid ""
 "Compose your post for WordPress as you normally would, with the appropriate "
 "%sPost Format%s."
 msgstr ""
 
-#: tumblr-crosspostr.php:155
+#: tumblr-crosspostr.php:156
 msgid ""
 "In %sthe Tumblr Crosspostr box%s, ensure the \"Send this post to Tumblr?\" "
 "option is set to \"Yes.\" (You can set it to \"No\" if you do not want to "
 "copy this post to Tumblr.)"
 msgstr ""
 
-#: tumblr-crosspostr.php:158
+#: tumblr-crosspostr.php:159
 msgid ""
 "If you have more than one Tumblr, choose the one you want to send this post "
 "to from the \"Send to my Tumblr blog\" list."
 msgstr ""
 
-#: tumblr-crosspostr.php:159
+#: tumblr-crosspostr.php:160
 msgid ""
 "Optionally, enter any additional details specifically for Tumblr, such as "
 "the \"Content source\" field."
 msgstr ""
 
-#: tumblr-crosspostr.php:161
+#: tumblr-crosspostr.php:162
 msgid ""
 "When you are done, click \"Publish\" (or \"Save Draft\"), and Tumblr "
 "Crosspostr will send your post to the Tumblr blog you chose."
 msgstr ""
 
-#: tumblr-crosspostr.php:162
+#: tumblr-crosspostr.php:163
 msgid ""
 "Note that Tumblr does not allow you to change the post format after you have "
 "saved a copy of your post, so please be sure you choose the appropriate Post "
 "Format before you save your post."
 msgstr ""
 
-#: tumblr-crosspostr.php:170
+#: tumblr-crosspostr.php:171
 msgid "Crossposting to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:174
+#: tumblr-crosspostr.php:175
 msgid "Tumblr Crosspostr:"
 msgstr ""
 
-#: tumblr-crosspostr.php:175
+#: tumblr-crosspostr.php:176
 msgid "Tumblr Crosspostr support forum"
 msgstr ""
 
-#: tumblr-crosspostr.php:176
+#: tumblr-crosspostr.php:177
 msgid "Donate to Tumblr Crosspostr"
 msgstr ""
 
@@ -100,7 +100,7 @@ msgid "Crossposting to Tumblr failed."
 msgstr ""
 
 #: tumblr-crosspostr.php:424
-msgid "Tumblr said:"
+msgid " Remote service said:"
 msgstr ""
 
 #: tumblr-crosspostr.php:426
@@ -131,7 +131,7 @@ msgid ""
 "Tumblr, too?"
 msgstr ""
 
-#. #-#-#-#-#  tumblr-crosspostr.pot (Tumblr Crosspostr 0.7.8.4)  #-#-#-#-#
+#. #-#-#-#-#  tumblr-crosspostr.pot (Tumblr Crosspostr 0.7.8.5)  #-#-#-#-#
 #. Plugin Name of the plugin/theme
 #: tumblr-crosspostr.php:444 tumblr-crosspostr.php:752
 #: tumblr-crosspostr.php:775
@@ -224,8 +224,8 @@ msgstr ""
 msgid "Send excerpt instead of main content?"
 msgstr ""
 
-#: tumblr-crosspostr.php:821 tumblr-crosspostr.php:845
-msgid "Uncheck to disable the auto-tweet."
+#: tumblr-crosspostr.php:821
+msgid "Uncheck to send post content as crosspost content."
 msgstr ""
 
 #: tumblr-crosspostr.php:825
@@ -262,6 +262,10 @@ msgstr ""
 
 #: tumblr-crosspostr.php:843
 msgid "Send tweet?"
+msgstr ""
+
+#: tumblr-crosspostr.php:845
+msgid "Uncheck to disable the auto-tweet."
 msgstr ""
 
 #: tumblr-crosspostr.php:851

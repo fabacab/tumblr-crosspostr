@@ -55,7 +55,7 @@ class Tumblr_Crosspostr_API_Client extends Tumblr_OAuthWP_Plugin {
         $api_method = "/blog/$blog/post/edit";
         return $this->talkToService($api_method, $params);
     }
-    public function deleteFromTumblrBlog($blog, $params) {
+    public function deleteFromTumblrBlog ($blog, $params) {
         $api_method = "/blog/$blog/post/delete";
         return $this->talkToService($api_method, $params);
     }

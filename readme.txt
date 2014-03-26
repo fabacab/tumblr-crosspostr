@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.8.4
+Stable tag: 0.7.8.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -122,6 +122,12 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.8.5 =
+
+* Bugfix: Save value of "Send excerpt instead of main content?" option locally even if not sending a crosspost.
+* Bugfix: Correct `title` value in "Send excerpt instead of main content?" option so tooltip help text is actually helpful.
+* Minor code cleanup.
 
 = Version 0.7.8.4 =
 
