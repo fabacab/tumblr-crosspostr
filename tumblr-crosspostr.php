@@ -16,7 +16,7 @@ class Tumblr_Crosspostr {
 
     public function __construct () {
         add_action('plugins_loaded', array($this, 'registerL10n'));
-        add_action('init', array($this, 'setTumblrSyncSchedules'));
+        add_action('init', array($this, 'setSyncSchedules'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
         add_action('admin_enqueue_scripts', array($this, 'registerAdminScripts'));
@@ -34,9 +34,9 @@ class Tumblr_Crosspostr {
         require_once 'lib/TumblrCrosspostrAPIClient.php';
         if (isset($options['consumer_key']) && isset($options['consumer_secret'])) {
             $this->tumblr = new Tumblr_Crosspostr_API_Client($options['consumer_key'], $options['consumer_secret']);
-            if (isset($options['access_token']) && isset($options['access_token_secret'])) {
-                $this->tumblr->client->access_token = $options['access_token'];
-                $this->tumblr->client->access_token_secret = $options['access_token_secret'];
+            if (get_option($this->prefix . '_access_token') && get_option($this->prefix . '_access_token_secret')) {
+                $this->tumblr->client->access_token = get_option($this->prefix . '_access_token');
+                $this->tumblr->client->access_token_secret = get_option($this->prefix . '_access_token_secret');
             }
         } else {
             $this->tumblr = new Tumblr_Crosspostr_API_Client;
@@ -120,10 +120,8 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
 
     public function completeAuthorization () {
         $tokens = $this->tumblr->completeAuthorization(admin_url('options-general.php?page=' . $this->prefix . '_settings&' . $this->prefix . '_callback'));
-        $options = get_option($this->prefix . '_settings');
-        $options['access_token'] = $tokens['value'];
-        $options['access_token_secret'] = $tokens['secret'];
-        update_option($this->prefix . '_settings', $options);
+        update_option($this->prefix . '_access_token', $tokens['value']);
+        update_option($this->prefix . '_access_token_secret', $tokens['secret']);
     }
 
     public function registerL10n () {
@@ -394,7 +392,7 @@ END_HTML;
         if (!isset($_POST[$this->prefix . '_meta_box_nonce']) || !wp_verify_nonce($_POST[$this->prefix . '_meta_box_nonce'], 'editing_' . $this->prefix)) {
             return;
         }
-        if (!$this->isConnectedToTumblr()) { return; }
+        if (!$this->isConnectedToService()) { return; }
 
         if (isset($_POST[$this->prefix . '_use_excerpt'])) {
             update_post_meta($post_id, $this->prefix . '_use_excerpt', 1);
@@ -700,8 +698,6 @@ END_HTML;
                     }
                     $safe_input[$k] = sanitize_text_field($v);
                 break;
-                case 'access_token':
-                case 'access_token_secret':
                 case 'default_hostname':
                     $safe_input[$k] = sanitize_text_field($v);
                 break;
@@ -779,14 +775,20 @@ END_HTML;
         );
     }
 
-    private function isConnectedToTumblr () {
+    private function isConnectedToService () {
         $options = get_option($this->prefix . '_settings');
-        return isset($this->tumblr) && isset($options['access_token']);
+        return isset($this->tumblr) && get_option($this->prefix . '_access_token');
+    }
+
+    private function disconnectFromService () {
+        @$this->tumblr->client->ResetAccessToken(); // Suppress session_start() warning.
+        delete_option($this->prefix . '_access_token');
+        delete_option($this->prefix . '_access_token_secret');
     }
 
     public function renderMetaBox ($post) {
         wp_nonce_field('editing_' . $this->prefix, $this->prefix . '_meta_box_nonce');
-        if (!$this->isConnectedToTumblr()) {
+        if (!$this->isConnectedToService()) {
             $this->showError(__('Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure you connected Tumblr Crosspostr to your Tumblr account?', 'tumblr-crosspostr'));
             return;
         }
@@ -870,9 +872,7 @@ END_HTML;
         }
         $options = get_option($this->prefix . '_settings');
         if (isset($_GET['disconnect']) && wp_verify_nonce($_GET[$this->prefix . '_nonce'], 'disconnect_from_tumblr')) {
-            @$this->tumblr->client->ResetAccessToken(); // Suppress session_start() warning.
-            unset($options['access_token']);
-            if (update_option($this->prefix . '_settings', $options)) {
+            $this->disconnectFromService();
 ?>
 <div class="updated">
     <p>
@@ -881,7 +881,6 @@ END_HTML;
     </p>
 </div>
 <?php
-            }
         }
 ?>
 <h2><?php esc_html_e('Tumblr Crosspostr Settings', 'tumblr-crosspostr');?></h2>
@@ -890,7 +889,7 @@ END_HTML;
 <fieldset><legend><?php esc_html_e('Connection to Tumblr', 'tumblr-crosspostr');?></legend>
 <table class="form-table" summary="<?php esc_attr_e('Required settings to connect to Tumblr.', 'tumblr-crosspostr');?>">
     <tbody>
-        <tr<?php if (isset($options['access_token'])) : print ' style="display: none;"'; endif;?>>
+        <tr<?php if (get_option($this->prefix . '_access_token')) : print ' style="display: none;"'; endif;?>>
             <th>
                 <label for="<?php esc_attr_e($this->prefix);?>_consumer_key"><?php esc_html_e('Tumblr API key/OAuth consumer key', 'tumblr-crosspostr');?></label>
             </th>
@@ -907,7 +906,7 @@ END_HTML;
                 </p>
             </td>
         </tr>
-        <tr<?php if (isset($options['access_token'])) : print ' style="display: none;"'; endif;?>>
+        <tr<?php if (get_option($this->prefix . '_access_token')) : print ' style="display: none;"'; endif;?>>
             <th>
                 <label for="<?php esc_attr_e($this->prefix);?>_consumer_secret"><?php esc_html_e('OAuth consumer secret', 'tumblr-crosspostr');?></label>
             </th>
@@ -918,7 +917,7 @@ END_HTML;
                 </p>
             </td>
         </tr>
-        <?php if (!isset($options['access_token']) && isset($options['consumer_key']) && isset($options['consumer_secret'])) { ?>
+        <?php if (!get_option($this->prefix . '_access_token') && isset($options['consumer_key']) && isset($options['consumer_secret'])) { ?>
         <tr>
             <th class="wp-ui-notification" style="border-radius: 5px; padding: 10px;">
                 <label for="<?php esc_attr_e($this->prefix);?>_oauth_authorize"><?php esc_html_e('Connect to Tumblr:', 'tumblr-crosspostr');?></label>
@@ -927,7 +926,7 @@ END_HTML;
                 <a href="<?php print wp_nonce_url(admin_url('options-general.php?page=' . $this->prefix . '_settings&' . $this->prefix . '_oauth_authorize'), 'tumblr-authorize');?>" class="button button-primary"><?php esc_html_e('Click here to connect to Tumblr', 'tumblr-crosspostr');?></a>
             </td>
         </tr>
-        <?php } else if (isset($options['access_token'])) { ?>
+        <?php } else if (get_option($this->prefix . '_access_token')) { ?>
         <tr>
             <th colspan="2">
                 <div class="updated">
@@ -937,16 +936,13 @@ END_HTML;
                         <span class="description"><?php esc_html_e('Disconnecting will stop cross-posts from appearing on or being imported from your Tumblr blog(s), and will reset the options below to their defaults. You can re-connect at any time.', 'tumblr-crosspostr');?></span>
                     </p>
                 </div>
-                <?php // TODO: Should the access tokens never be revealed to the client? ?>
-                <input type="hidden" name="<?php esc_attr_e($this->prefix);?>_settings[access_token]" value="<?php esc_attr_e($options['access_token']);?>" />
-                <input type="hidden" name="<?php esc_attr_e($this->prefix);?>_settings[access_token_secret]" value="<?php esc_attr_e($options['access_token_secret']);?>" />
             </th>
         </tr>
         <?php } ?>
     </tbody>
 </table>
 </fieldset>
-        <?php if (isset($options['access_token'])) { ?>
+        <?php if (get_option($this->prefix . '_access_token')) { ?>
 <fieldset><legend><?php esc_html_e('Crossposting Options', 'tumblr-crosspostr');?></legend>
 <table class="form-table" summary="<?php esc_attr_e('Options for customizing crossposting behavior.', 'tumblr-crosspostr');?>">
     <tbody>
@@ -1100,7 +1096,7 @@ END_HTML;
         if (!isset($_GET[$this->prefix . '_nonce']) || !wp_verify_nonce($_GET[$this->prefix . '_nonce'], 'tumblrize_everything')) {
             $this->renderManagementPage();
         } else {
-            if (!$this->isConnectedToTumblr()) {
+            if (!$this->isConnectedToService()) {
                 wp_redirect(admin_url('options-general.php?page=' . $this->prefix . '_settings'));
                 exit();
             }
@@ -1153,8 +1149,8 @@ END_HTML;
         $this->showDonationAppeal();
     } // end renderManagementPage ()
 
-    public function setTumblrSyncSchedules () {
-        if (!$this->isConnectedToTumblr()) { return; }
+    public function setSyncSchedules () {
+        if (!$this->isConnectedToService()) { return; }
         $options = get_option($this->prefix . '_settings');
         $blogs_to_sync = (empty($options['sync_tumblr'])) ? array() : $options['sync_tumblr'];
         // If we are being asked to sync, set up a daily schedule for that.

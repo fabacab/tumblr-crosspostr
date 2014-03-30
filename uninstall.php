@@ -11,6 +11,8 @@ if (!defined('WP_UNINSTALL_PLUGIN')) { exit(); }
 // Delete options.
 delete_option('tumblr_crosspostr_settings');
 delete_option('_tumblr_crosspostr_admin_notices');
+delete_option('tumblr_crosspostr_access_token');
+delete_option('tumblr_crosspostr_access_token_secret');
 
 delete_post_meta_by_key('tumblr_crosspostr_crosspost');
 /**
