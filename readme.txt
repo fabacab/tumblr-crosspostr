@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 0.7.8.5
+Stable tag: 0.7.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -34,6 +34,13 @@ The WordPress post format to Tumblr post type mapping looks like this:
 * WordPress's `Gallery` post format becomes Tumblr's `Photoset` post type (sadly this is not yet implemented, but maybe one day soon!!)
 
 Other options enable tweaking additional metadata from your WordPress entry (notably tags and "Content source" attributions) to Tumblr, sending all your post archives to Tumblr in one click, and more.
+
+> Servers no longer serve, they possess. We should call them possessors.
+
+--[Ward Cunningham](https://twitter.com/WardCunningham/status/289875660246220800)
+
+Learn more about how you can use this plugin to own your own data in conjunction with [the "Bring Your Own Content" self-hosted Web publishing virtual appliance](http://maymay.net/blog/2014/03/13/bring-your-own-content-virtual-self-hosting-web-publishing/).
+
 
 == Installation ==
 
@@ -122,6 +129,12 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.9 =
+
+* Security: Improved protection for OAuth access tokens.
+* Bugfix: Ensure sanitization routines do not corrupt OAuth access tokens.
+* Minor code cleanup.
 
 = Version 0.7.8.5 =
 
