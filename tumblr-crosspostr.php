@@ -27,7 +27,7 @@ class Tumblr_Crosspostr {
         // run late, so themes have a chance to register support
         add_action('after_setup_theme', array($this, 'registerThemeSupport'), 700);
 
-        add_action($this->prefix . '_sync_tumblr', array($this, 'syncFromTumblrBlog'));
+        add_action($this->prefix . '_sync_content', array($this, 'syncFromTumblrBlog'));
 
         $options = get_option($this->prefix . '_settings');
         // Initialize consumer if we can, set up authroization flow if we can't.
@@ -701,7 +701,7 @@ END_HTML;
                 case 'default_hostname':
                     $safe_input[$k] = sanitize_text_field($v);
                 break;
-                case 'sync_tumblr':
+                case 'sync_content':
                     $safe_input[$k] = array();
                     foreach ($v as $x) {
                         $safe_input[$k][] = sanitize_text_field($x);
@@ -961,8 +961,8 @@ END_HTML;
                 <p class="description"><?php esc_html_e('(This feature is experimental. Please backup your website before you turn this on.)', 'tumblr-crosspostr');?></p>
             </th>
             <td>
-                <ul id="<?php esc_attr_e($this->prefix);?>_sync_tumblr">
-                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => $this->prefix . '_sync_tumblr', 'name' => $this->prefix . '_settings[sync_tumblr][]'), $options['sync_tumblr']);?>
+                <ul id="<?php esc_attr_e($this->prefix);?>_sync_content">
+                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => $this->prefix . '_sync_content', 'name' => $this->prefix . '_settings[sync_content][]'), $options['sync_content']);?>
                 </ul>
                 <p class="description"><?php esc_html_e('Content you create on the Tumblr blogs you select will automatically be copied to this blog.', 'tumblr-crosspostr');?></p>
             </td>
@@ -1152,12 +1152,12 @@ END_HTML;
     public function setSyncSchedules () {
         if (!$this->isConnectedToService()) { return; }
         $options = get_option($this->prefix . '_settings');
-        $blogs_to_sync = (empty($options['sync_tumblr'])) ? array() : $options['sync_tumblr'];
+        $blogs_to_sync = (empty($options['sync_content'])) ? array() : $options['sync_content'];
         // If we are being asked to sync, set up a daily schedule for that.
         if (!empty($blogs_to_sync)) {
             foreach ($blogs_to_sync as $x) {
-                if (!wp_get_schedule($this->prefix . '_sync_tumblr', array($x))) {
-                    wp_schedule_event(time(), 'daily', $this->prefix . '_sync_tumblr', array($x));
+                if (!wp_get_schedule($this->prefix . '_sync_content', array($x))) {
+                    wp_schedule_event(time(), 'daily', $this->prefix . '_sync_content', array($x));
                 }
             }
         }
@@ -1171,8 +1171,8 @@ END_HTML;
             // check to see if there's a scheduled event to sync it, and,
             // if so, unschedule it.
             wp_unschedule_event(
-                wp_next_scheduled($this->prefix . '_sync_tumblr', array($x)),
-                $this->prefix . '_sync_tumblr',
+                wp_next_scheduled($this->prefix . '_sync_content', array($x)),
+                $this->prefix . '_sync_content',
                 array($x)
             );
         }
