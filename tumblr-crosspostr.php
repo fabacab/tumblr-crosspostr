@@ -16,6 +16,7 @@ class Tumblr_Crosspostr {
 
     public function __construct () {
         add_action('plugins_loaded', array($this, 'registerL10n'));
+        add_action('init', array($this, 'updateChangedSettings'));
         add_action('init', array($this, 'setSyncSchedules'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
@@ -57,6 +58,38 @@ class Tumblr_Crosspostr {
                 add_action('init', array($this, 'completeAuthorization'));
             }
         }
+    }
+
+    // Detects old options/settings and migrates them to current version.
+    public function updateChangedSettings () {
+        $options = get_option($this->prefix . '_settings');
+        $new_opts = array();
+        foreach ($options as $opt_name => $opt_value) {
+            switch ($opt_name) {
+                // Rename "sync_tumblr" to "sync_content"
+                case 'sync_tumblr':
+                    foreach ($opt_value as $blog_to_sync) {
+                        $new_opts['sync_content'][] = $blog_to_sync;
+                        // Remove events with old name.
+                        wp_unschedule_event(
+                            wp_next_scheduled($this->prefix . '_sync_tumblr', array($blog_to_sync)),
+                            $this->prefix . '_sync_tumblr',
+                            array($blog_to_sync)
+                        );
+                    }
+                    break;
+                // Move the OAuth access tokens to their own options.
+                case 'access_token':
+                case 'access_token_secret':
+                    update_option($this->prefix . '_' . $opt_name, $opt_value);
+                    break;
+                default:
+                    // Do nothing for the rest, they're unchanged.
+                    $new_opts[$opt_name] = $opt_value;
+                    break;
+            }
+        }
+        update_option($this->prefix . '_settings', $new_opts);
     }
 
     public function showMissingConfigNotice () {
