@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.9
+ * Version: 0.7.10
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -634,7 +634,9 @@ END_HTML;
             case 'audio':
                 $r['caption'] = ($e)
                     ? apply_filters('the_excerpt', $post_excerpt)
-                    : apply_filters('the_content', $this->strip_only($post_body, 'audio', 1));
+                    : apply_filters('the_content', $post_body);
+                // Strip after apply_filters in case shortcode is used to generate <audio> element.
+                $r['caption'] = $this->strip_only($r['caption'], 'audio', 1);
                 $r['external_url'] = $this->extractByRegex('/(?:href|src)="(.*?\.(?:mp3|wav|wma|aiff|ogg|ra|ram|rm|mid|alac|flac))".*?>/i', $post_body, 1);
                 break;
             case 'video':
@@ -1284,12 +1286,12 @@ END_HTML;
                 $content .= $post->description;
                 break;
             case 'audio':
-                $content .= $post->caption;
                 $content .= $post->player;
-                break;
-            case 'audio':
                 $content .= $post->caption;
+                break;
+            case 'video':
                 $content .= $post->player[0]->embed_code;
+                $content .= $post->caption;
                 break;
             case 'answer':
                 $content .= '<a href="' . $post->asking_url .'" class="tumblr_blog">' . $post->asking_name . '</a>:';
@@ -1316,7 +1318,10 @@ END_HTML;
         $wp_post['post_date_gmt'] = gmdate('Y-m-d H:i:s', $post->timestamp);
         $wp_post['tags_input'] = $post->tags;
 
+        // Remove filtering so we retain audio, video, embeds, etc.
+        remove_filter('content_save_pre', 'wp_filter_post_kses');
         $wp_id = wp_insert_post($wp_post);
+        add_filter('content_save_pre', 'wp_filter_post_kses');
         if ($wp_id) {
             set_post_format($wp_id, $this->TumblrPostType2WordPressPostFormat($post->type));
             update_post_meta($wp_id, 'tumblr_base_hostname', parse_url($post->post_url, PHP_URL_HOST));
@@ -1326,8 +1331,8 @@ END_HTML;
                 update_post_meta($wp_id, 'tumblr_source_url', $post->source_url);
             }
 
-            // Import image files from photo post types as WordPress attachments.
-            if ('photo' === $post->type) {
+            // Import media from post types as WordPress attachments.
+            if (!empty($post->type)) {
                 $wp_subdir_from_post_timestamp = date('Y/m', $post->timestamp);
                 $wp_upload_dir = wp_upload_dir($wp_subdir_from_post_timestamp);
                 if (!is_writable($wp_upload_dir['path'])) {
@@ -1337,48 +1342,89 @@ END_HTML;
                     );
                     error_log($msg);
                 } else {
-                    foreach ($post->photos as $photo) {
-                        $data = wp_remote_get($photo->original_size->url);
-                        if (200 != $data['response']['code']) {
-                            $msg = sprintf(
-                                esc_html__('Failed to get Tumblr photo (%1$s) from post (%2$s). Server responded: %3$s', 'tumblr-crosspostr'),
-                                $photo->original_size->url,
-                                $post->post_url,
-                                print_r($data, true)
-                            );
-                            error_log($msg);
-                        } else {
-                            $f = wp_upload_bits(basename($photo->original_size->url), null, $data['body'], $wp_subdir_from_post_timestamp);
-                            if ($f['error']) {
-                                $msg = sprintf(
-                                    esc_html__('Error saving file (%s): ', 'tumblr-crosspostr'),
-                                    basename($photo->original_size->url)
-                                );
-                                error_log($msg);
-                            } else {
-                                $wp_filetype = wp_check_filetype(basename($f['file']));
-                                $wp_file_id = wp_insert_attachment(array(
-                                    'post_title' => basename($f['file'], ".{$wp_filetype['ext']}"),
-                                    'post_content' => '', // Always empty string.
-                                    'post_status' => 'inherit',
-                                    'post_mime_type' => $wp_filetype['type'],
-                                    'guid' => $wp_upload_dir['url'] . '/' . basename($f['file'])
-                                ), $f['file'], $wp_id);
-                                require_once(ABSPATH . 'wp-admin/includes/image.php');
-                                $metadata = wp_generate_attachment_metadata($wp_file_id, $f['file']);
-                                wp_update_attachment_metadata($wp_file_id, $metadata);
-                                $new_content = str_replace($photo->original_size->url, $f['url'], get_post_field('post_content', $wp_id));
-                                wp_update_post(array(
-                                    'ID' => $wp_id,
-                                    'post_content' => $new_content
-                                ));
-                            }
-                        }
+                    switch ($post->type) {
+                        case 'photo':
+                            $this->importPhotosInPost($post, $wp_id);
+                            break;
+                        case 'audio':
+                            $this->importAudioInPost($post, $wp_id);
+                            break;
+                        default:
+                            // TODO: Import media from other post types?
+                            break;
                     }
                 }
             }
         }
         return $wp_id;
+    }
+
+    /**
+     * Imports some URL-accessible asset (image, audio file, etc.) as a
+     * WordPress attachment and associates it with a given WordPress post.
+     *
+     * @param string $media_url The URL to the asset.
+     * @param object $post Tumblr post object.
+     * @param int $wp_id WordPress post ID number.
+     * @param string $replace_this Content referencing remote asset to replace with locally imported asset.
+     * @param string $replace_with_this_before Content to prepend to locally imported asset URL, such as the start of a shortcode.
+     * @param string $replace_with_this_after Content to append to locally imported asset URL, such as the end of a shortcode.
+     */
+    private function importMedia ($media_url, $post, $wp_id, $replace_this, $replace_with_this_before = '', $replace_with_this_after = '') {
+        $data = wp_remote_get($media_url, array('timeout' => 300)); // Download for 5 minutes, tops.
+        if (is_wp_error($data)) {
+            $msg = sprintf(
+                esc_html__('Failed to get Tumblr media (%1$s) from post (%2$s). Server responded: %3$s', 'tumblr-crosspostr'),
+                $media_url,
+                $post->post_url,
+                print_r($data, true)
+            );
+            error_log($msg);
+        } else {
+            $f = wp_upload_bits(basename($media_url), null, $data['body'], date('Y/m', $post->timestamp));
+            if ($f['error']) {
+                $msg = sprintf(
+                    esc_html__('Error saving file (%s): ', 'tumblr-crosspostr'),
+                    basename($media_url)
+                );
+                error_log($msg);
+            } else {
+                $wp_upload_dir = wp_upload_dir(date('Y/m', $post->timestamp));
+                $wp_filetype = wp_check_filetype(basename($f['file']));
+                $wp_file_id = wp_insert_attachment(array(
+                    'post_title' => basename($f['file'], ".{$wp_filetype['ext']}"),
+                    'post_content' => '', // Always empty string.
+                    'post_status' => 'inherit',
+                    'post_mime_type' => $wp_filetype['type'],
+                    'guid' => $wp_upload_dir['url'] . '/' . basename($f['file'])
+                ), $f['file'], $wp_id);
+                require_once(ABSPATH . 'wp-admin/includes/media.php');
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                $metadata = wp_generate_attachment_metadata($wp_file_id, $f['file']);
+                wp_update_attachment_metadata($wp_file_id, $metadata);
+                $new_content = str_replace($replace_this, $replace_with_this_before . $f['url'] . $replace_with_this_after, get_post_field('post_content', $wp_id));
+                wp_update_post(array(
+                    'ID' => $wp_id,
+                    'post_content' => $new_content
+                ));
+            }
+        }
+    }
+
+    private function importPhotosInPost ($post, $wp_id) {
+        foreach ($post->photos as $photo) {
+            $this->importMedia($photo->original_size->url, $post, $wp_id, $photo->original_size->url);
+        }
+    }
+
+    private function importAudioInPost ($post, $wp_id) {
+        $player_atts = wp_kses_hair($post->player, array('http', 'https'));
+        $x = parse_url($player_atts['src']['value'], PHP_URL_QUERY);
+        $vars = array();
+        parse_str($x, $vars);
+        $audio_file_url = urldecode($vars['audio_file']);
+
+        $this->importMedia($audio_file_url, $post, $wp_id, $post->player, '[audio src="', '"]');
     }
 
     private function getTumblrAppRegistrationUrl () {
