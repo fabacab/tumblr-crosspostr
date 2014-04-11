@@ -14,6 +14,7 @@ class Tumblr_Crosspostr_API_Client extends Tumblr_OAuthWP_Plugin {
         $this->client->server = 'Tumblr';
         $this->client->client_id = $consumer_key;
         $this->client->client_secret = $consumer_secret;
+        $this->client->configuration_file = dirname(__FILE__) . '/oauth_api/oauth_configuration.json';
         $this->client->Initialize();
 
         return $this;
