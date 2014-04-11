@@ -28,7 +28,11 @@ class Tumblr_Crosspostr_API_Client extends Tumblr_OAuthWP_Plugin {
     public function getUserBlogs () {
         $data = $this->talkToService('/user/info', array(), 'GET');
         // TODO: This could use some error handling?
-        return $data->response->user->blogs;
+        if (isset($data)) {
+            return $data->response->user->blogs;
+        } else {
+            return false;
+        }
     }
 
     public function getBlogInfo ($base_hostname) {

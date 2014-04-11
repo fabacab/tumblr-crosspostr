@@ -1198,8 +1198,11 @@ END_HTML;
         }
         // For any blogs we know of but aren't being asked to sync,
         $known_blogs = array();
-        foreach ($this->tumblr->getUserBlogs() as $blog) {
-            $known_blogs[] = parse_url($blog->url, PHP_URL_HOST);
+        $users_blogs = $this->tumblr->getUserBlogs();
+        if ($users_blogs) {
+            foreach ($users_blogs as $blog) {
+                $known_blogs[] = parse_url($blog->url, PHP_URL_HOST);
+            }
         }
         $to_unschedule = array_diff($known_blogs, $blogs_to_sync);
         foreach ($to_unschedule as $x) {
