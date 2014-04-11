@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.2
-Stable tag: 0.7.10
+Stable tag: 0.7.11
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.11 =
+
+* [Bugfix](https://wordpress.org/support/topic/error-400-403): Fix "400 Bad Request" errors on attempts to crosspost large amounts of data.
+* [Bugfix](https://wordpress.org/support/topic/invalid-argument-supplied-7): Fix "Invalid Argument Supplied" error when connectivity to Tumblr is flaky.
 
 = Version 0.7.10 =
 
