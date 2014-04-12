@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 3.8.2
-Stable tag: 0.7.11
+Stable tag: 0.7.12
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -67,7 +67,8 @@ Tumblr Crosspostr makes use of Manuel Lemos's `oauth_client_class` for some core
     │   └── http.php
     └── oauth_api
         ├── LICENSE
-        └── oauth_client.php
+        ├── oauth_client.php
+        └── oauth_configuration.json
 
 It's also possible that your system administrator will apply updates to one or more of the core system packages this plugin uses without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, the plugin may begin to issue errors. Should this occur, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/meitar/tumblr-crosspostr/issues/new).
 
@@ -129,6 +130,10 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.12 =
+
+* [Bugfix](https://github.com/meitar/tumblr-crosspostr/issues/8): Treat `tumblr_post_id` meta field value as string (not integer) to prevent 32 bit systems from overflowing and attempting to edit posts with a different ID than stored in the database.
 
 = Version 0.7.11 =
 

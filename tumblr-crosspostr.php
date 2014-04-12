@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.11
+ * Version: 0.7.12
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -577,10 +577,10 @@ END_HTML;
         // TODO: Smoothen this deleting thing.
         //       Cancel WordPress deletions if Tumblr deletions aren't working?
         if ($deleting === true && $tumblr_id) {
-            $params['id'] = (int) $tumblr_id;
+            $params['id'] = $tumblr_id;
             return $this->tumblr->deleteFromTumblrBlog($blog, $params);
         } else if ($tumblr_id) {
-            $params['id'] = (int) $tumblr_id;
+            $params['id'] = $tumblr_id;
             return $this->tumblr->editOnTumblrBlog($blog, $params);
         } else {
             return $this->tumblr->postToTumblrBlog($blog, $params);
