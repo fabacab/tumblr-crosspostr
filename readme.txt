@@ -3,8 +3,8 @@ Contributors: meitar
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
-Tested up to: 3.8.2
-Stable tag: 0.7.12
+Tested up to: 3.9
+Stable tag: 0.7.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
