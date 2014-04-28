@@ -131,6 +131,10 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 == Changelog ==
 
+= Version 0.7.13 =
+
+* [Bugfix](https://github.com/meitar/tumblr-crosspostr/issues/7): Correctly post tweets that have quotation marks without slashes in them. (Also fixes the case where a tweet would not be posted because the added slashes pushed the tweet contents over Twitter's 140 character length limit.)
+
 = Version 0.7.12 =
 
 * [Bugfix](https://github.com/meitar/tumblr-crosspostr/issues/8): Treat `tumblr_post_id` meta field value as string (not integer) to prevent 32 bit systems from overflowing and attempting to edit posts with a different ID than stored in the database.
