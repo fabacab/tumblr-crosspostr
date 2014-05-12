@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.13
+ * Version: 0.7.14
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -448,9 +448,12 @@ END_HTML;
             } else {
                 $prepared_post->params['tweet'] = 'off';
             }
-            if (get_magic_quotes_gpc()) {
-                $prepared_post->params['tweet'] = stripslashes_deep($prepared_post->params['tweet']);
-            }
+//            // NOTE: WordPress intentionally adds slashes. Grr.
+//            //       See http://codex.wordpress.org/Function_Reference/stripslashes_deep#Good_Coding_Practice
+//            if (get_magic_quotes_gpc()) {
+//                $prepared_post->params['tweet'] = stripslashes_deep($prepared_post->params['tweet']);
+//            }
+            $prepared_post->params['tweet'] = stripslashes_deep($prepared_post->params['tweet']);
             $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
             if (empty($data->response->id)) {
                 $msg = esc_html__('Crossposting to Tumblr failed.', 'tumblr-crosspostr');
