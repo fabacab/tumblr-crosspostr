@@ -30,6 +30,8 @@ class Tumblr_Crosspostr {
 
         add_action($this->prefix . '_sync_content', array($this, 'syncFromTumblrBlog'));
 
+        add_filter('post_row_actions', array($this, 'addTumblrPermalinkRowAction'), 10, 2);
+
         $options = get_option($this->prefix . '_settings');
         // Initialize consumer if we can, set up authroization flow if we can't.
         require_once 'lib/TumblrCrosspostrAPIClient.php';
@@ -212,6 +214,20 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
 <p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank">&hearts; $z &hearts;</a></p>
 END_HTML;
         $screen->set_help_sidebar($screen->get_help_sidebar() . $sidebar);
+    }
+
+    public function addTumblrPermalinkRowAction ($actions, $post) {
+        $tumblr_id = get_post_meta($post->ID, 'tumblr_post_id', true);
+        if ($tumblr_id) {
+            $base_hostname = get_post_meta($post->ID, 'tumblr_base_hostname', true);
+            if (empty($base_hostname)) { // fallback to default blog domain
+                $options = get_option($this->prefix . '_settings');
+                $base_hostname = $options['default_hostname'];
+            }
+            $html .= '<a href="http://' . $base_hostname . '/' . $tumblr_id . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>';
+            $actions['view_on_tumblr'] = $html;
+        }
+        return $actions;
     }
 
     private function WordPressPostFormat2TumblrPostType ($format) {
