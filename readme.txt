@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.0
-Stable tag: 0.7.15
+Stable tag: 0.7.16
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,6 +130,10 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.16 =
+
+* [Feature](https://wordpress.org/support/topic/feature-request-tumblr-post-link): Show "View post on Tumblr" link in Posts listing screen.
 
 = Version 0.7.15 =
 
