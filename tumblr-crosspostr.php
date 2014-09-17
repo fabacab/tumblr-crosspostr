@@ -32,6 +32,8 @@ class Tumblr_Crosspostr {
 
         add_filter('post_row_actions', array($this, 'addTumblrPermalinkRowAction'), 10, 2);
 
+        register_deactivation_hook(__FILE__, array($this, 'deactivate'));
+
         $options = get_option($this->prefix . '_settings');
         // Initialize consumer if we can, set up authroization flow if we can't.
         require_once 'lib/TumblrCrosspostrAPIClient.php';
@@ -1219,10 +1221,14 @@ END_HTML;
         $this->showDonationAppeal();
     } // end renderManagementPage ()
 
+    private function getBlogsToSync () {
+        $options = get_option($this->prefix . '_settings');
+        return (empty($options['sync_content'])) ? array() : $options['sync_content'];
+    }
+
     public function setSyncSchedules () {
         if (!$this->isConnectedToService()) { return; }
-        $options = get_option($this->prefix . '_settings');
-        $blogs_to_sync = (empty($options['sync_content'])) ? array() : $options['sync_content'];
+        $blogs_to_sync = $this->getBlogsToSync();
         // If we are being asked to sync, set up a daily schedule for that.
         if (!empty($blogs_to_sync)) {
             foreach ($blogs_to_sync as $x) {
@@ -1248,6 +1254,15 @@ END_HTML;
                 $this->prefix . '_sync_content',
                 array($x)
             );
+        }
+    }
+
+    public function deactivate () {
+        $blogs_to_sync = $this->getBlogsToSync();
+        if (!empty($blogs_to_sync)) {
+            foreach ($blogs_to_sync as $blog) {
+                wp_clear_scheduled_hook($this->prefix . '_sync_content', array($blog));
+            }
         }
     }
 
