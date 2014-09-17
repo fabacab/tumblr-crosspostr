@@ -226,8 +226,7 @@ END_HTML;
                 $options = get_option($this->prefix . '_settings');
                 $base_hostname = $options['default_hostname'];
             }
-            $html .= '<a href="http://' . $base_hostname . '/' . $tumblr_id . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>';
-            $actions['view_on_tumblr'] = $html;
+            $actions['view_on_tumblr'] = '<a href="http://' . $base_hostname . '/' . $tumblr_id . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>';
         }
         return $actions;
     }
