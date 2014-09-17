@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.0
-Stable tag: 0.7.16
+Stable tag: 0.7.17
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,6 +130,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.17 =
+
+* Feature: Show "View post on Tumblr" link in Post Edit screen inside Tumblr Crosspostr Custom Metabox. Useful for reviewing individual crossposted entries and ensuring WordPress and Tumblr are still in sync.
+* Bugfix: Clear WP-Cron schedules on plugin deactivation. (This improves performance, security, and prevents errors by ensuring any Tumblr synchronization routines are not invoked if you have deactivated but not deleted Tumblr Crosspostr.)
 
 = Version 0.7.16 =
 
