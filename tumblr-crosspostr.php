@@ -858,6 +858,15 @@ END_HTML;
         $d = $this->getTumblrBasename($post->ID);
         $e = $this->getTumblrUseExcerpt($post->ID);
         $s = get_post_meta($post->ID, 'tumblr_source_url', true);
+
+        $tumblr_id = get_post_meta($post->ID, 'tumblr_post_id', true);
+        if ('publish' === $post->post_status && $tumblr_id) {
+?>
+<p>
+    <a href="http://<?php print esc_attr($d);?>/<?php print esc_attr($tumblr_id);?>" class="button button-small"><?php esc_html_e('View post on Tumblr', 'tumblr-crosspostr');?></a>
+</p>
+<?php
+        }
 ?>
 <fieldset>
     <legend style="display:block;"><?php esc_html_e('Send this post to Tumblr?', 'tumblr-crosspostr');?></legend>
