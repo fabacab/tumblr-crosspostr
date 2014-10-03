@@ -30,6 +30,9 @@ class Tumblr_Crosspostr {
 
         add_action($this->prefix . '_sync_content', array($this, 'syncFromTumblrBlog'));
 
+        // Template tag actions
+        add_action($this->prefix . '_reblog_key', 'tumblr_reblog_key');
+
         add_filter('post_row_actions', array($this, 'addTumblrPermalinkRowAction'), 10, 2);
 
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
@@ -732,6 +735,19 @@ END_HTML;
         $options = get_option($this->prefix . '_settings');
         $tumblr_id = get_post_meta($post_id, 'tumblr_post_id', true);
         $this->crosspostToTumblr($this->getTumblrBasename($post_id), array(), $tumblr_id, true);
+    }
+
+    public function getReblogKey ($post_id) {
+        $reblog_key = get_post_meta($post_id, 'tumblr_reblog_key', true);
+        if (empty($reblog_key)) {
+            $tumblr_id = get_post_meta($post_id, 'tumblr_post_id', true);
+            $options = get_option($this->prefix . '_settings');
+            $this->tumblr->setApiKey($options['consumer_key']);
+            $resp = $this->tumblr->getPosts($this->getTumblrBaseName($post_id), array('id' => $tumblr_id));
+            $reblog_key = $resp->posts[0]->reblog_key;
+            update_post_meta($post_id, 'tumblr_reblog_key', $reblog_key);
+        }
+        return $reblog_key;
     }
 
     /**
@@ -1573,3 +1589,4 @@ END_HTML;
 }
 
 $tumblr_crosspostr = new Tumblr_Crosspostr();
+require_once 'template-functions.php';
