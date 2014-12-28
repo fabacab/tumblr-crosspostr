@@ -652,8 +652,15 @@ END_HTML;
                 $r['caption'] = ($e)
                     ? apply_filters('the_excerpt', $post_excerpt)
                     : apply_filters('the_content', $this->strip_only($post_body, 'img', true, 1));
-                $r['link'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
-                $r['source'] = $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1);
+                $x = (preg_match('/<img.*?src="(.*?)".*?\/?>/', $post_body))
+                     ? $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1)
+                     : $this->extractByRegex(
+                         '/<img.*?src="(.*?)".*?\/?>/',
+                         get_the_post_thumbnail($post_id, 'full'),
+                         1
+                     );
+                $r['link'] = $x;
+                $r['source'] = $x;
                 break;
             case 'quote':
                 $pattern = '/<blockquote.*?>(.*?)<\/blockquote>/s';
@@ -728,8 +735,8 @@ END_HTML;
      */
     private function extractByRegex ($pattern, $str, $group = 0) {
         $matches = array();
-        preg_match($pattern, $str, $matches);
-        return $matches[$group];
+        $x = preg_match($pattern, $str, $matches);
+        return (!empty($matches[$group])) ? $matches[$group] : $x;
     }
 
     private function getTumblrBasename ($post_id) {
