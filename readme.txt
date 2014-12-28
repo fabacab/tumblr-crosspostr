@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.0
-Stable tag: 0.7.17
+Stable tag: 0.7.18
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,6 +130,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.18 =
+
+* [Developer](https://wordpress.org/support/topic/get-reblog-key-from-created-post): New action hook `tumblr_crosspostr_reblog_key` (calling template tag `tumblr_reblog_key`) now enables theme developers to create Tumblr reblog buttons for all crossposted posts. To print a crossposted post's Tumblr reblog key, use the following code inside The Loop:
+    * `<?php do_action('tumblr_crosspostr_reblog_key');?>`
 
 = Version 0.7.17 =
 
