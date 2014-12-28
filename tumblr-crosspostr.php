@@ -139,18 +139,37 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
     }
 
     public function registerThemeSupport () {
-        $formats = array(
-            'link',
-            'image',
-            'quote',
-            'video',
-            'audio',
-            'chat'
+        add_theme_support(
+            'post-formats',
+            $this->diffThemeSupport(array(
+                'link',
+                'image',
+                'quote',
+                'video',
+                'audio',
+                'chat'
+            ), 'post-formats')
         );
-        $x = get_theme_support('post-formats');
-        $f = (empty($x)) ? array() : $x[0];
-        $diff = array_diff($formats, $f);
-        add_theme_support('post-formats', array_merge($f, $diff));
+        add_theme_support(
+            'post-thumbnails',
+            $this->diffThemeSupport(array(
+                'post'
+            ), 'post-thumbnails')
+        );
+    }
+
+    /**
+     * Returns the difference between a requested and existing theme support for a feature.
+     *
+     * @param array $new_array The options of a feature to query.
+     * @param string $feature The feature to query.
+     * @return array The difference, each element as an argument to original add_theme_support() call.
+     */
+    private function diffThemeSupport ($new_array, $feature) {
+        $x = get_theme_support($feature);
+        if (is_bool($x)) { $x = array(); }
+        $y = (empty($x)) ? array() : $x[0];
+        return array_merge($y, array_diff($new_array, $y));
     }
 
     public function authorizeApp () {
