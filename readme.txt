@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.1
-Stable tag: 0.7.19
+Stable tag: 0.7.20
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,6 +130,10 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.20 =
+
+* [Bugfix](https://wordpress.org/support/topic/featured-image-metabox-hidden-on-page-edit-screens#post-6414152): Fix conflict with theme support for [Post Thumbnails](https://codex.wordpress.org/Post_Thumbnails) on `page` post types.
 
 = Version 0.7.19 =
 
