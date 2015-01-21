@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.20
+ * Version: 0.7.21
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -21,7 +21,8 @@ class Tumblr_Crosspostr {
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
         add_action('admin_enqueue_scripts', array($this, 'registerAdminScripts'));
-        add_action('admin_head', array($this, 'doAdminHeadActions'));
+        add_action('admin_head', array($this, 'registerContextualHelp'));
+        add_action('admin_notices', array($this, 'showAdminNotices'));
         add_action('add_meta_boxes', array($this, 'addMetaBox'));
         add_action('save_post', array($this, 'savePost'));
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
@@ -189,12 +190,7 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
         );
     }
 
-    public function doAdminHeadActions () {
-        $this->registerContextualHelp();
-        $this->showAdminNotices();
-    }
-
-    private function registerContextualHelp () {
+    public function registerContextualHelp () {
         $screen = get_current_screen();
         if ($screen->id !== 'post') { return; }
         $html = '<p>' . esc_html__('You can automatically copy this post to your Tumblr blog:', 'tumblr-crosspostr') . '</p>'
@@ -455,9 +451,6 @@ END_HTML;
 
     public function savePost ($post_id) {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
-        if (!isset($_POST[$this->prefix . '_meta_box_nonce']) || !wp_verify_nonce($_POST[$this->prefix . '_meta_box_nonce'], 'editing_' . $this->prefix)) {
-            return;
-        }
         if (!$this->isConnectedToService()) { return; }
 
         if (isset($_POST[$this->prefix . '_use_excerpt'])) {
@@ -466,7 +459,7 @@ END_HTML;
             delete_post_meta($post_id, $this->prefix . '_use_excerpt');
         }
 
-        if ('N' === $_POST[$this->prefix . '_crosspost']) {
+        if (isset($_POST[$this->prefix . '_crosspost']) && 'N' === $_POST[$this->prefix . '_crosspost']) {
             update_post_meta($post_id, $this->prefix . '_crosspost', 'N'); // 'N' means "no"
             return;
         } else {
@@ -568,7 +561,7 @@ END_HTML;
         update_option('_' . $this->prefix . '_admin_notices', $notices);
     }
 
-    private function showAdminNotices () {
+    public function showAdminNotices () {
         $notices = get_option('_' . $this->prefix . '_admin_notices');
         if ($notices) {
             foreach ($notices as $msg) {
@@ -882,7 +875,6 @@ END_HTML;
     }
 
     public function renderMetaBox ($post) {
-        wp_nonce_field('editing_' . $this->prefix, $this->prefix . '_meta_box_nonce');
         if (!$this->isConnectedToService()) {
             $this->showError(__('Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure you connected Tumblr Crosspostr to your Tumblr account?', 'tumblr-crosspostr'));
             return;
