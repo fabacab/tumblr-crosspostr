@@ -651,15 +651,17 @@ END_HTML;
                 $r['caption'] = ($e)
                     ? apply_filters('the_excerpt', $post_excerpt)
                     : apply_filters('the_content', $this->strip_only($post_body, 'img', true, 1));
-                $x = (preg_match('/<img.*?src="(.*?)".*?\/?>/', $post_body))
-                     ? $this->extractByRegex('/<img.*?src="(.*?)".*?\/?>/', $post_body, 1)
-                     : $this->extractByRegex(
-                         '/<img.*?src="(.*?)".*?\/?>/',
-                         get_the_post_thumbnail($post_id, 'full'),
-                         1
-                     );
-                $r['link'] = $x;
-                $r['source'] = $x;
+                $pattern = '/(?:<a.*?href="(.*?)"[^>]*>)?<img.*?src="(.*?)".*?\/?>/';
+                $m = array();
+                preg_match($pattern, $post_body, $m);
+                if (empty($m)) {
+                    $r['link'] = $r['source'] = $this->extractByRegex($pattern, get_the_post_thumbnail($post_id, 'full'), 2);
+                } else if (empty($m[1])) {
+                    $r['link'] = $r['source'] = $m[2];
+                } else {
+                    $r['link'] = $m[1];
+                    $r['source'] = $m[2];
+                }
                 break;
             case 'quote':
                 $pattern = '/<blockquote.*?>(.*?)<\/blockquote>/s';
