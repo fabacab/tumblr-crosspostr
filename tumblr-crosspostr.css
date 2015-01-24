@@ -1,3 +1,22 @@
+.settings_page_tumblr_crosspostr_settings legend {
+    font-size: large;
+    font-style: italic;
+}
+.settings_page_tumblr_crosspostr_settings fieldset:target {
+    border: 2px solid blue;
+    padding: 0 15px 15px 15px;
+    margin-bottom: 2em;
+}
+.settings_page_tumblr_crosspostr_settings .fieldset-toc,
+.settings_page_tumblr_crosspostr_settings .fieldset-toc li {
+    display: inline;
+}
+.settings_page_tumblr_crosspostr_settings .fieldset-toc li:not(:last-child)::after {
+    content: " | ";
+}
+.settings_page_tumblr_crosspostr_settings fieldset {
+    margin-top: 1em;
+}
 #tumblr-crosspostr-meta-box legend {
     display: none;
 }

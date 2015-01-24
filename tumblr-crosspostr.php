@@ -809,6 +809,7 @@ END_HTML;
                     }
                 break;
                 case 'exclude_categories':
+                case 'import_to_categories':
                     $safe_v = array();
                     foreach ($v as $x) {
                         $safe_v[] = sanitize_text_field($x);
@@ -995,9 +996,16 @@ END_HTML;
         }
 ?>
 <h2><?php esc_html_e('Tumblr Crosspostr Settings', 'tumblr-crosspostr');?></h2>
+<p class="fieldset-toc"><?php esc_html_e('Jump to options:', 'tumblr-crosspostr');?></p>
+<ul class="fieldset-toc">
+    <li><a href="#connection-to-tumblr"><?php esc_html_e('Connection to Tumblr', 'tumblr-crosspostr');?></a></li>
+    <li><a href="#crossposting-options"><?php esc_html_e('Crossposting options', 'tumblr-crosspostr');?></a></li>
+    <li><a href="#sync-options"><?php esc_html_e('Sync options', 'tumblr-crosspostr');?></a></li>
+    <li><a href="#plugin-extras"><?php esc_html_e('Plugin extras', 'tumblr-crosspostr');?></a></li>
+</ul>
 <form method="post" action="options.php">
 <?php settings_fields($this->prefix . '_settings');?>
-<fieldset><legend><?php esc_html_e('Connection to Tumblr', 'tumblr-crosspostr');?></legend>
+<fieldset id="connection-to-tumblr"><legend><?php esc_html_e('Connection to Tumblr', 'tumblr-crosspostr');?></legend>
 <table class="form-table" summary="<?php esc_attr_e('Required settings to connect to Tumblr.', 'tumblr-crosspostr');?>">
     <tbody>
         <tr<?php if (get_option($this->prefix . '_access_token')) : print ' style="display: none;"'; endif;?>>
@@ -1054,7 +1062,7 @@ END_HTML;
 </table>
 </fieldset>
         <?php if (get_option($this->prefix . '_access_token')) { ?>
-<fieldset><legend><?php esc_html_e('Crossposting Options', 'tumblr-crosspostr');?></legend>
+<fieldset id="crossposting-options"><legend><?php esc_html_e('Crossposting options', 'tumblr-crosspostr');?></legend>
 <table class="form-table" summary="<?php esc_attr_e('Options for customizing crossposting behavior.', 'tumblr-crosspostr');?>">
     <tbody>
         <tr<?php if (!isset($options['default_hostname'])) : print ' class="wp-ui-highlight"'; endif;?>>
@@ -1064,18 +1072,6 @@ END_HTML;
             <td>
                 <?php print $this->tumblrBlogsSelectField(array('id' => $this->prefix . '_default_hostname', 'name' => $this->prefix . '_settings[default_hostname]'), $this->getTumblrBasename(0));?>
                 <p class="description"><?php esc_html_e('Choose which Tumblr blog you want to send your posts to by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></p>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                <label for="<?php esc_attr_e($this->prefix);?>_sync_from_tumblr"><?php esc_html_e('Sync posts from Tumblr', 'tumblr-crosspostr');?></label>
-                <p class="description"><?php esc_html_e('(This feature is experimental. Please backup your website before you turn this on.)', 'tumblr-crosspostr');?></p>
-            </th>
-            <td>
-                <ul id="<?php esc_attr_e($this->prefix);?>_sync_content">
-                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => $this->prefix . '_sync_content', 'name' => $this->prefix . '_settings[sync_content][]'), $options['sync_content']);?>
-                </ul>
-                <p class="description"><?php esc_html_e('Content you create on the Tumblr blogs you select will automatically be copied to this blog.', 'tumblr-crosspostr');?></p>
             </td>
         </tr>
         <tr>
@@ -1186,6 +1182,52 @@ END_HTML;
                 <label for="<?php esc_attr_e($this->prefix);?>_auto_tweet"><span class="description"><?php print sprintf(esc_html__('When checked, new posts you create on WordPress will have their "%s" option enabled by default. You can always override this when editing an individual post.', 'tumblr-crosspostr'), esc_html__('Send tweet?', 'tumblr-crosspostr'));?></span></label>
             </td>
         </tr>
+    </tbody>
+</table>
+</fieldset>
+<fieldset id="sync-options"><legend><?php esc_html_e('Sync options', 'tumblr-crosspostr');?></legend>
+<table class="form-table" summary="<?php esc_attr_e('Customize the import behavior.', 'tumblr-crosspostr');?>">
+    <tbody>
+        <tr>
+            <th>
+                <label for="<?php esc_attr_e($this->prefix);?>_sync_from_tumblr"><?php esc_html_e('Sync posts from Tumblr', 'tumblr-crosspostr');?></label>
+                <p class="description"><?php esc_html_e('(This feature is experimental. Please backup your website before you turn this on.)', 'tumblr-crosspostr');?></p>
+            </th>
+            <td>
+                <ul id="<?php esc_attr_e($this->prefix);?>_sync_content">
+                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => $this->prefix . '_sync_content', 'name' => $this->prefix . '_settings[sync_content][]'), $options['sync_content']);?>
+                </ul>
+                <p class="description"><?php esc_html_e('Content you create on the Tumblr blogs you select will automatically be copied to this blog.', 'tumblr-crosspostr');?></p>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="<?php esc_attr_e($this->prefix);?>_import_to_categories"><?php esc_html_e('Automatically assign synced posts to these categories:');?></label>
+            </th>
+            <td>
+                <ul id="<?php esc_attr_e($this->prefix);?>_import_to_categories">
+                <?php foreach (get_categories(array('hide_empty' => 0)) as $cat) : ?>
+                    <li>
+                        <label>
+                            <input
+                                type="checkbox"
+                                <?php if (isset($options['import_to_categories']) && in_array($cat->slug, $options['import_to_categories'])) : print 'checked="checked"'; endif;?>
+                                value="<?php esc_attr_e($cat->slug);?>"
+                                name="<?php esc_attr_e($this->prefix);?>_settings[import_to_categories][]">
+                            <?php print esc_html($cat->name);?>
+                        </label>
+                    </li>
+                <?php endforeach;?>
+                </ul>
+                <p class="description"><?php print sprintf(esc_html__('Will cause any posts imported from your Tumblr blog to be assigned the categories that you enable here. It is often a good idea to %screate a new category%s that you use exclusively for this purpose.', 'tumblr-crosspostr'), '<a href="' . admin_url('edit-tags.php?taxonomy=category') . '">', '</a>');?></p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</fieldset>
+<fieldset id="plugin-extras"><legend><?php esc_html_e('Plugin extras', 'tumblr-crosspostr');?></legend>
+<table class="form-table" summary="<?php esc_attr_e('Additional options to customize plugin behavior.', 'tumblr-crosspostr');?>">
+    <tbody>
         <tr>
             <th>
                 <label for="<?php esc_attr_e($this->prefix);?>_debug">
@@ -1420,6 +1462,16 @@ END_HTML;
         $wp_post['post_date'] = date('Y-m-d H:i:s', $post->timestamp);
         $wp_post['post_date_gmt'] = gmdate('Y-m-d H:i:s', $post->timestamp);
         $wp_post['tags_input'] = $post->tags;
+
+        $options = get_option($this->prefix . '_settings');
+        if (!empty($options['import_to_categories'])) {
+            $cat_ids = array();
+            foreach ($options['import_to_categories'] as $slug) {
+                $x = get_category_by_slug($slug);
+                $cat_ids[] = $x->term_id;
+            }
+            $wp_post['post_category'] = $cat_ids;
+        }
 
         // Remove filtering so we retain audio, video, embeds, etc.
         remove_filter('content_save_pre', 'wp_filter_post_kses');
