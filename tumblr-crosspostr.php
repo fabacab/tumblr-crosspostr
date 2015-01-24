@@ -35,6 +35,7 @@ class Tumblr_Crosspostr {
         add_action($this->prefix . '_reblog_key', 'tumblr_reblog_key');
 
         add_filter('post_row_actions', array($this, 'addTumblrPermalinkRowAction'), 10, 2);
+        add_filter('plugin_row_meta', array($this, 'addPluginRowMeta'), 10, 2);
 
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
 
@@ -241,6 +242,17 @@ END_HTML;
             $actions['view_on_tumblr'] = '<a href="http://' . $base_hostname . '/' . $tumblr_id . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>';
         }
         return $actions;
+    }
+
+    public function addPluginRowMeta ($links, $file) {
+        if (false !== strpos($file, basename(__FILE__))) {
+            $new_links = array(
+                '&hearts; <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=meitarm%40gmail%2ecom&lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr%2dcrosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">' . esc_html__('Donate to Tumblr Crosspostr', 'tumblr-crosspostr') . '</a> &hearts;',
+                '<a href="https://wordpress.org/support/plugin/tumblr-crosspostr/">' . esc_html__('Tumblr Crosspostr support forum', 'tumblr-crosspostr') . '</a>'
+            );
+            $links = array_merge($links, $new_links);
+        }
+        return $links;
     }
 
     private function WordPressPostFormat2TumblrPostType ($format) {
