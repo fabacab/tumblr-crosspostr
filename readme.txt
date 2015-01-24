@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.1
-Stable tag: 0.7.21
+Stable tag: 0.7.22
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,6 +130,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.22 =
+
+* [Feature](https://wordpress.org/support/topic/sync-from-tumblr-define-category): Automatically assign categories to posts sync'ed from Tumblr. (Reminder: the sync feature is still experimental. Use with some caution.)
+* Feature: Set a click-thru link for an Image/Photo post. Whatever you tell WordPress to "Link To" (in its native image editing tool) is the URL Tumblr Crosspostr will use for the click-thru link on Tumblr.
 
 = Version 0.7.21 =
 
