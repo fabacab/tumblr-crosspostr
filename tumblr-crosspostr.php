@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.7.22
+ * Version: 0.7.23
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -535,7 +535,10 @@ END_HTML;
                     $this->addAdminNotices(
                         esc_html__('Post crossposted.', 'tumblr-crosspostr') . ' <a href="' . $url . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>'
                     );
-                    if ($msg = $this->maybeCaptureDebugOf($data)) { $this->addAdminNotices($msg); }
+                    if ($msg = $this->maybeCaptureDebugOf($data)) {
+                        $msg = $this->maybeCaptureDebugOf($prepared_post) . '<br /><br />' . $msg;
+                        $this->addAdminNotices($msg);
+                    }
                 }
             }
         }
@@ -1463,6 +1466,20 @@ END_HTML;
         $wp_post['post_date_gmt'] = gmdate('Y-m-d H:i:s', $post->timestamp);
         $wp_post['tags_input'] = $post->tags;
 
+        $x = get_posts(array(
+            'meta_key' => 'tumblr_post_id',
+            'meta_value' => $post->id
+        ));
+        if (1 === count($x)) {
+            $wp_post['ID'] = $x->ID; // update instead of insert
+        } else {
+            error_log(sprintf(
+                esc_html__('Found %s posts with tumblr_post_id=%s', 'tumblr-crosspostr'),
+                count($x),
+                $post->id
+            ));
+        }
+
         $options = get_option($this->prefix . '_settings');
         if (!empty($options['import_to_categories'])) {
             $cat_ids = array();
@@ -1475,6 +1492,7 @@ END_HTML;
 
         // Remove filtering so we retain audio, video, embeds, etc.
         remove_filter('content_save_pre', 'wp_filter_post_kses');
+        remove_action('save_post', array($this, 'savePost')); // avoid loops during import
         $wp_id = wp_insert_post($wp_post);
         add_filter('content_save_pre', 'wp_filter_post_kses');
         if ($wp_id) {

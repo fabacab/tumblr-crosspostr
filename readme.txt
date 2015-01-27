@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.1
-Stable tag: 0.7.22
+Stable tag: 0.7.23
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,6 +130,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.7.23 =
+
+* [Bugfix](https://wordpress.org/support/topic/crosspostr-ignores-filters): Avoid crossposting loops during Tumblr sync when posts are created through automatic publication.
+* Usability: Improve error detail when "detailed debugging" is enabled.
 
 = Version 0.7.22 =
 
