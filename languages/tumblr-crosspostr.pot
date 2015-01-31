@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Tumblr Crosspostr package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Tumblr Crosspostr 0.7.23\n"
+"Project-Id-Version: Tumblr Crosspostr 0.7.24\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/tumblr-crosspostr\n"
-"POT-Creation-Date: 2015-01-27 21:36:02+00:00\n"
+"POT-Creation-Date: 2015-01-31 07:42:24+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,122 +12,122 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: tumblr-crosspostr.php:109
+#: tumblr-crosspostr.php:110
 msgid "Connect to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:109
+#: tumblr-crosspostr.php:110
 msgid ""
 "Almost done! Connect your blog to Tumblr to begin crossposting with Tumblr "
 "Crosspostr."
 msgstr ""
 
-#: tumblr-crosspostr.php:135
+#: tumblr-crosspostr.php:136
 msgid ""
 "Tumblr Crosspostr is provided as free software, but sadly grocery stores do "
 "not offer free food. If you like this plugin, please consider %1$s to its "
 "%2$s. &hearts; Thank you!"
 msgstr ""
 
-#: tumblr-crosspostr.php:136
+#: tumblr-crosspostr.php:137
 msgid "making a donation"
 msgstr ""
 
-#: tumblr-crosspostr.php:137
+#: tumblr-crosspostr.php:138
 msgid "houseless, jobless, nomadic developer"
 msgstr ""
 
-#: tumblr-crosspostr.php:197
+#: tumblr-crosspostr.php:198
 msgid "You can automatically copy this post to your Tumblr blog:"
 msgstr ""
 
-#: tumblr-crosspostr.php:200
+#: tumblr-crosspostr.php:201
 msgid ""
 "Compose your post for WordPress as you normally would, with the appropriate "
 "%sPost Format%s."
 msgstr ""
 
-#: tumblr-crosspostr.php:204
+#: tumblr-crosspostr.php:205
 msgid ""
 "In %sthe Tumblr Crosspostr box%s, ensure the \"Send this post to Tumblr?\" "
 "option is set to \"Yes.\" (You can set it to \"No\" if you do not want to "
 "copy this post to Tumblr.)"
 msgstr ""
 
-#: tumblr-crosspostr.php:207
+#: tumblr-crosspostr.php:208
 msgid ""
 "If you have more than one Tumblr, choose the one you want to send this post "
 "to from the \"Send to my Tumblr blog\" list."
 msgstr ""
 
-#: tumblr-crosspostr.php:208
+#: tumblr-crosspostr.php:209
 msgid ""
 "Optionally, enter any additional details specifically for Tumblr, such as "
 "the \"Content source\" field."
 msgstr ""
 
-#: tumblr-crosspostr.php:210
+#: tumblr-crosspostr.php:211
 msgid ""
 "When you are done, click \"Publish\" (or \"Save Draft\"), and Tumblr "
 "Crosspostr will send your post to the Tumblr blog you chose."
 msgstr ""
 
-#: tumblr-crosspostr.php:211
+#: tumblr-crosspostr.php:212
 msgid ""
 "Note that Tumblr does not allow you to change the post format after you have "
 "saved a copy of your post, so please be sure you choose the appropriate Post "
 "Format before you save your post."
 msgstr ""
 
-#: tumblr-crosspostr.php:219
+#: tumblr-crosspostr.php:220
 msgid "Crossposting to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:223
+#: tumblr-crosspostr.php:224
 msgid "Tumblr Crosspostr:"
 msgstr ""
 
-#: tumblr-crosspostr.php:224 tumblr-crosspostr.php:251
+#: tumblr-crosspostr.php:225 tumblr-crosspostr.php:252
 msgid "Tumblr Crosspostr support forum"
 msgstr ""
 
-#: tumblr-crosspostr.php:225 tumblr-crosspostr.php:250
+#: tumblr-crosspostr.php:226 tumblr-crosspostr.php:251
 msgid "Donate to Tumblr Crosspostr"
 msgstr ""
 
-#: tumblr-crosspostr.php:242 tumblr-crosspostr.php:536
-#: tumblr-crosspostr.php:912
+#: tumblr-crosspostr.php:243 tumblr-crosspostr.php:553
+#: tumblr-crosspostr.php:930
 msgid "View post on Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:497
+#: tumblr-crosspostr.php:514
 msgid "Crossposting to Tumblr failed."
 msgstr ""
 
-#: tumblr-crosspostr.php:499
+#: tumblr-crosspostr.php:516
 msgid " Remote service said:"
 msgstr ""
 
-#: tumblr-crosspostr.php:501
+#: tumblr-crosspostr.php:518
 msgid "Response code:"
 msgstr ""
 
-#: tumblr-crosspostr.php:502
+#: tumblr-crosspostr.php:519
 msgid "Response message:"
 msgstr ""
 
-#: tumblr-crosspostr.php:509
+#: tumblr-crosspostr.php:526
 msgid ""
 "This might mean your %1$s are invalid or have been revoked by Tumblr. If "
 "everything looks fine on your end, you may want to ask %2$s to confirm your "
 "app is still allowed to use their API."
 msgstr ""
 
-#: tumblr-crosspostr.php:510
+#: tumblr-crosspostr.php:527
 msgid "OAuth credentials"
 msgstr ""
 
-#: tumblr-crosspostr.php:517
+#: tumblr-crosspostr.php:534
 msgid ""
 "Unfortunately, I have no idea what Tumblr is talking about. Consider asking "
 "%1$s for help. Tell them you are using %2$s, that you got the error shown "
@@ -136,271 +136,271 @@ msgid ""
 "Tumblr, too?"
 msgstr ""
 
-#. #-#-#-#-#  tumblr-crosspostr.pot (Tumblr Crosspostr 0.7.23)  #-#-#-#-#
+#. #-#-#-#-#  tumblr-crosspostr.pot (Tumblr Crosspostr 0.7.24)  #-#-#-#-#
 #. Plugin Name of the plugin/theme
-#: tumblr-crosspostr.php:519 tumblr-crosspostr.php:854
-#: tumblr-crosspostr.php:877
+#: tumblr-crosspostr.php:536 tumblr-crosspostr.php:872
+#: tumblr-crosspostr.php:895
 msgid "Tumblr Crosspostr"
 msgstr ""
 
-#: tumblr-crosspostr.php:525
+#: tumblr-crosspostr.php:542
 msgid ""
 "Additionally, you may want to turn on Tumblr Crosspostr's \"%s\" option to "
 "get more information about this error the next time it happens."
 msgstr ""
 
-#: tumblr-crosspostr.php:527 tumblr-crosspostr.php:1237
+#: tumblr-crosspostr.php:544 tumblr-crosspostr.php:1279
 msgid "Enable detailed debugging information?"
 msgstr ""
 
-#: tumblr-crosspostr.php:536
+#: tumblr-crosspostr.php:553
 msgid "Post crossposted."
 msgstr ""
 
-#: tumblr-crosspostr.php:559
+#: tumblr-crosspostr.php:576
 msgid "Debug output:"
 msgstr ""
 
-#: tumblr-crosspostr.php:566
+#: tumblr-crosspostr.php:583
 msgid "Tumblr Support"
 msgstr ""
 
-#: tumblr-crosspostr.php:711
+#: tumblr-crosspostr.php:728
 msgid "Watch this video."
 msgstr ""
 
-#: tumblr-crosspostr.php:793
+#: tumblr-crosspostr.php:810
 msgid "Consumer key cannot be empty."
 msgstr ""
 
-#: tumblr-crosspostr.php:800
+#: tumblr-crosspostr.php:817
 msgid "Consumer secret cannot be empty."
 msgstr ""
 
-#: tumblr-crosspostr.php:853 tumblr-crosspostr.php:1001
+#: tumblr-crosspostr.php:871 tumblr-crosspostr.php:1020
 msgid "Tumblr Crosspostr Settings"
 msgstr ""
 
-#: tumblr-crosspostr.php:861 tumblr-crosspostr.php:862
+#: tumblr-crosspostr.php:879 tumblr-crosspostr.php:880
 msgid "Tumblrize Archives"
 msgstr ""
 
-#: tumblr-crosspostr.php:897
+#: tumblr-crosspostr.php:915
 msgid ""
 "Tumblr Crossposter does not yet have a connection to Tumblr. Are you sure "
 "you connected Tumblr Crosspostr to your Tumblr account?"
 msgstr ""
 
-#: tumblr-crosspostr.php:918
+#: tumblr-crosspostr.php:936
 msgid "Send this post to Tumblr?"
 msgstr ""
 
-#: tumblr-crosspostr.php:919
+#: tumblr-crosspostr.php:937
 msgid ""
 "If this post is in a category that Tumblr Crosspostr excludes, this will be "
 "ignored."
 msgstr ""
 
-#: tumblr-crosspostr.php:921 tumblr-crosspostr.php:1114
+#: tumblr-crosspostr.php:939 tumblr-crosspostr.php:1133
 msgid "Yes"
 msgstr ""
 
-#: tumblr-crosspostr.php:922 tumblr-crosspostr.php:1123
+#: tumblr-crosspostr.php:940 tumblr-crosspostr.php:1142
 msgid "No"
 msgstr ""
 
-#: tumblr-crosspostr.php:926 tumblr-crosspostr.php:1005
-#: tumblr-crosspostr.php:1068
+#: tumblr-crosspostr.php:944 tumblr-crosspostr.php:1024
+#: tumblr-crosspostr.php:1087
 msgid "Crossposting options"
 msgstr ""
 
-#: tumblr-crosspostr.php:928
+#: tumblr-crosspostr.php:946
 msgid "Destination & content"
 msgstr ""
 
-#: tumblr-crosspostr.php:930
+#: tumblr-crosspostr.php:948
 msgid "Send to my Tumblr blog titled"
 msgstr ""
 
-#: tumblr-crosspostr.php:934
+#: tumblr-crosspostr.php:952
 msgid "Send excerpt instead of main content?"
 msgstr ""
 
-#: tumblr-crosspostr.php:937
+#: tumblr-crosspostr.php:955
 msgid "Uncheck to send post content as crosspost content."
 msgstr ""
 
-#: tumblr-crosspostr.php:941
+#: tumblr-crosspostr.php:959
 msgid "Content source:"
 msgstr ""
 
-#: tumblr-crosspostr.php:944
+#: tumblr-crosspostr.php:962
 msgid ""
 "Set the content source of this post on Tumblr by pasting the URL where you "
 "found the content you are blogging about."
 msgstr ""
 
-#: tumblr-crosspostr.php:944
+#: tumblr-crosspostr.php:962
 msgid ""
 "Leave this blank to set the content source URL of your Tumblr post to the "
 "permalink of this WordPress post."
 msgstr ""
 
-#: tumblr-crosspostr.php:946
+#: tumblr-crosspostr.php:964
 msgid "//original-source.com/"
 msgstr ""
 
-#: tumblr-crosspostr.php:947
+#: tumblr-crosspostr.php:965
 msgid "Provide source attribution, if relevant."
 msgstr ""
 
-#: tumblr-crosspostr.php:954
+#: tumblr-crosspostr.php:972
 msgid "Social media broadcasts"
 msgstr ""
 
-#: tumblr-crosspostr.php:956
+#: tumblr-crosspostr.php:974
 msgid "Twitter"
 msgstr ""
 
-#: tumblr-crosspostr.php:959 tumblr-crosspostr.php:1185
+#: tumblr-crosspostr.php:977 tumblr-crosspostr.php:1227
 msgid "Send tweet?"
 msgstr ""
 
-#: tumblr-crosspostr.php:962
+#: tumblr-crosspostr.php:980
 msgid "Uncheck to disable the auto-tweet."
 msgstr ""
 
-#: tumblr-crosspostr.php:968
+#: tumblr-crosspostr.php:986
 msgid ""
 "If your Tumblr automatically tweets new posts to your Twitter account, you "
 "can customize the default tweet text by entering it here."
 msgstr ""
 
-#: tumblr-crosspostr.php:969
+#: tumblr-crosspostr.php:987
 msgid "New post: %s :)"
 msgstr ""
 
-#: tumblr-crosspostr.php:971
+#: tumblr-crosspostr.php:989
 msgid ""
 "Use %s where you want the link to your Tumblr post to appear, or leave blank "
 "to use the default Tumblr auto-tweet."
 msgstr ""
 
-#: tumblr-crosspostr.php:986
+#: tumblr-crosspostr.php:1004
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: tumblr-crosspostr.php:994
+#: tumblr-crosspostr.php:1013
 msgid "Disconnected from Tumblr."
 msgstr ""
 
-#: tumblr-crosspostr.php:995
+#: tumblr-crosspostr.php:1014
 msgid ""
 "The connection to Tumblr was disestablished. You can reconnect using the "
 "same credentials, or enter different credentials before reconnecting."
 msgstr ""
 
-#: tumblr-crosspostr.php:1002
+#: tumblr-crosspostr.php:1021
 msgid "Jump to options:"
 msgstr ""
 
-#: tumblr-crosspostr.php:1004 tumblr-crosspostr.php:1011
+#: tumblr-crosspostr.php:1023 tumblr-crosspostr.php:1030
 msgid "Connection to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:1006 tumblr-crosspostr.php:1191
+#: tumblr-crosspostr.php:1025 tumblr-crosspostr.php:1233
 msgid "Sync options"
 msgstr ""
 
-#: tumblr-crosspostr.php:1007 tumblr-crosspostr.php:1231
+#: tumblr-crosspostr.php:1026 tumblr-crosspostr.php:1273
 msgid "Plugin extras"
 msgstr ""
 
-#: tumblr-crosspostr.php:1012
+#: tumblr-crosspostr.php:1031
 msgid "Required settings to connect to Tumblr."
 msgstr ""
 
-#: tumblr-crosspostr.php:1016
+#: tumblr-crosspostr.php:1035
 msgid "Tumblr API key/OAuth consumer key"
 msgstr ""
 
-#: tumblr-crosspostr.php:1019
+#: tumblr-crosspostr.php:1038
 msgid "Paste your API key here"
 msgstr ""
 
-#: tumblr-crosspostr.php:1021
+#: tumblr-crosspostr.php:1040
 msgid "Your Tumblr API key is also called your consumer key."
 msgstr ""
 
-#: tumblr-crosspostr.php:1023
+#: tumblr-crosspostr.php:1042
 msgid "If you need an API key, you can %s."
 msgstr ""
 
-#: tumblr-crosspostr.php:1025
+#: tumblr-crosspostr.php:1044
 msgid ""
 "Get an API key from Tumblr by registering your WordPress blog as a new "
 "Tumblr app."
 msgstr ""
 
-#: tumblr-crosspostr.php:1026
+#: tumblr-crosspostr.php:1045
 msgid "create one here"
 msgstr ""
 
-#: tumblr-crosspostr.php:1033
+#: tumblr-crosspostr.php:1052
 msgid "OAuth consumer secret"
 msgstr ""
 
-#: tumblr-crosspostr.php:1036
+#: tumblr-crosspostr.php:1055
 msgid "Paste your consumer secret here"
 msgstr ""
 
-#: tumblr-crosspostr.php:1038
+#: tumblr-crosspostr.php:1057
 msgid ""
 "Your consumer secret is like your app password. Never share this with anyone."
 msgstr ""
 
-#: tumblr-crosspostr.php:1045
+#: tumblr-crosspostr.php:1064
 msgid "Connect to Tumblr:"
 msgstr ""
 
-#: tumblr-crosspostr.php:1048
+#: tumblr-crosspostr.php:1067
 msgid "Click here to connect to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:1056
+#: tumblr-crosspostr.php:1075
 msgid "Connected to Tumblr!"
 msgstr ""
 
-#: tumblr-crosspostr.php:1057
+#: tumblr-crosspostr.php:1076
 msgid "Disconnect"
 msgstr ""
 
-#: tumblr-crosspostr.php:1058
+#: tumblr-crosspostr.php:1077
 msgid ""
 "Disconnecting will stop cross-posts from appearing on or being imported from "
 "your Tumblr blog(s), and will reset the options below to their defaults. You "
 "can re-connect at any time."
 msgstr ""
 
-#: tumblr-crosspostr.php:1069
+#: tumblr-crosspostr.php:1088
 msgid "Options for customizing crossposting behavior."
 msgstr ""
 
-#: tumblr-crosspostr.php:1073
+#: tumblr-crosspostr.php:1092
 msgid "Default Tumblr blog for crossposts"
 msgstr ""
 
-#: tumblr-crosspostr.php:1077
+#: tumblr-crosspostr.php:1096
 msgid ""
 "Choose which Tumblr blog you want to send your posts to by default. This can "
 "be overriden on a per-post basis, too."
 msgstr ""
 
-#: tumblr-crosspostr.php:1082
+#: tumblr-crosspostr.php:1101
 msgid "Do not crosspost entries in these categories:"
 msgstr ""
 
-#: tumblr-crosspostr.php:1099
+#: tumblr-crosspostr.php:1118
 msgid ""
 "Will cause posts in the specificied categories never to be crossposted to "
 "Tumblr. This is useful if, for instance, you are creating posts "
@@ -408,13 +408,13 @@ msgid ""
 "crossposting back and forth from one service to another."
 msgstr ""
 
-#: tumblr-crosspostr.php:1104
+#: tumblr-crosspostr.php:1123
 msgid ""
 "Use permalinks from this blog as the \"Content source\" for crossposts on "
 "Tumblr?"
 msgstr ""
 
-#: tumblr-crosspostr.php:1127
+#: tumblr-crosspostr.php:1146
 msgid ""
 "When enabled, leaving the %sContent source%s field blank on a given entry "
 "will result in setting %sthe \"Content source\" field on your Tumblr post%s "
@@ -423,11 +423,11 @@ msgid ""
 "Crosspostr as the back-end of a publishing platform."
 msgstr ""
 
-#: tumblr-crosspostr.php:1132
+#: tumblr-crosspostr.php:1151
 msgid "Send excerpts instead of main content?"
 msgstr ""
 
-#: tumblr-crosspostr.php:1136
+#: tumblr-crosspostr.php:1155
 msgid ""
 "When enabled, the excerpts (as opposed to the body) of your WordPress posts "
 "will be used as the main content of your Tumblr posts. Useful if you prefer "
@@ -435,23 +435,36 @@ msgid ""
 "default. This can be overriden on a per-post basis, too."
 msgstr ""
 
-#: tumblr-crosspostr.php:1141
+#: tumblr-crosspostr.php:1160
+msgid "Crosspost the following post types:"
+msgstr ""
+
+#: tumblr-crosspostr.php:1178
+msgid ""
+"Choose which %1$spost types%2$s you want to crosspost. Not all post types "
+"can be crossposted safely, but many can. If you are not sure about a post "
+"type, leave it disabled. Plugin authors may create post types that are "
+"crossposted regardless of the value of this setting. %3$spost%4$s post types "
+"are always enabled."
+msgstr ""
+
+#: tumblr-crosspostr.php:1183
 msgid "Add the following markup to each crossposted entry:"
 msgstr ""
 
-#: tumblr-crosspostr.php:1147
+#: tumblr-crosspostr.php:1189
 msgid "Anything you type in this box will be added to every crosspost."
 msgstr ""
 
-#: tumblr-crosspostr.php:1151
+#: tumblr-crosspostr.php:1193
 msgid "Go to the original post."
 msgstr ""
 
-#: tumblr-crosspostr.php:1151
+#: tumblr-crosspostr.php:1193
 msgid "was originally published on"
 msgstr ""
 
-#: tumblr-crosspostr.php:1154
+#: tumblr-crosspostr.php:1196
 msgid ""
 "Text or HTML you want to add to each post. Useful for things like a link "
 "back to your original post. You can use <code>%permalink%</code>, <code>"
@@ -462,25 +475,25 @@ msgid ""
 "the Tumblr \"Content source\" meta field for links back to your main blog."
 msgstr ""
 
-#: tumblr-crosspostr.php:1159 tumblr-crosspostr.php:1174
+#: tumblr-crosspostr.php:1201 tumblr-crosspostr.php:1216
 msgid "Do not send post tags to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:1163
+#: tumblr-crosspostr.php:1205
 msgid ""
 "When enabled, tags on your WordPress posts are not applied to your Tumblr "
 "posts. Useful if you maintain different taxonomies on your different sites."
 msgstr ""
 
-#: tumblr-crosspostr.php:1169
+#: tumblr-crosspostr.php:1211
 msgid "Automatically add these tags to all crossposts:"
 msgstr ""
 
-#: tumblr-crosspostr.php:1173
+#: tumblr-crosspostr.php:1215
 msgid "crosspost, magic"
 msgstr ""
 
-#: tumblr-crosspostr.php:1174
+#: tumblr-crosspostr.php:1216
 msgid ""
 "Comma-separated list of additional tags that will be added to every post "
 "sent to Tumblr. Useful if only some posts on your Tumblr blog are cross-"
@@ -489,53 +502,53 @@ msgid ""
 "the \"%s\" option.)"
 msgstr ""
 
-#: tumblr-crosspostr.php:1180
+#: tumblr-crosspostr.php:1222
 msgid "Automatically tweet a link to your Tumblr post?"
 msgstr ""
 
-#: tumblr-crosspostr.php:1185
+#: tumblr-crosspostr.php:1227
 msgid ""
 "When checked, new posts you create on WordPress will have their \"%s\" "
 "option enabled by default. You can always override this when editing an "
 "individual post."
 msgstr ""
 
-#: tumblr-crosspostr.php:1192
+#: tumblr-crosspostr.php:1234
 msgid "Customize the import behavior."
 msgstr ""
 
-#: tumblr-crosspostr.php:1196
+#: tumblr-crosspostr.php:1238
 msgid "Sync posts from Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:1197
+#: tumblr-crosspostr.php:1239
 msgid ""
 "(This feature is experimental. Please backup your website before you turn "
 "this on.)"
 msgstr ""
 
-#: tumblr-crosspostr.php:1203
+#: tumblr-crosspostr.php:1245
 msgid ""
 "Content you create on the Tumblr blogs you select will automatically be "
 "copied to this blog."
 msgstr ""
 
-#: tumblr-crosspostr.php:1208
+#: tumblr-crosspostr.php:1250
 msgid "Automatically assign synced posts to these categories:"
 msgstr ""
 
-#: tumblr-crosspostr.php:1225
+#: tumblr-crosspostr.php:1267
 msgid ""
 "Will cause any posts imported from your Tumblr blog to be assigned the "
 "categories that you enable here. It is often a good idea to %screate a new "
 "category%s that you use exclusively for this purpose."
 msgstr ""
 
-#: tumblr-crosspostr.php:1232
+#: tumblr-crosspostr.php:1274
 msgid "Additional options to customize plugin behavior."
 msgstr ""
 
-#: tumblr-crosspostr.php:1244
+#: tumblr-crosspostr.php:1286
 msgid ""
 "Turn this on only if you are experiencing problems using this plugin, or if "
 "you were told to do so by someone helping you fix a problem (or if you "
@@ -548,27 +561,27 @@ msgid ""
 "issue."
 msgstr ""
 
-#: tumblr-crosspostr.php:1289
+#: tumblr-crosspostr.php:1331
 msgid "Success! %1$d post has been crossposted."
 msgid_plural "Success! %1$d posts have been crossposted to %2$d blogs."
 msgstr[0] ""
 msgstr[1] ""
 
-#: tumblr-crosspostr.php:1298
+#: tumblr-crosspostr.php:1340
 msgid "Blogs touched:"
 msgstr ""
 
-#: tumblr-crosspostr.php:1311
+#: tumblr-crosspostr.php:1353
 msgid "Crosspost Archives to Tumblr"
 msgstr ""
 
-#: tumblr-crosspostr.php:1312
+#: tumblr-crosspostr.php:1354
 msgid ""
 "If you have post archives on this website, Tumblr Crosspostr can copy them "
 "to your Tumblr blog."
 msgstr ""
 
-#: tumblr-crosspostr.php:1314
+#: tumblr-crosspostr.php:1356
 msgid ""
 "Copies all posts from your archives to your default Tumblr blog (%s). This "
 "may take some time if you have a lot of content. If you do not want to "
@@ -578,11 +591,21 @@ msgid ""
 "your Tumblr blog(s)."
 msgstr ""
 
-#: tumblr-crosspostr.php:1477
-msgid "Found %s posts with tumblr_post_id=%s"
+#: tumblr-crosspostr.php:1436
+msgid "Entering Tumblr Sync routine for %s"
 msgstr ""
 
-#: tumblr-crosspostr.php:1513
+#: tumblr-crosspostr.php:1460
+msgid "Found %s preexisting post for Tumblr ID"
+msgid_plural "Found %s preexisting posts for Tumblr ID"
+msgstr[0] ""
+msgstr[1] ""
+
+#: tumblr-crosspostr.php:1475
+msgid "Previously synced, stopping."
+msgstr ""
+
+#: tumblr-crosspostr.php:1572
 msgid ""
 "Your WordPress uploads directory (%s) is not writeable, so Tumblr Crosspostr "
 "could not import some media files directly into your Media Library. Media "
@@ -590,12 +613,12 @@ msgid ""
 "imported and referenced locally."
 msgstr ""
 
-#: tumblr-crosspostr.php:1550
+#: tumblr-crosspostr.php:1609
 msgid ""
 "Failed to get Tumblr media (%1$s) from post (%2$s). Server responded: %3$s"
 msgstr ""
 
-#: tumblr-crosspostr.php:1560
+#: tumblr-crosspostr.php:1619
 msgid "Error saving file (%s): "
 msgstr ""
 
