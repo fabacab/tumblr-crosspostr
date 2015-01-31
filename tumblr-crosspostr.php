@@ -1361,8 +1361,38 @@ END_HTML;
         }
     }
 
+    /**
+     * There's a frustrating bug in PHP? In WordPress? That causes get_posts()
+     * to always return an empty array when run in Cron if the PHP version is
+     * less than 5.4-ish. Check for that and workaround if necessary.
+     *
+     * @see https://wordpress.org/support/topic/get_posts-returns-no-results-when-run-via-cron
+     */
+    private function crosspostExists ($tumblr_id) {
+        // If we're running on PHP >= 5.4, use WordPress's built-in function.
+        if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
+            return get_posts(array(
+                'meta_key' => 'tumblr_post_id',
+                'meta_value' => $tumblr_id,
+                'fields' => 'ids'
+            ));
+        }
+        global $wpdb;
+        return $wpdb->get_col($wpdb->prepare(
+            "
+            SELECT post_id FROM {$wpdb->postmeta}
+            WHERE meta_key='%s' AND meta_value='%s'
+            ",
+            'tumblr_post_id',
+            $tumblr_id
+        ));
+    }
+
     public function syncFromTumblrBlog ($base_hostname) {
         $options = get_option($this->prefix . '_settings');
+        if (!empty($options['debug'])) {
+            error_log(sprintf(esc_html__('Entering Tumblr Sync routine for %s', 'tumblr-crosspostr'), $base_hostname));
+        }
         if (!isset($options['last_synced_ids'])) {
             $options['last_synced_ids'] = array();
         }
@@ -1375,38 +1405,36 @@ END_HTML;
         $ids_synced = array(0); // Init with 0
         $offset = 0;
         $limit = 50;
-        $num_posts_to_get = 0;
-        // If we never synced, trawl through entire Tumblr archive.
-        if (0 === $latest_synced_id) {
-            $info = $this->tumblr->getBlogInfo($base_hostname);
-            $num_posts_to_get = $info->posts; // get all of them
-        } else {
-            $num_posts_to_get = $limit * 2; // Just get the last 2 batches.
-        }
-        $i = 0;
-        while ($i < $num_posts_to_get) {
+        // This loop either:
+        // * Trawls through the entire blog (if $latest_synced_id is 0), or
+        // * only tries to sync the latest two batches of posts
+        do {
             $resp = $this->tumblr->getPosts($base_hostname, array('offset' => $offset, 'limit' => $limit));
-            // If there aren't as many posts as we're trying to get,
-            if ($resp->total_posts <= $num_posts_to_get) {
-                // reset the loop condition so we only try getting
-                // as many posts that actually exist.
-                $num_posts_to_get = $resp->total_posts;
-            }
             $posts = $resp->posts;
-            foreach (array_reverse($posts) as $post) { // "older" posts first
-                $preexisting_posts = get_posts(array(
-                    'meta_key' => 'tumblr_post_id',
-                    'meta_value' => $post->id
-                ));
+            foreach ($posts as $post) {
+                $preexisting_posts = $this->crosspostExists($post->id);
+                if (!empty($options['debug'])) {
+                    error_log(sprintf(
+                        _n('Found %s preexisting post for Tumblr ID', 'Found %s preexisting posts for Tumblr ID', count($preexisting_posts), 'tumblr-crosspostr') . ' %s (%s)',
+                        count($preexisting_posts),
+                        $post->id,
+                        implode(',', $preexisting_posts)
+                    ));
+                }
                 if (empty($preexisting_posts)) {
                     if ($this->importPostFromTumblr($post)) {
                         $ids_synced[] = $post->id;
                     }
                 }
-                $i++; // in foreach cuz we're counting posts
             }
-            $offset = $offset + $limit; // Set up next fetch.
-        }
+            $offset = ($limit + $offset);
+            if (0 !== $latest_synced_id && $offset >= $limit * 2) {
+                if (!empty($options['debug'])) {
+                    error_log(esc_html__('Previously synced, stopping.', 'tumblr-crosspostr'));
+                }
+                break;
+            }
+        } while (!empty($posts));
 
         // Record the latest Tumblr post ID to be sync'ed on the blog.
         // (Usefully, Tumblr post ID's are sequential.)
@@ -1456,6 +1484,10 @@ END_HTML;
     }
 
     private function importPostFromTumblr ($post) {
+        $options = get_option($this->prefix . '_settings');
+        if (!empty($options['debug'])) {
+            error_log(sprintf('Entering importPostFromTumblr, tumblr_post_id=%s', $post->id));
+        }
         $wp_post = array();
         $wp_post['post_content'] = $this->translateTumblrPostContent($post);
         $wp_post['post_title'] = (isset($post->title)) ? $post->title : '';
@@ -1466,21 +1498,6 @@ END_HTML;
         $wp_post['post_date_gmt'] = gmdate('Y-m-d H:i:s', $post->timestamp);
         $wp_post['tags_input'] = $post->tags;
 
-        $x = get_posts(array(
-            'meta_key' => 'tumblr_post_id',
-            'meta_value' => $post->id
-        ));
-        if (1 === count($x)) {
-            $wp_post['ID'] = $x->ID; // update instead of insert
-        } else {
-            error_log(sprintf(
-                esc_html__('Found %s posts with tumblr_post_id=%s', 'tumblr-crosspostr'),
-                count($x),
-                $post->id
-            ));
-        }
-
-        $options = get_option($this->prefix . '_settings');
         if (!empty($options['import_to_categories'])) {
             $cat_ids = array();
             foreach ($options['import_to_categories'] as $slug) {

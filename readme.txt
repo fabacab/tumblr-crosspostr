@@ -131,6 +131,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 == Changelog ==
 
+= Version 0.8 =
+
+* Bugfix: First-time sync's now import all intended posts even when some posts are not public on Tumblr. Additionally, much-improved debug logging offers an easier way to trace sync problems.
+* Bugfix: Repeated sync's no longer cause duplicated posts on PHP less than 5.4.
+
 = Version 0.7.24 =
 
 * [Bugfix](https://wordpress.org/support/topic/photosetmultiple-images-problem): Importing Photosets no longer duplicates the post caption for each image. Additionally, each photo's individual caption is correctly added to the `<img>` element's `alt` attribute.
