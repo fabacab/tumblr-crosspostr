@@ -465,6 +465,17 @@ END_HTML;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
         if (!$this->isConnectedToService()) { return; }
 
+        // Only crosspost regular posts unless asked to cross-post other types.
+        $options = get_option($this->prefix . '_settings');
+        $post_types = array('post');
+        if (!empty($options['post_types'])) {
+            $post_types = array_merge($post_types, $options['post_types']);
+        }
+        $post_types = apply_filters($this->prefix . '_save_post_types', $post_types);
+        if (!in_array(get_post_type($post_id), $post_types)) {
+            return;
+        }
+
         if (isset($_POST[$this->prefix . '_use_excerpt'])) {
             update_post_meta($post_id, $this->prefix . '_use_excerpt', 1);
         } else {
@@ -492,6 +503,11 @@ END_HTML;
 //                $prepared_post->params['tweet'] = stripslashes_deep($prepared_post->params['tweet']);
 //            }
             $prepared_post->params['tweet'] = stripslashes_deep($prepared_post->params['tweet']);
+
+            $prepared_post = apply_filters($this->prefix . '_prepared_post', $prepared_post);
+            // We still have a post, right? in case someone forgets to return
+            if (empty($prepared_post)) { return; }
+
             $data = $this->crosspostToTumblr($prepared_post->base_hostname, $prepared_post->params, $prepared_post->tumblr_id);
             if (empty($data->response->id)) {
                 $msg = esc_html__('Crossposting to Tumblr failed.', 'tumblr-crosspostr');
@@ -812,6 +828,7 @@ END_HTML;
                     }
                 break;
                 case 'exclude_categories':
+                case 'post_types':
                 case 'import_to_categories':
                     $safe_v = array();
                     foreach ($v as $x) {
@@ -872,13 +889,19 @@ END_HTML;
     }
 
     public function addMetaBox ($post) {
-        add_meta_box(
-            'tumblr-crosspostr-meta-box',
-            __('Tumblr Crosspostr', 'tumblr-crosspostr'),
-            array($this, 'renderMetaBox'),
-            'post',
-            'side'
-        );
+        $options = get_option($this->prefix . '_settings');
+        if (empty($options['post_types'])) { $options['post_types'] = array(); }
+        $options['post_types'][] = 'post';
+        $options['post_types'] = apply_filters($this->prefix . '_meta_box_post_types', $options['post_types']);
+        foreach ($options['post_types'] as $cpt) {
+            add_meta_box(
+                'tumblr-crosspostr-meta-box',
+                __('Tumblr Crosspostr', 'tumblr-crosspostr'),
+                array($this, 'renderMetaBox'),
+                $cpt,
+                'side'
+            );
+        }
     }
 
     private function isConnectedToService () {
@@ -986,6 +1009,8 @@ END_HTML;
             wp_die(__('You do not have sufficient permissions to access this page.', 'tumblr-crosspostr'));
         }
         $options = get_option($this->prefix . '_settings');
+        if (empty($options['post_types'])) { $options['post_types'] = array(); }
+        $options['post_types'][] = 'post';
         if (isset($_GET['disconnect']) && wp_verify_nonce($_GET[$this->prefix . '_nonce'], 'disconnect_from_tumblr')) {
             $this->disconnectFromService();
 ?>
@@ -1079,7 +1104,7 @@ END_HTML;
         </tr>
         <tr>
             <th>
-                <label for="<?php esc_attr_e($this->prefix);?>_exclude_categories"><?php esc_html_e('Do not crosspost entries in these categories:');?></label>
+                <label for="<?php esc_attr_e($this->prefix);?>_exclude_categories"><?php esc_html_e('Do not crosspost entries in these categories:', 'tumblr-crosspostr');?></label>
             </th>
             <td>
                 <ul id="<?php esc_attr_e($this->prefix);?>_exclude_categories">
@@ -1134,6 +1159,29 @@ END_HTML;
             <td>
                 <input type="checkbox" <?php if (isset($options['use_excerpt'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_use_excerpt" name="<?php esc_attr_e($this->prefix);?>_settings[use_excerpt]" />
                 <label for="<?php esc_attr_e($this->prefix);?>_use_excerpt"><span class="description"><?php esc_html_e('When enabled, the excerpts (as opposed to the body) of your WordPress posts will be used as the main content of your Tumblr posts. Useful if you prefer to crosspost summaries instead of the full text of your entires to Tumblr by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></span></label>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="<?php esc_attr_e($this->prefix);?>_post_types"><?php esc_html_e('Crosspost the following post types:', 'tumblr-crosspostr');?></label>
+            </th>
+            <td>
+                <ul id="<?php esc_attr_e($this->prefix);?>_post_types">
+                <?php foreach (get_post_types(array('public' => true)) as $cpt) : ?>
+                    <li>
+                        <label>
+                            <input
+                                type="checkbox"
+                                <?php if (isset($options['post_types']) && in_array($cpt, $options['post_types'])) : print 'checked="checked"'; endif;?>
+                                <?php if ('post' === $cpt) { print 'disabled="disabled"'; } ?>
+                                value="<?php esc_attr_e($cpt);?>"
+                                name="<?php esc_attr_e($this->prefix);?>_settings[post_types][]">
+                            <?php print esc_html($cpt);?>
+                        </label>
+                    </li>
+                <?php endforeach;?>
+                </ul>
+                <p class="description"><?php print sprintf(esc_html__('Choose which %1$spost types%2$s you want to crosspost. Not all post types can be crossposted safely, but many can. If you are not sure about a post type, leave it disabled. Plugin authors may create post types that are crossposted regardless of the value of this setting. %3$spost%4$s post types are always enabled.', 'tumblr-crosspostr'), '<a href="https://codex.wordpress.org/Post_Types">', '</a>', '<code>', '</code>');?></p>
             </td>
         </tr>
         <tr>
@@ -1421,7 +1469,9 @@ END_HTML;
                         implode(',', $preexisting_posts)
                     ));
                 }
-                if (empty($preexisting_posts)) {
+                if (in_array($post->id, $ids_synced)) {
+                    error_log("Haven't we already sync'ed this Tumblr post? {$post->id}");
+                } else if (empty($preexisting_posts)) {
                     if ($this->importPostFromTumblr($post)) {
                         $ids_synced[] = $post->id;
                     }

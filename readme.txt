@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.1
-Stable tag: 0.7.24
+Stable tag: 0.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -90,11 +90,17 @@ Yes. Go edit the desired post, verify the crosspost option is set to `Yes`, and 
 
 = What if I edit a post that has been cross-posted? =
 
-If you edit or delete a post, changes will appear on Tumblr accordingly.
+If you edit or delete a post, changes will appear on or disappear from Tumblr accordingly.
 
 = Can I cross-post Private posts from WordPress to Tumblr? =
 
 Yes. Tumblr Crosspostr respects the WordPress post visibility setting and supports cross-posting private posts to Tumblr. Editing the visibility setting of your WordPress post will update your Tumblr cross-post with the new setting, as well.
+
+= Can I cross-post custom post types? =
+
+Yes. By default, Tumblr Crosspostr only crossposts `post` post types, but you can enable or disable other post types from the plugin's settings screen.
+
+If you're a plugin developer, you can easily make your custom post types work well with Tumblr Crosspostr by implementing the `tumblr_crosspostr_save_post_types`, `tumblr_crosspostr_meta_box_post_types`, and `tumblr_crosspostr_prepared_post` filter hooks. See [Other Notes](https://wordpress.org/plugins/tumblr-crosspostr/other_notes/) for coding details.
 
 = Is Tumblr Crosspostr available in languages other than English? =
 
@@ -133,6 +139,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 
 = Version 0.8 =
 
+* Feature: Option to cross-post any [post type](https://codex.wordpress.org/Post_Type). Not all post types can be crossposted safely, but many can, especially if they use default WordPress features like "title" and "excerpt" and so on. On important websites, don't enable crossposting for post types whose compatibility with Tumblr you are not sure of, or at least make sure you have a backup you can restore from. :)
+* Developer: Three new filter hooks allow you to create your own custom post types that will be sent to Tumblr:
+    * Use the new `tumblr_crosspostr_save_post_types` filter hook to programmatically add custom post types to be processed by Tumblr Crosspostr during WordPress's `save_post` action.
+    * Use the new `tumblr_crosspostr_meta_box_post_types` filter hook to programmatically add or remove the Tumblr Crosspostr post editing meta box from certain post types.
+    * Use the new `tumblr_crosspostr_prepared_post` filter hook to programmatically alter the `$prepared_post` object immediately before it is crossposted to Tumblr.
 * Bugfix: First-time sync's now import all intended posts even when some posts are not public on Tumblr. Additionally, much-improved debug logging offers an easier way to trace sync problems.
 * Bugfix: Repeated sync's no longer cause duplicated posts on PHP less than 5.4.
 
@@ -341,3 +352,17 @@ And if you choose to do this yourself, consider getting in touch with your theme
 == Other notes ==
 
 Maintaining this plugin is a labor of love. However, if you like it, please consider [making a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted) for your use of the plugin, [purchasing one of Meitar's web development books](http://www.amazon.com/gp/redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2Fs%3Fie%3DUTF8%26redirect%3Dtrue%26sort%3Drelevancerank%26search-type%3Dss%26index%3Dbooks%26ref%3Dntt%255Fathr%255Fdp%255Fsr%255F2%26field-author%3DMeitar%2520Moscovitz&tag=maymaydotnet-20&linkCode=ur2&camp=1789&creative=390957) or, better yet, contributing directly to [Meitar's Cyberbusking fund](http://Cyberbusking.org/). (Publishing royalties ain't exactly the lucrative income it used to be, y'know?) Your support is appreciated!
+
+= Developer reference =
+
+Tumblr Crosspostr provides the following hooks for plugin and theme authors:
+
+*Filters*
+
+* `tumblr_crosspostr_save_post_types` - Filter an array of custom post type names to process when Tumblr Crosspostr is invoked in the `save_post` WordPress action.
+* `tumblr_crosspostr_meta_box_post_types` - Filter an array of custom post type names for which to show the Tumblr Crosspostr post editing meta box.
+* `tumblr_crosspostr_prepared_post` - Filter the `$prepared_post` object immediately before it gets crossposted to Tumblr
+
+*Actions*
+
+* `tumblr_crosspostr_reblog_key` - Prints the Tumblr Reblog Key for a given post.
