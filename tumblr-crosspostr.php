@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.8
+ * Version: 0.8.1
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -34,8 +34,9 @@ class Tumblr_Crosspostr {
         // Template tag actions
         add_action($this->prefix . '_reblog_key', 'tumblr_reblog_key');
 
-        add_filter('post_row_actions', array($this, 'addTumblrPermalinkRowAction'), 10, 2);
+        add_filter('post_row_actions', array($this, 'addPostRowAction'), 10, 2);
         add_filter('plugin_row_meta', array($this, 'addPluginRowMeta'), 10, 2);
+        add_filter('syn_add_links', array($this, 'addSyndicatedLinks'));
 
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
 
@@ -99,6 +100,18 @@ class Tumblr_Crosspostr {
             }
         }
         update_option($this->prefix . '_settings', $new_opts);
+    }
+
+    /**
+     * Implements rel-syndication for POSSE as expected by the
+     * Syndication Links plugin for WordPress.
+     *
+     * @see https://wordpress.org/plugins/syndication-links/
+     * @see http://indiewebcamp.com/rel-syndication
+     */
+    public function addSyndicatedLinks ($urls) {
+        $urls[] = $this->getSyndicatedAddress(get_the_id());
+        return $urls;
     }
 
     public function showMissingConfigNotice () {
@@ -231,15 +244,19 @@ END_HTML;
         $screen->set_help_sidebar($screen->get_help_sidebar() . $sidebar);
     }
 
-    public function addTumblrPermalinkRowAction ($actions, $post) {
-        $tumblr_id = get_post_meta($post->ID, 'tumblr_post_id', true);
-        if ($tumblr_id) {
-            $base_hostname = get_post_meta($post->ID, 'tumblr_base_hostname', true);
-            if (empty($base_hostname)) { // fallback to default blog domain
-                $options = get_option($this->prefix . '_settings');
-                $base_hostname = $options['default_hostname'];
-            }
-            $actions['view_on_tumblr'] = '<a href="http://' . $base_hostname . '/' . $tumblr_id . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>';
+    private function getSyndicatedAddress ($post_id) {
+        $url = '';
+        if ($id = get_post_meta($post_id, 'tumblr_post_id', true)) {
+            $base_hostname = $this->getTumblrBasename($post_id);
+            $url .= "http://{$base_hostname}/posts/{$id}";
+        }
+        return $url;
+    }
+
+    public function addPostRowAction ($actions, $post) {
+        $id = get_post_meta($post->ID, 'tumblr_post_id', true);
+        if ($id) {
+            $actions['view_on_tumblr'] = '<a href="' . $this->getSyndicatedAddress($post->ID) . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>';
         }
         return $actions;
     }
@@ -547,9 +564,8 @@ END_HTML;
             } else {
                 update_post_meta($post_id, 'tumblr_post_id', $data->response->id);
                 if ($prepared_post->params['state'] === 'published') {
-                    $url = 'http://' . $this->getTumblrBasename($post_id) . '/post/' . get_post_meta($post_id, 'tumblr_post_id', true);
                     $this->addAdminNotices(
-                        esc_html__('Post crossposted.', 'tumblr-crosspostr') . ' <a href="' . $url . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>'
+                        esc_html__('Post crossposted.', 'tumblr-crosspostr') . ' <a href="' . $this->getSyndicatedAddress($post_id) . '">' . esc_html__('View post on Tumblr', 'tumblr-crosspostr') . '</a>'
                     );
                     if ($msg = $this->maybeCaptureDebugOf($data)) {
                         $msg = $this->maybeCaptureDebugOf($prepared_post) . '<br /><br />' . $msg;
@@ -932,7 +948,7 @@ END_HTML;
         if ('publish' === $post->post_status && $tumblr_id) {
 ?>
 <p>
-    <a href="http://<?php print esc_attr($d);?>/<?php print esc_attr($tumblr_id);?>" class="button button-small"><?php esc_html_e('View post on Tumblr', 'tumblr-crosspostr');?></a>
+    <a href="<?php print esc_attr($this->getSyndicatedAddress($post->ID));?>" class="button button-small"><?php esc_html_e('View post on Tumblr', 'tumblr-crosspostr');?></a>
 </p>
 <?php
         }
