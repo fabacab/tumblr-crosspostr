@@ -427,7 +427,7 @@ END_HTML;
             $source_url = false;
         }
 
-        $format = get_post_format($post_id);
+        $format = (defined('DOING_AJAX') && DOING_AJAX) ? $_POST['post_format'] : get_post_format($post_id);
         $state = $this->WordPressStatus2TumblrState(get_post_status($post_id));
         $tags = array();
         if ($t = get_the_tags($post_id)) {
