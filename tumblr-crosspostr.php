@@ -1658,7 +1658,14 @@ END_HTML;
                 require_once(ABSPATH . 'wp-admin/includes/image.php');
                 $metadata = wp_generate_attachment_metadata($wp_file_id, $f['file']);
                 wp_update_attachment_metadata($wp_file_id, $metadata);
-                $new_content = str_replace($replace_this, $replace_with_this_before . $f['url'] . $replace_with_this_after, get_post_field('post_content', $wp_id));
+                if (1 === count($post->photos)) {
+                    set_post_thumbnail($wp_id, $wp_file_id);
+                    $photo = array_shift($post->photos);
+                    $replace_this = '<img src="' . $photo->original_size->url . '" alt="' . $photo->caption. '" />';
+                    $new_content = str_replace($replace_this, '', get_post_field('post_content', $wp_id));
+                } else {
+                    $new_content = str_replace($replace_this, $replace_with_this_before . $f['url'] . $replace_with_this_after, get_post_field('post_content', $wp_id));
+                }
                 wp_update_post(array(
                     'ID' => $wp_id,
                     'post_content' => $new_content
