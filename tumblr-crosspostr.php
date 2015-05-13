@@ -3,7 +3,7 @@
  * Plugin Name: Tumblr Crosspostr
  * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.8.2
+ * Version: 0.8.3
  * Author: Meitar Moscovitz
  * Author URI: http://Cyberbusking.org/
  * Text Domain: tumblr-crosspostr
@@ -970,11 +970,11 @@ END_HTML;
             <?php print $this->tumblrBlogsSelectField(array('name' => $this->prefix . '_destination'), $d);?>
         </label></p>
         <p><label>
+            <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_use_excerpt" value="1"
+                <?php if (1 === $e) { print 'checked="checked"'; } ?>
+                title="<?php esc_html_e('Uncheck to send post content as crosspost content.', 'tumblr-crosspostr');?>"
+                />
             <?php esc_html_e('Send excerpt instead of main content?', 'tumblr-crosspostr');?>
-                <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_use_excerpt" value="1"
-                    <?php if (1 === $e) { print 'checked="checked"'; } ?>
-                    title="<?php esc_html_e('Uncheck to send post content as crosspost content.', 'tumblr-crosspostr');?>"
-                    />
         </label></p>
         <p>
             <label><?php esc_html_e('Content source:', 'tumblr-crosspostr');?>
@@ -995,11 +995,11 @@ END_HTML;
         <summary><?php esc_html_e('Twitter', 'tumblr-crosspostr');?></summary>
         <p>
             <label>
-                <?php esc_html_e('Send tweet?', 'tumblr-crosspostr');?>
                 <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_send_tweet" value="1"
                     <?php if (!empty($options['auto_tweet'])) { ?>checked="checked"<?php } ?>
                     title="<?php esc_html_e('Uncheck to disable the auto-tweet.', 'tumblr-crosspostr');?>"
                     />
+                <?php esc_html_e('Send tweet?', 'tumblr-crosspostr');?>
             </label>
             <label>
                 <input id="<?php esc_attr_e($this->prefix);?>_tweet_text" type="text"

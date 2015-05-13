@@ -3,8 +3,8 @@ Contributors: meitar
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
-Tested up to: 4.1.1
-Stable tag: 0.8.2
+Tested up to: 4.2.2
+Stable tag: 0.8.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -14,13 +14,18 @@ Tumblr Crosspostr cross-posts your WordPress entries to Tumblr. Changes to your 
 
 Tumblr Crosspostr posts to Tumblr whenever you hit the "Publish" (or "Save Draft") button. It can import your reblogs on Tumblr as native WordPress posts. It even downloads the images in your Photo posts and saves them in the WordPress Media Library.
 
-**Transform your WordPress website into a back-end for Tumblr. Create original posts using WordPress, but publish them to Tumblr. Import your Tumblr reblogs. [Always have a portable copy (a running backup) of your entire Tumblr blog](http://maymay.net/blog/2014/02/17/keep-a-running-backup-of-your-tumblr-reblogs-with-tumblr-crosspostr/).**
+* Transform your WordPress website into a back-end for Tumblr.
+* Create original posts using WordPress, but publish them to Tumblr.
+* Import your Tumblr reblogs automatically.
+* [Always have a portable copy (a running backup) of your entire Tumblr blog](http://maymay.net/blog/2014/02/17/keep-a-running-backup-of-your-tumblr-reblogs-with-tumblr-crosspostr/).
 
-Tumblr Crosspostr uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post. Private WordPress posts become private Tumblr posts, deleting a post from WordPress that you've previously cross-posted to Tumblr deletes it from Tumblr, too, and so on. Scheduling a WordPress post to be published any time in the future will add it to the Tumblr blog's Queue. (However, the publishing schedule of your Tumblr queue will take precedence, so be careful!)
+*Donations for this plugin make up a chunk of my income. If you continue to enjoy this plugin, please consider [making a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted). :) Thank you for your support!*
 
-Tumblr Crosspostr is very lightweight. It just requires you to connect to your Tumblr account from the plugin options screen. After that, you're ready to cross-post!
+Tumblr Crosspostr uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post. Private WordPress posts become private Tumblr posts, deleting a post from WordPress that you've previously cross-posted to Tumblr deletes it from Tumblr, too, and so on. Scheduling a WordPress post to be published any time in the future will add it to the Tumblr blog's Queue. (However, *the publishing schedule of your Tumblr queue will take precedence*, so be careful!)
 
-Tumblr Crosspostr uses [post formats](http://codex.wordpress.org/Post_Formats) to automatically choose the appropriate Tumblr post type. The first image, video embed, etcetera that Tumblr Crosspostr detects will be used as the primary media for the Tumblr post type. To take full advantage of Tumblr Crosspostr, I suggest you choose a WordPress theme that supports all the post formats that your Tumblr theme supports, but Tumblr Crosspostr will still work even if your theme does not natively support this feature. :)
+Tumblr Crosspostr is very lightweight. It just requires you to connect to your Tumblr account from the plugin options screen. After that, you're ready to cross-post! See the [Screenshots](https://wordpress.org/plugins/tumblr-crosspostr/screenshots/) for a walk through of this process.
+
+Tumblr Crosspostr uses [post formats](http://codex.wordpress.org/Post_Formats) to set the appropriate Tumblr post type. The first image, video embed, etcetera that Tumblr Crosspostr detects will be used as the primary media for the Tumblr post type. To take full advantage of Tumblr Crosspostr, I suggest you choose a WordPress theme that supports all the post formats that your Tumblr theme supports, but Tumblr Crosspostr will still work even if your theme does not natively support this feature. :)
 
 The WordPress post format to Tumblr post type mapping looks like this:
 
@@ -121,6 +126,14 @@ If you feel comfortable doing this yourself, then in most cases, this is literal
 
 And if you choose to do this yourself, consider getting in touch with your theme's developer to let them know how easy it was! We devs love to hear this kind of stuff. :)
 
+= Why won't my Tumblr post appear on my WordPress blog immediately? =
+
+Unfortunately, Tumblr does not provide a programmatic "export" feature, so there is no way to push posts out from Tumblr. This is known as a "[data silo](https://indiewebcamp.com/silo)" and it's always enforced in the interest of corporate control so that humans are turned into dollars. Think Facebook, for example: you can easily put stuff into Facebook, but it's much harder to get that same stuff out. This is the exact opposite of WordPress in every way, both philosophically and technologically. Tumblr, in this case, is like Facebook. It, too, allows you to easily put stuff into it, but it's very hard to take stuff back out.
+
+Tumblr Crosspostr's Tumblr Sync feature was built to work despite this harsh reality. One of the limitations is that Tumblr Crosspostr Sync can not detect when you have published a new post on Tumblr (because Tumblr never notifies your WordPress blog that this has happened). Instead, it must periodically check your Tumblr blog on its own. It polls your Tumblr blog once every twenty four hours, and then does its best to identify which posts are new. This usually works quite well, but it does mean that it can take up to 24 hours for posts created on Tumblr to show up on your WordPress website. This is another reason why creating posts on WordPress is better than creating posts on Tumblr.
+
+If you'd like to see a world without arbitrary and unnecessary limitations that only serve corporate overseers like this, consider encouraging your friends to join and support free software platforms like WordPress, [Diaspora](https://wordpress.org/plugins/diasposter/), and other systems that let you own your own data.
+
 == Screenshots ==
 
 1. When you first install Tumblr Crosspostr, you'll need to connect it to your Tumblr account before you can start crossposting. This screenshot shows how its options screen first appears after you activate the plugin.
@@ -136,6 +149,11 @@ And if you choose to do this yourself, consider getting in touch with your theme
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.8.3 =
+
+* [Feature](https://wordpress.org/support/topic/feature-request-send-excerpt-image?replies=17#post-6665842): When importing a Photo post from Tumblr, the photo in the Tumblr post becomes the Featured Image of the WordPress post. This only happens when a Tumblr post contains a single photo.
+* Compatibility with WordPress 4.2.x's new PressThis bookmarklet.
 
 = Version 0.8.2 =
 
