@@ -127,7 +127,7 @@ class Tumblr_Crosspostr {
 
     private function showError ($msg) {
 ?>
-<div class="error">
+<div class="notice is-dismissible error">
     <p><?php print esc_html($msg);?></p>
 </div>
 <?php
@@ -135,8 +135,8 @@ class Tumblr_Crosspostr {
 
     private function showNotice ($msg) {
 ?>
-<div class="updated">
-    <p><?php print $msg; // No escaping because we want links, so be careful. ?></p>
+<div class="notice is-dismissible updated">
+    <p><?php print strip_tags($msg, '<a>');?></p>
 </div>
 <?php
     }
