@@ -1052,7 +1052,7 @@ END_HTML;
                 <label for="<?php esc_attr_e($this->prefix);?>_consumer_key"><?php esc_html_e('Tumblr API key/OAuth consumer key', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input id="<?php esc_attr_e($this->prefix);?>_consumer_key" name="<?php esc_attr_e($this->prefix);?>_settings[consumer_key]" value="<?php esc_attr_e($options['consumer_key']);?>" placeholder="<?php esc_attr_e('Paste your API key here', 'tumblr-crosspostr');?>" />
+                <input id="<?php esc_attr_e($this->prefix);?>_consumer_key" name="<?php esc_attr_e($this->prefix);?>_settings[consumer_key]" value="<?php empty($options['consumer_key']) ? print '' : esc_attr_e($options['consumer_key']);?>" placeholder="<?php esc_attr_e('Paste your API key here', 'tumblr-crosspostr');?>" />
                 <p class="description">
                     <?php esc_html_e('Your Tumblr API key is also called your consumer key.', 'tumblr-crosspostr');?>
                     <?php print sprintf(
@@ -1069,7 +1069,7 @@ END_HTML;
                 <label for="<?php esc_attr_e($this->prefix);?>_consumer_secret"><?php esc_html_e('OAuth consumer secret', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input id="<?php esc_attr_e($this->prefix);?>_consumer_secret" name="<?php esc_attr_e($this->prefix);?>_settings[consumer_secret]" value="<?php esc_attr_e($options['consumer_secret']);?>" placeholder="<?php esc_attr_e('Paste your consumer secret here', 'tumblr-crosspostr');?>" />
+                <input id="<?php esc_attr_e($this->prefix);?>_consumer_secret" name="<?php esc_attr_e($this->prefix);?>_settings[consumer_secret]" value="<?php empty($options['consumer_secret']) ? '' : esc_attr_e($options['consumer_secret']);?>" placeholder="<?php esc_attr_e('Paste your consumer secret here', 'tumblr-crosspostr');?>" />
                 <p class="description">
                     <?php esc_html_e('Your consumer secret is like your app password. Never share this with anyone.', 'tumblr-crosspostr');?>
                 </p>
@@ -1257,7 +1257,13 @@ END_HTML;
             </th>
             <td>
                 <ul id="<?php esc_attr_e($this->prefix);?>_sync_content">
-                    <?php print $this->tumblrBlogsListCheckboxes(array('id' => $this->prefix . '_sync_content', 'name' => $this->prefix . '_settings[sync_content][]'), $options['sync_content']);?>
+                    <?php print $this->tumblrBlogsListCheckboxes(
+                        array(
+                            'id' => $this->prefix . '_sync_content',
+                            'name' => $this->prefix . '_settings[sync_content][]'
+                        ),
+                        (empty($options['sync_content'])) ? false : $options['sync_content']
+                    );?>
                 </ul>
                 <p class="description"><?php esc_html_e('Content you create on the Tumblr blogs you select will automatically be copied to this blog.', 'tumblr-crosspostr');?></p>
             </td>

@@ -155,6 +155,7 @@ If you'd like to see a world without arbitrary and unnecessary limitations that 
 * [Bugfix](https://wordpress.org/support/topic/warning-invalid-argument-12): Fix "invalid argument" error for some people when they first install the plugin.
 * [Bugfix](https://wordpress.org/support/topic/strip-html-in-titles-before-posting-to-tumblr): Strip HTML tags from titles on Tumblr posts.
 * Bugfix: Fix "undefined index" error for installations in strict environments when the tweet option is enabled but the tweet text is left blank.
+* Bugfix: Fix several other "undefined index" errors at various locations on the plugin's settings screen.
 * Tested for compatibility with WordPress 4.3.
 
 = Version 0.8.3 =
