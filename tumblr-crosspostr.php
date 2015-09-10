@@ -73,6 +73,7 @@ class Tumblr_Crosspostr {
     // Detects old options/settings and migrates them to current version.
     public function updateChangedSettings () {
         $options = get_option($this->prefix . '_settings');
+        if (false === $options) { return; } // don't need to migrate anything
         $new_opts = array();
         foreach ($options as $opt_name => $opt_value) {
             switch ($opt_name) {
