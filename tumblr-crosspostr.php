@@ -509,17 +509,11 @@ END_HTML;
         if ($prepared_post = $this->prepareForTumblr($post_id)) {
             if (isset($_POST[$this->prefix . '_send_tweet'])) {
                 if (!empty($_POST[$this->prefix . '_tweet_text'])) {
-                    $prepared_post->params['tweet'] = sanitize_text_field($_POST[$this->prefix . '_tweet_text']);
+                    $prepared_post->params['tweet'] = stripslashes_deep(sanitize_text_field($_POST[$this->prefix . '_tweet_text']));
                 }
             } else {
                 $prepared_post->params['tweet'] = 'off';
             }
-//            // NOTE: WordPress intentionally adds slashes. Grr.
-//            //       See http://codex.wordpress.org/Function_Reference/stripslashes_deep#Good_Coding_Practice
-//            if (get_magic_quotes_gpc()) {
-//                $prepared_post->params['tweet'] = stripslashes_deep($prepared_post->params['tweet']);
-//            }
-            $prepared_post->params['tweet'] = stripslashes_deep($prepared_post->params['tweet']);
 
             $prepared_post = apply_filters($this->prefix . '_prepared_post', $prepared_post);
             // We still have a post, right? in case someone forgets to return
