@@ -3,8 +3,8 @@ Contributors: meitar
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
-Tested up to: 4.2.2
-Stable tag: 0.8.3
+Tested up to: 4.3
+Stable tag: 0.8.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -149,6 +149,13 @@ If you'd like to see a world without arbitrary and unnecessary limitations that 
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.8.4 =
+
+* [Bugfix](https://wordpress.org/support/topic/warning-invalid-argument-12): Fix "invalid argument" error for some people when they first install the plugin.
+* [Bugfix](https://wordpress.org/support/topic/strip-html-in-titles-before-posting-to-tumblr): Strip HTML tags from titles on Tumblr posts.
+* Bugfix: Fix "undefined index" error for installations in strict environments when the tweet option is enabled but the tweet text is left blank.
+* Tested for compatibility with WordPress 4.3.
 
 = Version 0.8.3 =
 
