@@ -707,7 +707,7 @@ END_HTML;
                     : apply_filters('the_content', substr($post_body, $len));
                 break;
             case 'link':
-                $r['title'] = get_post_field('post_title', $post_id);
+                $r['title'] = strip_tags(get_post_field('post_title', $post_id));
                 $r['url'] = ($e && preg_match('/<a.*?href="(.*?)".*?>/', $post_excerpt))
                     ? $this->extractByRegex('/<a.*?href="(.*?)".*?>/', $post_excerpt, 1)
                     : $this->extractByRegex('/<a.*?href="(.*?)".*?>/', $post_body, 1);
@@ -716,7 +716,7 @@ END_HTML;
                     : apply_filters('the_content', $post_body);
                 break;
             case 'chat':
-                $r['title'] = get_post_field('post_title', $post_id);
+                $r['title'] = strip_tags(get_post_field('post_title', $post_id));
                 $r['conversation'] = wp_strip_all_tags($post_body);
                 break;
             case 'audio':
@@ -747,7 +747,7 @@ END_HTML;
                 }
                 break;
             case 'text':
-                $r['title'] = get_post_field('post_title', $post_id);
+                $r['title'] = strip_tags(get_post_field('post_title', $post_id));
                 // fall through
             case 'aside':
             default:
