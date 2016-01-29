@@ -2,7 +2,7 @@
 /*
  * http.php
  *
- * @(#) $Header: /opt2/ena/metal/http/http.php,v 1.90 2013/02/20 11:45:28 mlemos Exp $
+ * @(#) $Header: /opt2/ena/metal/http/http.php,v 1.93 2015/08/22 18:53:37 mlemos Exp $
  *
  */
 
@@ -27,7 +27,7 @@ class http_class
 
 	var $protocol="http";
 	var $request_method="GET";
-	var $user_agent='httpclient (http://www.phpclasses.org/httpclient $Revision: 1.90 $)';
+	var $user_agent='httpclient (http://www.phpclasses.org/httpclient $Revision: 1.93 $)';
 	var $accept='';
 	var $authentication_mechanism="";
 	var $user;
@@ -640,6 +640,8 @@ class http_class
 			$this->socks_host_port=$arguments["SOCKSHostPort"];
 		if(IsSet($arguments["SOCKSVersion"]))
 			$this->socks_version=$arguments["SOCKSVersion"];
+		if(IsSet($arguments["PreferCurl"]))
+			$this->prefer_curl=$arguments["PreferCurl"];
 		if(IsSet($arguments["Protocol"]))
 			$this->protocol=$arguments["Protocol"];
 		switch(strtolower($this->protocol))
@@ -806,8 +808,10 @@ class http_class
 	Function GetFileDefinition($file, &$definition)
 	{
 		$name="";
-		if(IsSet($file["FileName"]))
-			$name=basename($file["FileName"]);
+        if(IsSet($file["FileName"]) && is_array($file["FileName"]))
+            $file["FileName"]=$file["FileName"][0];
+        if(IsSet($file["FileName"]))
+            $name=$file["FileName"];
 		if(IsSet($file["Name"]))
 			$name=$file["Name"];
 		if(strlen($name)==0)
@@ -1009,7 +1013,9 @@ class http_class
 
 	Function ConnectFromProxy($arguments, &$headers)
 	{
-		if(!$this->PutLine('CONNECT '.$this->host_name.':'.($this->host_port ? $this->host_port : 443).' HTTP/1.0')
+		$host = $this->host_name.':'.($this->host_port ? $this->host_port : 443);
+		$this->OutputDebug('Connecting from proxy to host '.$host);
+		if(!$this->PutLine('CONNECT '.$host.' HTTP/1.0')
 		|| (strlen($this->user_agent)
 		&& !$this->PutLine('User-Agent: '.$this->user_agent))
 		|| (strlen($this->accept)
@@ -1034,12 +1040,15 @@ class http_class
 		switch($this->response_status)
 		{
 			case "200":
-				if(!@stream_socket_enable_crypto($this->connection, 1, STREAM_CRYPTO_METHOD_SSLv23_CLIENT))
+				$this->OutputDebug('Establishing the cryptography layer with host '.$host);
+				if(!stream_socket_enable_crypto($this->connection, 1, STREAM_CRYPTO_METHOD_SSLv23_CLIENT))
 				{
+					$this->OutputDebug('Failed establishing the cryptography layer with host '.$host);
 					$this->SetPHPError('it was not possible to start a SSL encrypted connection via this proxy', $php_errormsg, HTTP_CLIENT_ERROR_COMMUNICATION_FAILURE);
 					$this->Disconnect();
 					return($this->error);
 				}
+				$this->OutputDebug('Succeeded establishing the cryptography layer with host '.$host);
 				$this->state = "Connected";
 				break;
 			case "407":
@@ -1546,6 +1555,11 @@ class http_class
 					return($this->SetError("it was received an unexpected HTTP response status", HTTP_CLIENT_ERROR_PROTOCOL_FAILURE));
 				$this->response_status=$matches[1];
 				$this->response_message=$matches[2];
+				if($this->response_status == 204)
+				{
+					$this->content_length = 0;
+					$this->content_length_set = 1;
+				}
 			}
 			if($line=="")
 			{
@@ -1990,6 +2004,36 @@ class http_class
 			if(strlen($block) == 0)
 				return('');
 			$body .= $block;
+		}
+	}
+
+	Function ReadWholeReplyIntoTemporaryFile(&$file)
+	{
+		if(!($file = tmpfile()))
+			return $this->SetPHPError('could not create the temporary file to save the response', $php_errormsg, HTTP_CLIENT_ERROR_CANNOT_ACCESS_LOCAL_FILE);
+		for(;;)
+		{
+			if(strlen($error = $this->ReadReplyBody($block, $this->file_buffer_length)))
+			{
+				fclose($file);
+				return($error);
+			}
+			if(strlen($block) == 0)
+			{
+				if(@fseek($file, 0) != 0)
+				{
+					$error = $this->SetPHPError('could not seek to the beginning of temporary file with the response', $php_errormsg, HTTP_CLIENT_ERROR_CANNOT_ACCESS_LOCAL_FILE);
+					fclose($file);
+					return $error;
+				}
+				return('');
+			}
+			if(!@fwrite($file, $block))
+			{
+				$error = $this->SetPHPError('could not write to the temporary file to save the response', $php_errormsg, HTTP_CLIENT_ERROR_CANNOT_ACCESS_LOCAL_FILE);
+				fclose($file);
+				return $error;
+			}
 		}
 	}
 
