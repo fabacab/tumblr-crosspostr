@@ -648,6 +648,20 @@ END_HTML;
      * @return array Tumblr's decoded JSON response.
      */
     private function crosspostToTumblr ($blog, $params, $tumblr_id = false, $deleting = false) {
+        $opts = array();
+        if (!empty($params['data']) && !filter_var($params['data'], FILTER_VALIDATE_URL)) {
+            // TODO: Graaaah! Why is Tumblr such a shit?
+            $params['data'] = array(
+                file_get_contents($params['data'])
+            );
+            $opts = array(
+//                'Files' => array('data' => array())
+                'RequestHeaders' => array('Expect' => '')
+            );
+//            $options = get_option($this->prefix . '_settings');
+//            $this->tumblr->setApiKey($options['consumer_key']);
+        }
+
         // TODO: Smoothen this deleting thing.
         //       Cancel WordPress deletions if Tumblr deletions aren't working?
         if ($deleting === true && $tumblr_id) {
@@ -655,9 +669,9 @@ END_HTML;
             return $this->tumblr->deleteFromTumblrBlog($blog, $params);
         } else if ($tumblr_id) {
             $params['id'] = $tumblr_id;
-            return $this->tumblr->editOnTumblrBlog($blog, $params);
+            return $this->tumblr->editOnTumblrBlog($blog, $params, $opts);
         } else {
-            return $this->tumblr->postToTumblrBlog($blog, $params);
+            return $this->tumblr->postToTumblrBlog($blog, $params, $opts);
         }
     }
 
@@ -685,7 +699,8 @@ END_HTML;
                 $m = array();
                 preg_match($pattern, $post_body, $m);
                 if (empty($m)) {
-                    $r['link'] = $r['source'] = $this->extractByRegex($pattern, get_the_post_thumbnail($post_id, 'full'), 2);
+                    $r['data'] = get_attached_file(get_post_thumbnail_id($post_id));
+                    $r['link'] = $this->extractByRegex($pattern, get_the_post_thumbnail($post_id, 'full'), 2);
                 } else if (empty($m[1])) {
                     $r['link'] = $r['source'] = $m[2];
                 } else {

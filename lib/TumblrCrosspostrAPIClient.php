@@ -52,14 +52,34 @@ class Tumblr_Crosspostr_API_Client extends Tumblr_OAuthWP_Plugin {
         return $data->response;
     }
 
-    public function postToTumblrBlog ($blog, $params) {
+    /**
+     * Creates a new post on the Tumblr blog.
+     *
+     * @param string $blog
+     * @param array $params
+     * @param array $opts
+     *
+     * @return stdClass
+     */
+    public function postToTumblrBlog ($blog, $params, $opts = array()) {
         $api_method = "/blog/$blog/post";
-        return $this->talkToService($api_method, $params);
+        return $this->talkToService($api_method, $params, 'POST', $opts);
     }
-    public function editOnTumblrBlog ($blog, $params) {
+
+    /**
+     * Edits an existing post on the Tumblr blog.
+     *
+     * @param string $blog
+     * @param array $params
+     * @param array $opts
+     *
+     * @return stdClass
+     */
+    public function editOnTumblrBlog ($blog, $params, $opts = array()) {
         $api_method = "/blog/$blog/post/edit";
-        return $this->talkToService($api_method, $params);
+        return $this->talkToService($api_method, $params, 'POST', $opts);
     }
+
     public function deleteFromTumblrBlog ($blog, $params) {
         $api_method = "/blog/$blog/post/delete";
         return $this->talkToService($api_method, $params);
