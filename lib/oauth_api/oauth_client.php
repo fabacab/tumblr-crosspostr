@@ -2,9 +2,25 @@
 /*
  * oauth_client.php
  *
- * @(#) $Id: oauth_client.php,v 1.93 2014/04/11 10:24:00 mlemos Exp $
+ * @(#) $Id: oauth_client.php,v 1.143 2016/01/14 21:30:45 mlemos Exp $
  *
  */
+
+class oauth_session_value_class
+{
+	var $id;
+	var $session;
+	var $state;
+	var $access_token;
+	var $access_token_secret;
+	var $authorized;
+	var $expiry;
+	var $type;
+	var $server;
+	var $creation;
+	var $refresh_token;
+	var $access_token_response;
+};
 
 /*
 {metadocument}<?xml version="1.0" encoding="ISO-8859-1" ?>
@@ -12,7 +28,7 @@
 
 	<package>net.manuellemos.oauth</package>
 
-	<version>@(#) $Id: oauth_client.php,v 1.93 2014/04/11 10:24:00 mlemos Exp $</version>
+	<version>@(#) $Id: oauth_client.php,v 1.143 2016/01/14 21:30:45 mlemos Exp $</version>
 	<copyright>Copyright © (C) Manuel Lemos 2012</copyright>
 	<title>OAuth client</title>
 	<author>Manuel Lemos</author>
@@ -48,6 +64,7 @@
 			<variablelink>authorization_header</variablelink>,
 			<variablelink>request_token_url</variablelink>,
 			<variablelink>dialog_url</variablelink>,
+			<variablelink>pin_dialog_url</variablelink>,
 			<variablelink>offline_dialog_url</variablelink>,
 			<variablelink>append_state_to_redirect_uri</variablelink> and
 			<variablelink>access_token_url</variablelink>.<paragraphbreak />
@@ -227,9 +244,13 @@ class oauth_client_class
 				Currently it supports the following servers:
 				<stringvalue>37Signals</stringvalue>,
 				<stringvalue>Amazon</stringvalue>,
+				<stringvalue>AOL</stringvalue>,
 				<stringvalue>Bitbucket</stringvalue>,
+				<stringvalue>Bitly</stringvalue>,
 				<stringvalue>Box</stringvalue>,
 				<stringvalue>Buffer</stringvalue>,
+				<stringvalue>Copy</stringvalue>,
+				<stringvalue>Dailymotion</stringvalue>,
 				<stringvalue>Discogs</stringvalue>,
 				<stringvalue>Disqus</stringvalue>,
 				<stringvalue>Dropbox</stringvalue> (Dropbox with OAuth 1.0),
@@ -243,23 +264,39 @@ class oauth_client_class
 				<stringvalue>github</stringvalue>,
 				<stringvalue>Google</stringvalue>,
 				<stringvalue>Google1</stringvalue> (Google with OAuth 1.0),
+				<stringvalue>imgur</stringvalue>,
+				<stringvalue>Intuit</stringvalue>,
 				<stringvalue>Instagram</stringvalue>,
+				<stringvalue>Jawbone</stringvalue>,
 				<stringvalue>LinkedIn</stringvalue>,
+				<stringvalue>LinkedIn2</stringvalue> (LinkedIn with OAuth 2.0),
+				<stringvalue>mail.ru</stringvalue>,
+				<stringvalue>MailChimp</stringvalue>,
+				<stringvalue>Mavenlink</stringvalue>,
+				<stringvalue>Meetup</stringvalue>,
 				<stringvalue>Microsoft</stringvalue>,
+				<stringvalue>Misfit</stringvalue>,
+				<stringvalue>oDesk</stringvalue>,
+				<stringvalue>Paypal</stringvalue>,
+				<stringvalue>PaypalApplication</stringvalue>,
 				<stringvalue>Rdio</stringvalue>,
 				<stringvalue>Reddit</stringvalue>,
+				<stringvalue>RunKeeper</stringvalue>,
 				<stringvalue>Salesforce</stringvalue>,
 				<stringvalue>Scoop.it</stringvalue>,
 				<stringvalue>StockTwits</stringvalue>,
 				<stringvalue>SurveyMonkey</stringvalue>,
+				<stringvalue>TeamViewer</stringvalue>,
 				<stringvalue>Tumblr</stringvalue>,
 				<stringvalue>Twitter</stringvalue>,
 				<stringvalue>Vimeo</stringvalue>,
 				<stringvalue>VK</stringvalue>,
 				<stringvalue>Withings</stringvalue>,
+				<stringvalue>Wordpress</stringvalue>,
 				<stringvalue>Xero</stringvalue>,
-				<stringvalue>XING</stringvalue> and
-				<stringvalue>Yahoo</stringvalue>. Please contact the author if you
+				<stringvalue>XING</stringvalue>,
+				<stringvalue>Yahoo</stringvalue> and
+				<stringvalue>Yandex</stringvalue>. Please contact the author if you
 				would like to ask to add built-in support for other types of OAuth
 				servers.<paragraphbreak />
 				If you want to access other types of OAuth servers that are not
@@ -339,12 +376,32 @@ class oauth_client_class
 				{SCOPE} - scope of the requested permissions to the granted by the
 				OAuth server with the user permissions<paragraphbreak />
 				{STATE} - identifier of the OAuth session state<paragraphbreak />
-				{API_KEY} - API key to access the server</usage>
+				{API_KEY} - API key to access the server<paragraphbreak />
+				{REALM} - realm name for OpenID Connect</usage>
 		</documentation>
 	</variable>
 {/metadocument}
 */
 	var $dialog_url = '';
+
+/*
+{metadocument}
+	<variable>
+		<name>pin_dialog_url</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>URL of the OAuth server to redirect the browser so the user
+				can grant access to your application.</purpose>
+			<usage>Set this variable when using the pin based authorization and
+				the format of the of the authorization dialog page URL is
+				different than the one set to the
+				<variablelink>dialog_url</variablelink> variable.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $pin_dialog_url = '';
 
 /*
 {metadocument}
@@ -366,6 +423,24 @@ class oauth_client_class
 {/metadocument}
 */
 	var $offline_dialog_url = '';
+
+/*
+{metadocument}
+	<variable>
+		<name>pin</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Value of the pin code for pin based authorization.</purpose>
+			<usage>Set this value to the pin informed by the user when
+				implementing the pin based authorization.<paragraphbreak />
+				Make sure the <variablelink>redirect_uri</variablelink> variable
+				is set to <stringvalue>oob</stringvalue>.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $pin = '';
 
 /*
 {metadocument}
@@ -504,7 +579,9 @@ class oauth_client_class
 			<purpose>URL of the current script page that is calling this
 				class</purpose>
 			<usage>Set this variable to the current script page URL before
-				proceeding the the OAuth authorization process.</usage>
+				proceeding the the OAuth authorization process.<paragraphbreak />
+				For pin based authorization, set this variable to
+				<stringvalue>oob</stringvalue>.</usage>
 		</documentation>
 	</variable>
 {/metadocument}
@@ -598,6 +675,22 @@ class oauth_client_class
 {/metadocument}
 */
 	var $scope = '';
+
+/*
+{metadocument}
+	<variable>
+		<name>realm</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Realm of authorization for OpenID Connect</purpose>
+			<usage>Set this variable to the realm value when using OpenID
+				Connect.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $realm = '';
 
 /*
 {metadocument}
@@ -772,12 +865,35 @@ class oauth_client_class
 			<usage>Set this variable to <stringvalue>basic</stringvalue> if the
 				OAuth server requires that the the client ID and secret be passed
 				using HTTP basic authentication headers when retrieving a new
-				token.</usage>
+				token. Set this variable to <stringvalue>none</stringvalue> to
+				avoid that the Authorization header be set in the request to get
+				the access token.</usage>
 		</documentation>
 	</variable>
 {/metadocument}
 */
 	var $access_token_authentication = '';
+
+/*
+{metadocument}
+	<variable>
+		<name>refresh_token_authentication</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Option to determine if the requests to refresh an expired
+				access token should use authentication to pass the application
+				client ID and secret.</purpose>
+			<usage>Leave this value with an empty string to make it use the same
+				as the <variablelink>access_token_authentication</variablelink>
+				variable. Set this variable to <stringvalue>none</stringvalue> to
+				avoid that the Authorization header be set in the request to get
+				the refresh token.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $refresh_token_authentication = '';
 
 /*
 {metadocument}
@@ -850,7 +966,94 @@ class oauth_client_class
 */
 	var $response_status = 0;
 
-	var $oauth_user_agent = 'PHP-OAuth-API (http://www.phpclasses.org/oauth-api $Revision: 1.93 $)';
+/*
+{metadocument}
+	<variable>
+		<name>oauth_username</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Define the user name to obtain authorization using a password.</purpose>
+			<usage>Set this variable to the user name of the account to
+				authorize instead of going through the interactive user
+				authorization process.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $oauth_username = '';
+
+/*
+{metadocument}
+	<variable>
+		<name>oauth_password</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Define the user name to obtain authorization using a password.</purpose>
+			<usage>Set this variable to the user password of the account to
+				authorize instead of going through the interactive user
+				authorization process.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $oauth_password = '';
+
+/*
+{metadocument}
+	<variable>
+		<name>grant_type</name>
+		<type>STRING</type>
+		<value>authorization_code</value>
+		<documentation>
+			<purpose>Define the type of grant to obtain the OAuth 2 access
+				token.</purpose>
+			<usage>Change this variable to 
+				<stringvalue>client_credentials</stringvalue> to obtain
+				application only access token.<paragraphbreak />
+				Change this variable to <stringvalue>password</stringvalue> to
+				obtain an access token on behalf of an user with a given username
+				and password specified by the
+				<variablelink>oauth_username</variablelink> and
+				<variablelink>oauth_password</variablelink> variables
+				respectively.<paragraphbreak />In this case the user does not need
+				to be present, so the class will not redirect the user to the
+				authorization dialog page.<paragraphbreak />
+					</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $grant_type = "authorization_code";
+
+/*
+{metadocument}
+	<variable>
+		<name>http_arguments</name>
+		<type>HASH</type>
+		<value></value>
+		<documentation>
+			<purpose>Define additional arguments to configure the HTTP
+				requests.</purpose>
+			<usage>Set this associative array with argument values that you need
+				to set options of the HTTP requests sent to the OAuth server and
+				API URLs.<paragraphbreak />
+				Check the documentation of the <link>
+					<data>HTTP client class</data>
+					<url>http://www.phpclasses.org/httpclient</url>
+				</link> for more
+				information on the available arguments that can be configured
+				using this option.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $http_arguments = array();
+	var $oauth_user_agent = 'PHP-OAuth-API (http://www.phpclasses.org/oauth-api $Revision: 1.143 $)';
+
+	var $response_time = 0;
+	var $session = '';
 
 	Function SetError($error)
 	{
@@ -879,6 +1082,50 @@ class oauth_client_class
 		return(true);
 	}
 
+	Function SetupSession(&$session)
+	{
+		if(strlen($this->session)
+		|| IsSet($_COOKIE[$this->session_cookie]))
+		{
+			if($this->debug)
+				$this->OutputDebug(strlen($this->session) ? 'Checking OAuth session '.$this->session : 'Checking OAuth session from cookie '.$_COOKIE[$this->session_cookie]);
+			if(!$this->GetOAuthSession(strlen($this->session) ? $this->session : $_COOKIE[$this->session_cookie], $this->server, $session))
+				return($this->SetError('OAuth session error: '.$this->error));
+		}
+		else
+		{
+			if($this->debug)
+				$this->OutputDebug('No OAuth session is set');
+			$session = null;
+		}
+		if(!IsSet($session))
+		{
+			if($this->debug)
+				$this->OutputDebug('Creating a new OAuth session');
+			if(!$this->CreateOAuthSession($this->server, $session))
+				return($this->SetError('OAuth session error: '.$this->error));
+			SetCookie($this->session_cookie, $session->session, 0, $this->session_path);
+		}
+		$this->session = $session->session;
+		return true;
+	}
+
+	Function InitializeOAuthSession(&$session)
+	{
+		$session = new oauth_session_value_class;
+		$session->state = md5(time().rand());
+		$session->session = md5($session->state.time().rand());
+		$session->access_token = '';
+		$session->access_token_secret = '';
+		$session->authorized = null;
+		$session->expiry = null;
+		$session->type = '';
+		$session->server = $this->server;
+		$session->creation = gmstrftime("%Y-%m-%d %H:%M:%S");
+		$session->refresh_token = '';
+		$session->access_token_response = null;
+	}
+
 	Function GetRequestTokenURL(&$request_token_url)
 	{
 		$request_token_url = $this->request_token_url;
@@ -887,7 +1134,7 @@ class oauth_client_class
 
 	Function GetDialogURL(&$url, $redirect_uri = '', $state = '')
 	{
-		$url = (($this->offline && strlen($this->offline_dialog_url)) ? $this->offline_dialog_url : $this->dialog_url);
+		$url = (($this->offline && strlen($this->offline_dialog_url)) ? $this->offline_dialog_url : (($redirect_uri === 'oob' && strlen($this->pin_dialog_url)) ? $this->pin_dialog_url : $this->dialog_url));
 		if(strlen($url) === 0)
 			return $this->SetError('the dialog URL '.($this->offline ? 'for offline access ' : '').'is not defined for this server');
 		$url = str_replace(
@@ -895,8 +1142,9 @@ class oauth_client_class
 			'{STATE}', UrlEncode($state), str_replace(
 			'{CLIENT_ID}', UrlEncode($this->client_id), str_replace(
 			'{API_KEY}', UrlEncode($this->api_key), str_replace(
-			'{SCOPE}', UrlEncode($this->scope),
-			$url)))));
+			'{SCOPE}', UrlEncode($this->scope), str_replace(
+			'{REALM}', UrlEncode($this->realm),
+			$url))))));
 		return(true);
 	}
 
@@ -1155,8 +1403,8 @@ class oauth_client_class
 		if(session_id() === ''
 		&& !session_start())
 			return($this->SetPHPError('it was not possible to start the PHP session', $php_errormsg));
-		if(IsSet($_SESSION['OAUTH_ACCESS_TOKEN'][$access_token_url]))
-			Unset($_SESSION['OAUTH_ACCESS_TOKEN'][$access_token_url]);
+		Unset($_SESSION['OAUTH_ACCESS_TOKEN'][$access_token_url]);
+		UnSet($_SESSION['OAUTH_STATE']);
 		return true;
 	}
 /*
@@ -1197,6 +1445,95 @@ class oauth_client_class
 		return(pack($pack, $function((str_repeat("\x5c", 64) ^ $key).pack($pack, $function((str_repeat("\x36", 64) ^ $key).$data)))));
 	}
 
+	Function Sign(&$url, $method, $parameters, $oauth, $request_content_type, $has_files, $post_values_in_uri, &$authorization, &$post_values)
+	{
+		$values = array(
+			'oauth_consumer_key'=>$this->client_id,
+			'oauth_nonce'=>md5(uniqid(rand(), true)),
+			'oauth_signature_method'=>$this->signature_method,
+			'oauth_timestamp'=>time(),
+			'oauth_version'=>'1.0',
+		);
+		if($has_files)
+			$value_parameters = array();
+		else
+		{
+			if(($this->url_parameters
+			|| $method !== 'POST')
+			&& $request_content_type === 'application/x-www-form-urlencoded'
+			&& count($parameters))
+			{
+				$first = (strpos($url, '?') === false);
+				foreach($parameters as $parameter => $value)
+				{
+					$url .= ($first ? '?' : '&').UrlEncode($parameter).'='.UrlEncode($value);
+					$first = false;
+				}
+				$parameters = array();
+			}
+			$value_parameters = (($request_content_type !== 'application/x-www-form-urlencoded') ? array() : $parameters);
+		}
+		$header_values = ($method === 'GET' ? array_merge($values, $oauth, $value_parameters) : array_merge($values, $oauth));
+		$values = array_merge($values, $oauth, $value_parameters);
+		$key = $this->Encode($this->client_secret).'&'.$this->Encode($this->access_token_secret);
+		switch($this->signature_method)
+		{
+			case 'PLAINTEXT':
+				$values['oauth_signature'] = $key;
+				break;
+			case 'HMAC-SHA1':
+				$uri = strtok($url, '?');
+				$sign = $method.'&'.$this->Encode($uri).'&';
+				$first = true;
+				$sign_values = $values;
+				$u = parse_url($url);
+				if(IsSet($u['query']))
+				{
+					parse_str($u['query'], $q);
+					foreach($q as $parameter => $value)
+						$sign_values[$parameter] = $value;
+				}
+				KSort($sign_values);
+				foreach($sign_values as $parameter => $value)
+				{
+					$sign .= $this->Encode(($first ? '' : '&').$parameter.'='.$this->Encode($value));
+					$first = false;
+				}
+				$header_values['oauth_signature'] = $values['oauth_signature'] = base64_encode($this->HMAC('sha1', $sign, $key));
+				break;
+			default:
+				return $this->SetError($this->signature_method.' signature method is not yet supported');
+		}
+		if($this->authorization_header)
+		{
+			$authorization = 'OAuth';
+			$first = true;
+			foreach($header_values as $parameter => $value)
+			{
+				$authorization .= ($first ? ' ' : ',').$parameter.'="'.$this->Encode($value).'"';
+				$first = false;
+			}
+			$post_values = $parameters;
+		}
+		else
+		{
+			if($method !== 'POST'
+			|| $post_values_in_uri)
+			{
+				$first = (strcspn($url, '?') == strlen($url));
+				foreach($values as $parameter => $value)
+				{
+					$url .= ($first ? '?' : '&').$parameter.'='.$this->Encode($value);
+					$first = false;
+				}
+				$post_values = array();
+			}
+			else
+				$post_values = $values;
+		}
+		return true;
+	}
+
 	Function SendAPIRequest($url, $method, $parameters, $oauth, $options, &$response)
 	{
 		$this->response_status = 0;
@@ -1212,138 +1549,64 @@ class oauth_client_class
 		$post_files = array();
 		$method = strtoupper($method);
 		$authorization = '';
-		$type = (IsSet($options['RequestContentType']) ? strtolower(trim(strtok($options['RequestContentType'], ';'))) : (($method === 'POST' || IsSet($oauth)) ? 'application/x-www-form-urlencoded' : ''));
+		$request_content_type = (IsSet($options['RequestContentType']) ? strtolower(trim(strtok($options['RequestContentType'], ';'))) : (($method === 'POST' || IsSet($oauth)) ? 'application/x-www-form-urlencoded' : ''));
+		$files = (IsSet($options['Files']) ? $options['Files'] : array());
+		if(count($files))
+		{
+			foreach($files as $name => $value)
+			{
+				if(!IsSet($parameters[$name]))
+					return($this->SetError('it was not specified a file parameter named '.$name));
+				$file = array();
+				$value_type = IsSet($value['Type']) ? $value['Type'] : 'FileName';
+				switch($value_type)
+				{
+					case 'FileName':
+						$file['FileName'] = $parameters[$name];
+						if(IsSet($value['FileName']))
+							$file['Name'] = $value['FileName'];
+						break;
+					case 'Data':
+						$file['Data'] = $parameters[$name];
+						if(!IsSet($value['FileName']))
+							return($this->SetError('it was not specified the file name for data file parameter '.$name));
+						$file['Name'] = $value['FileName'];
+						break;
+					default:
+						return($this->SetError($value_type.' is not a valid type for file '.$name));
+				}
+				$file['Content-Type'] = (IsSet($value['ContentType']) ? $value['ContentType'] : 'automatic/name');
+				$post_files[$name] = $file;
+			}
+			UnSet($parameters[$name]);
+			if($method !== 'POST')
+			{
+				$this->OutputDebug('For uploading files the method should be POST not '.$method);
+				$method = 'POST';
+			}
+			if($request_content_type !== 'multipart/form-data')
+			{
+				if(IsSet($options['RequestContentType']))
+					return($this->SetError('the request content type for uploading files should be multipart/form-data'));
+				$request_content_type = 'multipart/form-data';
+			}
+		}
 		if(IsSet($oauth))
 		{
-			$values = array(
-				'oauth_consumer_key'=>$this->client_id,
-				'oauth_nonce'=>md5(uniqid(rand(), true)),
-				'oauth_signature_method'=>$this->signature_method,
-				'oauth_timestamp'=>time(),
-				'oauth_version'=>'1.0',
-			);
-			$files = (IsSet($options['Files']) ? $options['Files'] : array());
-			if(count($files))
-			{
-				foreach($files as $name => $value)
-				{
-					if(!IsSet($parameters[$name]))
-						return($this->SetError('it was specified an file parameters named '.$name));
-					$file = array();
-					switch(IsSet($value['Type']) ? $value['Type'] : 'FileName')
-					{
-						case 'FileName':
-							$file['FileName'] = $parameters[$name];
-							break;
-						case 'Data':
-							$file['Data'] = $parameters[$name];
-							break;
-						default:
-							return($this->SetError($value['Type'].' is not a valid type for file '.$name));
-					}
-					$file['ContentType'] = (IsSet($value['Content-Type']) ? $value['Content-Type'] : 'automatic/name');
-					$post_files[$name] = $file;
-				}
-				UnSet($parameters[$name]);
-				if($method !== 'POST')
-				{
-					$this->OutputDebug('For uploading files the method should be POST not '.$method);
-					$method = 'POST';
-				}
-				if($type !== 'multipart/form-data')
-				{
-					if(IsSet($options['RequestContentType']))
-						return($this->SetError('the request content type for uploading files should be multipart/form-data'));
-					$type = 'multipart/form-data';
-				}
-				$value_parameters = array();
-			}
-			else
-			{
-				if($this->url_parameters
-				&& $type === 'application/x-www-form-urlencoded'
-				&& count($parameters))
-				{
-					$first = (strpos($url, '?') === false);
-					foreach($parameters as $parameter => $value)
-					{
-						$url .= ($first ? '?' : '&').UrlEncode($parameter).'='.UrlEncode($value);
-						$first = false;
-					}
-					$parameters = array();
-				}
-				$value_parameters = (($type !== 'application/x-www-form-urlencoded') ? array() : $parameters);
-			}
-			$header_values = ($method === 'GET' ? array_merge($values, $oauth, $value_parameters) : array_merge($values, $oauth));
-			$values = array_merge($values, $oauth, $value_parameters);
-			$key = $this->Encode($this->client_secret).'&'.$this->Encode($this->access_token_secret);
-			switch($this->signature_method)
-			{
-				case 'PLAINTEXT':
-					$values['oauth_signature'] = $key;
-					break;
-				case 'HMAC-SHA1':
-					$uri = strtok($url, '?');
-					$sign = $method.'&'.$this->Encode($uri).'&';
-					$first = true;
-					$sign_values = $values;
-					$u = parse_url($url);
-					if(IsSet($u['query']))
-					{
-						parse_str($u['query'], $q);
-						foreach($q as $parameter => $value)
-							$sign_values[$parameter] = $value;
-					}
-					KSort($sign_values);
-					foreach($sign_values as $parameter => $value)
-					{
-						$sign .= $this->Encode(($first ? '' : '&').$parameter.'='.$this->Encode($value));
-						$first = false;
-					}
-					$header_values['oauth_signature'] = $values['oauth_signature'] = base64_encode($this->HMAC('sha1', $sign, $key));
-					break;
-				default:
-					return $this->SetError($this->signature_method.' signature method is not yet supported');
-			}
-			if($this->authorization_header)
-			{
-				$authorization = 'OAuth';
-				$first = true;
-				foreach($header_values as $parameter => $value)
-				{
-					$authorization .= ($first ? ' ' : ',').$parameter.'="'.$this->Encode($value).'"';
-					$first = false;
-				}
-				$post_values = $parameters;
-			}
-			else
-			{
-				if($method === 'GET'
-				|| (IsSet($options['PostValuesInURI'])
-				&& $options['PostValuesInURI']))
-				{
-					$first = (strcspn($url, '?') == strlen($url));
-					foreach($values as $parameter => $value)
-					{
-						$url .= ($first ? '?' : '&').$parameter.'='.$this->Encode($value);
-						$first = false;
-					}
-					$post_values = array();
-				}
-				else
-					$post_values = $values;
-			}
+			if(!$this->Sign($url, $method, $parameters, $oauth, $request_content_type, count($files) !== 0, IsSet($options['PostValuesInURI']) && $options['PostValuesInURI'], $authorization, $post_values))
+				return false;
 		}
 		else
 		{
 			$post_values = $parameters;
 			if(count($parameters))
 			{
-				switch($type)
+				switch($request_content_type)
 				{
 					case 'application/x-www-form-urlencoded':
 					case 'multipart/form-data':
 					case 'application/json':
+					case 'application/javascript':
 						break;
 					default:
 						$first = (strpos($url, '?') === false);
@@ -1371,12 +1634,13 @@ class oauth_client_class
 			$authorization = 'Bearer '.$this->access_token;
 		if(strlen($error = $http->GetRequestArguments($url, $arguments)))
 			return($this->SetError('it was not possible to open the '.$options['Resource'].' URL: '.$error));
+		$arguments = array_merge($this->http_arguments, $arguments);
 		if(strlen($error = $http->Open($arguments)))
 			return($this->SetError('it was not possible to open the '.$options['Resource'].' URL: '.$error));
 		if(count($post_files))
 			$arguments['PostFiles'] = $post_files;
 		$arguments['RequestMethod'] = $method;
-		switch($type)
+		switch($request_content_type)
 		{
 			case 'application/x-www-form-urlencoded':
 			case 'multipart/form-data':
@@ -1385,20 +1649,23 @@ class oauth_client_class
 				$arguments['PostValues'] = $post_values;
 				break;
 			case 'application/json':
+			case 'application/javascript':
 				$arguments['Headers']['Content-Type'] = $options['RequestContentType'];
+				$arguments['Body'] = (IsSet($options['RequestBody']) ? $options['RequestBody'] : json_encode($parameters));
+				break;
+			default:
 				if(!IsSet($options['RequestBody']))
 				{
-					$arguments['Body'] = json_encode($parameters);
+					if(IsSet($options['RequestContentType']))
+						return($this->SetError('it was not specified the body value of the of the API call request'));
 					break;
 				}
-				if(!IsSet($options['RequestBody']))
-					return($this->SetError('it was not specified the body value of the of the API call request'));
 				$arguments['Headers']['Content-Type'] = $options['RequestContentType'];
 				$arguments['Body'] = $options['RequestBody'];
 				break;
 		}
 		$arguments['Headers']['Accept'] = (IsSet($options['Accept']) ? $options['Accept'] : '*/*');
-		switch(IsSet($options['AccessTokenAuthentication']) ? strtolower($options['AccessTokenAuthentication']) : '')
+		switch($authentication = (IsSet($options['AccessTokenAuthentication']) ? strtolower($options['AccessTokenAuthentication']) : ''))
 		{
 			case 'basic':
 				$arguments['Headers']['Authorization'] = 'Basic '.base64_encode($this->client_id.':'.($this->get_token_with_api_key ? $this->api_key : $this->client_secret));
@@ -1407,12 +1674,17 @@ class oauth_client_class
 				if(strlen($authorization))
 					$arguments['Headers']['Authorization'] = $authorization;
 				break;
+			case 'none':
+				break;
 			default:
-				return($this->SetError($this->access_token_authentication.' is not a supported authentication mechanism to retrieve an access token'));
+				return($this->SetError($authentication.' is not a supported authentication mechanism to retrieve an access token'));
 		}
+		if(IsSet($options['RequestHeaders']))
+			$arguments['Headers'] = array_merge($arguments['Headers'], $options['RequestHeaders']);
 		if(strlen($error = $http->SendRequest($arguments))
 		|| strlen($error = $http->ReadReplyHeaders($headers)))
 		{
+            error_log($error);
 			$http->Close();
 			return($this->SetError('it was not possible to retrieve the '.$options['Resource'].': '.$error));
 		}
@@ -1424,11 +1696,13 @@ class oauth_client_class
 		}
 		$this->response_status = intval($http->response_status);
 		$content_type = (IsSet($options['ResponseContentType']) ? $options['ResponseContentType'] : (IsSet($headers['content-type']) ? strtolower(trim(strtok($headers['content-type'], ';'))) : 'unspecified'));
-		$content_type = preg_replace('/^(.+\\/).+\\+(.+)$/', '\\1\\2', $content_type); 
+		$content_type = preg_replace('/^(.+\\/).+\\+(.+)$/', '\\1\\2', $content_type);
+		$this->response_time = (IsSet($headers['date']) ? strtotime(GetType($headers['date']) === 'array' ? $headers['date'][0] : $headers['date']) : time());
 		switch($content_type)
 		{
 			case 'text/javascript':
 			case 'application/json':
+			case 'application/javascript':
 				if(!function_exists('json_decode'))
 					return($this->SetError('the JSON extension is not available in this PHP setup'));
 				$object = json_decode($data);
@@ -1503,42 +1777,143 @@ class oauth_client_class
 		return true;
 	}
 
-	Function ProcessToken($code, $refresh)
+	Function ProcessToken1($oauth, &$access_token)
+	{
+		if(!$this->GetAccessTokenURL($url))
+			return false;
+		$options = array('Resource'=>'OAuth access token');
+		$method = strtoupper($this->token_request_method);
+		switch($method)
+		{
+			case 'GET':
+				break;
+			case 'POST':
+				$options['PostValuesInURI'] = true;
+				break;
+			default:
+				$this->error = $method.' is not a supported method to request tokens';
+				return false;
+		}
+		if(!$this->SendAPIRequest($url, $method, array(), $oauth, $options, $response))
+			return false;
+		if(strlen($this->access_token_error))
+		{
+			$this->authorization_error = $this->access_token_error;
+			return true;
+		}
+		if(!IsSet($response['oauth_token'])
+		|| !IsSet($response['oauth_token_secret']))
+		{
+			$this->authorization_error= 'it was not returned the access token and secret';
+			return true;
+		}
+		$access_token = array(
+			'value'=>$response['oauth_token'],
+			'secret'=>$response['oauth_token_secret'],
+			'authorized'=>true
+		);
+		if(IsSet($response['oauth_expires_in'])
+		&& $response['oauth_expires_in'] == 0)
+		{
+			if($this->debug)
+				$this->OutputDebug('Ignoring access token expiry set to 0');
+			$this->access_token_expiry = '';
+		}
+		elseif(IsSet($response['oauth_expires_in']))
+		{
+			$expires = $response['oauth_expires_in'];
+			if(strval($expires) !== strval(intval($expires))
+			|| $expires <= 0)
+				return($this->SetError('OAuth server did not return a supported type of access token expiry time'));
+			$this->access_token_expiry = gmstrftime('%Y-%m-%d %H:%M:%S', $this->response_time + $expires);
+			if($this->debug)
+				$this->OutputDebug('Access token expiry: '.$this->access_token_expiry.' UTC');
+			$access_token['expiry'] = $this->access_token_expiry;
+		}
+		else
+			$this->access_token_expiry = '';
+		if(IsSet($response['oauth_session_handle']))
+		{
+			$access_token['refresh'] = $response['oauth_session_handle'];
+			if($this->debug)
+				$this->OutputDebug('Refresh token: '.$access_token['refresh']);
+		}
+		return $this->StoreAccessToken($access_token);
+	}
+
+	Function ProcessToken2($code, $refresh)
 	{
 		if(!$this->GetRedirectURI($redirect_uri))
 			return false;
-		if($refresh)
+		$authentication = $this->access_token_authentication;
+		if(strlen($this->oauth_username))
+		{
+			$values = array(
+				'grant_type'=>'password',
+				'username'=>$this->oauth_username,
+				'password'=>$this->oauth_password,
+				'redirect_uri' => $redirect_uri
+			);
+			$authentication = 'Basic';
+		}
+		elseif($this->redirect_uri === 'oob'
+		&& strlen($this->pin))
+		{
+			$values = array(
+				'grant_type'=>'pin',
+				'pin'=>$this->pin,
+				'scope'=>$this->scope,
+			);
+		}
+		elseif($refresh)
 		{
 			$values = array(
 				'refresh_token'=>$this->refresh_token,
 				'grant_type'=>'refresh_token',
 				'scope'=>$this->scope,
 			);
+			if(strlen($this->refresh_token_authentication))
+				$authentication = $this->refresh_token_authentication;
 		}
 		else
 		{
-			$values = array(
-				'code'=>$code,
-				'redirect_uri'=>$redirect_uri,
-				'grant_type'=>'authorization_code'
-			);
+			switch($this->grant_type)
+			{
+				case 'password':
+					return $this->SetError('it was not specified the username for obtaining a password based OAuth 2 authorization');
+				case 'authorization_code':
+					$values = array(
+						'code'=>$code,
+						'redirect_uri'=>$redirect_uri,
+						'grant_type'=>'authorization_code'
+					);
+					break;
+				case 'client_credentials':
+					$values = array(
+						'grant_type'=>'client_credentials'
+					);
+					$authentication = 'Basic';
+					break;
+				default:
+					return $this->SetError($this->grant_type.' is not yet a supported OAuth 2 grant type');
+			}
 		}
 		$options = array(
 			'Resource'=>'OAuth '.($refresh ? 'refresh' : 'access').' token',
 			'ConvertObjects'=>true
 		);
-		switch(strtolower($this->access_token_authentication))
+		switch(strtolower($authentication))
 		{
 			case 'basic':
-				$options['AccessTokenAuthentication'] = $this->access_token_authentication;
-				$values['redirect_uri'] = $redirect_uri;
+			case 'none':
+				$options['AccessTokenAuthentication'] = $authentication;
 				break;
 			case '':
 				$values['client_id'] = $this->client_id;
 				$values['client_secret'] = ($this->get_token_with_api_key ? $this->api_key : $this->client_secret);
 				break;
 			default:
-				return($this->SetError($this->access_token_authentication.' is not a supported authentication mechanism to retrieve an access token'));
+				return($this->SetError($authentication.' is not a supported authentication mechanism to retrieve an access token'));
 		}
 		if(!$this->GetAccessTokenURL($access_token_url))
 			return false;
@@ -1576,11 +1951,11 @@ class oauth_client_class
 		elseif(IsSet($response['expires'])
 		|| IsSet($response['expires_in']))
 		{
-			$expires = (IsSet($response['expires']) ? $response['expires'] : $response['expires_in']);
+			$expires = (IsSet($response['expires_in']) ? $response['expires_in'] : $response['expires'] - ($response['expires'] > $this->response_time ? $this->response_time : 0));
 			if(strval($expires) !== strval(intval($expires))
 			|| $expires <= 0)
 				return($this->SetError('OAuth server did not return a supported type of access token expiry time'));
-			$this->access_token_expiry = gmstrftime('%Y-%m-%d %H:%M:%S', time() + $expires);
+			$this->access_token_expiry = gmstrftime('%Y-%m-%d %H:%M:%S', $this->response_time + $expires);
 			if($this->debug)
 				$this->OutputDebug('Access token expiry: '.$this->access_token_expiry.' UTC');
 			$access_token['expiry'] = $this->access_token_expiry;
@@ -1606,7 +1981,7 @@ class oauth_client_class
 		{
 			$this->refresh_token = $response['refresh_token'];
 			if($this->debug)
-				$this->OutputDebug('New refresh token: '.$this->refresh_token);
+				$this->OutputDebug('Refresh token: '.$this->refresh_token);
 			$access_token['refresh'] = $this->refresh_token;
 		}
 		elseif(strlen($this->refresh_token))
@@ -1615,9 +1990,7 @@ class oauth_client_class
 				$this->OutputDebug('Reusing previous refresh token: '.$this->refresh_token);
 			$access_token['refresh'] = $this->refresh_token;
 		}
-		if(!$this->StoreAccessToken($access_token))
-			return false;
-		return true;
+		return $this->StoreAccessToken($access_token);
 	}
 
 	Function RetrieveToken(&$valid)
@@ -1627,17 +2000,22 @@ class oauth_client_class
 			return false;
 		if(IsSet($access_token['value']))
 		{
+			$this->access_token = $access_token['value'];
 			$this->access_token_expiry = '';
 			$expired = (IsSet($access_token['expiry']) && strcmp($this->access_token_expiry = $access_token['expiry'], gmstrftime('%Y-%m-%d %H:%M:%S')) < 0);
-			if($expired)
+			if($this->debug)
 			{
-				if($this->debug)
-					$this->OutputDebug('The OAuth access token expired in '.$this->access_token_expiry);
+				if($expired)
+				{
+					$this->OutputDebug('The OAuth access token expired on '.$this->access_token_expiry.' UTC');
+				}
+				else
+				{
+					$this->OutputDebug('The OAuth access token '.$this->access_token.' is valid');
+					if(strlen($this->access_token_expiry))
+						$this->OutputDebug('The OAuth access token expires on '.$this->access_token_expiry);
+				}
 			}
-			$this->access_token = $access_token['value'];
-			if(!$expired
-			&& $this->debug)
-				$this->OutputDebug('The OAuth access token '.$this->access_token.' is valid');
 			if(IsSet($access_token['type']))
 			{
 				$this->access_token_type = $access_token['type'];
@@ -1658,7 +2036,8 @@ class oauth_client_class
 			{
 				$this->access_token_secret = $access_token['secret'];
 				if($this->debug
-				&& !$expired)
+				&& !$expired
+				&& strlen($this->access_token_secret))
 					$this->OutputDebug('The OAuth access token secret is '.$this->access_token_secret);
 			}
 			if(IsSet($access_token['refresh']))
@@ -1753,11 +2132,14 @@ class oauth_client_class
 						is the name of a local file to be uploaded. It may also be
 						<tt>'Data'</tt> if the parameter value is the actual data of
 						the file to be uploaded.<paragraphbreak />
-						- Default: <tt>'FileName'</tt><paragraphbreak />
+						Default: <tt>'FileName'</tt><paragraphbreak />
+						- <tt>FileName</tt> - defines a custom file name for the file
+						to be uploaded.<paragraphbreak />
+						Default: none<paragraphbreak />
 						- <tt>ContentType</tt> - MIME value of the content type of the
 						file. It can be <tt>'automatic/name'</tt> if the content type
 						should be determine from the file name extension.<paragraphbreak />
-						- Default: <tt>'automatic/name'</tt><paragraphbreak />
+						Default: <tt>'automatic/name'</tt><paragraphbreak />
 					<stringvalue>PostValuesInURI</stringvalue>: boolean option to
 						determine that a POST request should pass the request values
 						in the URI. The default value is
@@ -1780,10 +2162,10 @@ class oauth_client_class
 						<stringvalue>RequestBody</stringvalue> option is specified.
 						The default value is
 						<stringvalue>application/x-www-form-urlencoded</stringvalue>.<paragraphbreak />
-					<stringvalue>RequestBody</stringvalue>: request body data of a
-						custom type. The <stringvalue>RequestContentType</stringvalue>
-						option must be specified, so the
-						<stringvalue>RequestBody</stringvalue> option is considered.<paragraphbreak />
+					<stringvalue>RequestHeaders</stringvalue>: associative array of
+						custom headers to be sent with the API call. These headers
+						override any values set by the class when sending the API
+						call HTTP request.<paragraphbreak />
 					<stringvalue>Resource</stringvalue>: string with a label that
 						will be used in the error messages and debug log entries to
 						identify what operation the request is performing. The default
@@ -1825,19 +2207,51 @@ class oauth_client_class
 			$options['Resource'] = 'API call';
 		if(!IsSet($options['ConvertObjects']))
 			$options['ConvertObjects'] = false;
-		if(strlen($this->access_token) === 0)
+		$version = intval($this->oauth_version);
+		$two_legged = ($version === 1 && IsSet($options['2Legged']) && $options['2Legged']);
+		if(strlen($this->access_token) === 0
+		&& !$two_legged)
 		{
 			if(!$this->RetrieveToken($valid))
 				return false;
 			if(!$valid)
 				return $this->SetError('the access token is not set to a valid value');
 		}
-		switch(intval($this->oauth_version))
+		switch($version)
 		{
 			case 1:
-				$oauth = array(
-					(strlen($this->access_token_parameter) ? $this->access_token_parameter : 'oauth_token')=>((IsSet($options['2Legged']) && $options['2Legged']) ? '' : $this->access_token)
-				);
+				if(!$two_legged
+				&& strlen($this->access_token_expiry)
+				&& strcmp($this->access_token_expiry, gmstrftime('%Y-%m-%d %H:%M:%S')) <= 0)
+				{
+					if(strlen($this->refresh_token) === 0)
+						return($this->SetError('the access token expired and no refresh token is available'));
+					if($this->debug)
+						$this->OutputDebug('Refreshing the OAuth access token expired on '.$this->access_token_expiry);
+					$oauth = array(
+						'oauth_token'=>$this->access_token,
+						'oauth_session_handle'=>$this->refresh_token
+					);
+					if(!$this->ProcessToken1($oauth, $access_token))
+						return false;
+					if(IsSet($options['FailOnAccessError'])
+					&& $options['FailOnAccessError']
+					&& strlen($this->authorization_error))
+					{
+						$this->error = $this->authorization_error;
+						return false;
+					}
+					if(!IsSet($access_token['authorized'])
+					|| !$access_token['authorized'])
+						return($this->SetError('failed to obtain a renewed the expired access token'));
+					$this->access_token = $access_token['value'];
+					$this->access_token_secret = $access_token['secret'];
+					if(IsSet($access_token['refresh']))
+						$this->refresh_token = $access_token['refresh'];
+				}
+				$oauth = array();
+				if(!$two_legged)
+					$oauth[strlen($this->access_token_parameter) ? $this->access_token_parameter : 'oauth_token'] = $this->access_token;
 				break;
 
 			case 2:
@@ -1847,8 +2261,8 @@ class oauth_client_class
 					if(strlen($this->refresh_token) === 0)
 						return($this->SetError('the access token expired and no refresh token is available'));
 					if($this->debug)
-						$this->OutputDebug('Refreshing the OAuth access token');
-					if(!$this->ProcessToken(null, true))
+						$this->OutputDebug('Refreshing the OAuth access token expired on '.$this->access_token_expiry);
+					if(!$this->ProcessToken2(null, true))
 						return false;
 					if(IsSet($options['FailOnAccessError'])
 					&& $options['FailOnAccessError']
@@ -1901,6 +2315,7 @@ class oauth_client_class
 			return true;
 		$this->oauth_version =
 		$this->dialog_url = 
+		$this->pin_dialog_url = 
 		$this->access_token_url = 
 		$this->request_token_url =
 		$this->append_state_to_redirect_uri = '';
@@ -1912,11 +2327,13 @@ class oauth_client_class
 		$this->access_token_parameter = '';
 		$this->default_access_token_type = '';
 		$this->store_access_token_response = false;
+		$this->refresh_token_authentication = '';
+		$this->grant_type = 'authorization_code';
 		switch($this->server)
 		{
 			case 'Facebook':
 				$this->oauth_version = '2.0';
-				$this->dialog_url = 'https://www.facebook.com/dialog/oauth?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}';
+				$this->dialog_url = 'https://www.facebook.com/v2.3/dialog/oauth?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}';
 				$this->access_token_url = 'https://graph.facebook.com/oauth/access_token';
 				break;
 
@@ -1987,6 +2404,7 @@ class oauth_client_class
 					'oauth_version'=>'string',
 					'request_token_url'=>'string',
 					'dialog_url'=>'string',
+					'pin_dialog_url'=>'string',
 					'offline_dialog_url'=>'string',
 					'access_token_url'=>'string',
 					'append_state_to_redirect_uri'=> 'string',
@@ -1997,7 +2415,9 @@ class oauth_client_class
 					'access_token_authentication'=>'string',
 					'access_token_parameter'=>'string',
 					'default_access_token_type'=>'string',
-					'store_access_token_response'=>'boolean'
+					'store_access_token_response'=>'boolean',
+					'refresh_token_authentication'=>'string',
+					'grant_type'=>'string'
 				);
 				$required = array(
 					'oauth_version'=>array(),
@@ -2036,22 +2456,42 @@ class oauth_client_class
 /*
 {metadocument}
 	<function>
-		<name>Process</name>
+		<name>CheckAccessToken</name>
 		<type>BOOLEAN</type>
 		<documentation>
-			<purpose>Process the OAuth protocol interaction with the OAuth
-				server.</purpose>
-			<usage>Call this function when you need to retrieve the OAuth access
-				token. Check the <variablelink>access_token</variablelink> to
-				determine if the access token was obtained successfully.</usage>
+			<purpose>Check if the access token was retrieved and if it is
+				valid.</purpose>
+			<usage>Call this function when you need to check of an access token
+				is valid without forcing to redirect the user to the OAuth server
+				authorization page.<paragraphbreak />
+				If a previously retrieved access token has expired, this function
+				may renew it automatically.</usage>
 			<returnvalue>This function returns <booleanvalue>1</booleanvalue> if
-				the OAuth protocol was processed without errors.</returnvalue>
+				the OAuth protocol was checked without errors.</returnvalue>
 		</documentation>
+		<argument>
+			<name>redirect_url</name>
+			<type>STRING</type>
+			<out />
+			<documentation>
+				<purpose>Return the URL of the OAuth server authorization to
+					redirect the user if the access token was not yet retrieved or
+					is not valid.</purpose>
+			</documentation>
+		</argument>
 		<do>
 {/metadocument}
 */
-	Function Process()
+	Function CheckAccessToken(&$redirect_url)
 	{
+		$redirect_url = null;
+		if(strlen($this->access_token)
+		|| strlen($this->access_token_secret))
+		{
+			if($this->debug)
+				$this->OutputDebug('The Process function should not be called again if the OAuth token was already set manually');
+			return $this->SetError('the OAuth token was already set');
+		}
 		switch(intval($this->oauth_version))
 		{
 			case 1:
@@ -2060,6 +2500,8 @@ class oauth_client_class
 					$this->OutputDebug('Checking the OAuth token authorization state');
 				if(!$this->GetAccessToken($access_token))
 					return false;
+				if(IsSet($access_token['expiry']))
+					$this->access_token_expiry = $access_token['expiry'];
 				if(IsSet($access_token['authorized'])
 				&& IsSet($access_token['value']))
 				{
@@ -2073,103 +2515,69 @@ class oauth_client_class
 								$this->OutputDebug('The OAuth token expired on '.$access_token['expiry'].'UTC');
 							else
 								$this->OutputDebug('The OAuth token is not yet authorized');
-							$this->OutputDebug('Checking the OAuth token and verifier');
 						}
-						if(!$this->GetRequestToken($token, $verifier))
-							return false;
-						if(!IsSet($token)
-						|| ($one_a
-						&& !IsSet($verifier)))
-						{
-							if(!$this->GetRequestDenied($denied))
-								return false;
-							if(IsSet($denied)
-							&& $denied === $access_token['value'])
-							{
-								if($this->debug)
-									$this->OutputDebug('The authorization request was denied');
-								$this->authorization_error = 'the request was denied';
-								return true;
-							}
-							else
-							{
-								if($this->debug)
-									$this->OutputDebug('Reset the OAuth token state because token and verifier are not both set');
-								$access_token = array();
-							}
-						}
-						elseif($token !== $access_token['value'])
+						if($one_a
+						&& $this->redirect_uri === 'oob'
+						&& strlen($this->pin))
 						{
 							if($this->debug)
-								$this->OutputDebug('Reset the OAuth token state because token does not match what as previously retrieved');
-							$access_token = array();
-						}
-						else
-						{
-							if(!$this->GetAccessTokenURL($url))
-								return false;
-							$oauth = array(
-								'oauth_token'=>$token,
-							);
-							if($one_a)
-								$oauth['oauth_verifier'] = $verifier;
+								$this->OutputDebug('Checking the pin');
 							$this->access_token_secret = $access_token['secret'];
-							$options = array('Resource'=>'OAuth access token');
-							$method = strtoupper($this->token_request_method);
-							switch($method)
-							{
-								case 'GET':
-									break;
-								case 'POST':
-									$options['PostValuesInURI'] = true;
-									break;
-								default:
-									$this->error = $method.' is not a supported method to request tokens';
-									break;
-							}
-							if(!$this->SendAPIRequest($url, $method, array(), $oauth, $options, $response))
-								return false;
-							if(strlen($this->access_token_error))
-							{
-								$this->authorization_error = $this->access_token_error;
-								return true;
-							}
-							if(!IsSet($response['oauth_token'])
-							|| !IsSet($response['oauth_token_secret']))
-							{
-								$this->authorization_error= 'it was not returned the access token and secret';
-								return true;
-							}
-							$access_token = array(
-								'value'=>$response['oauth_token'],
-								'secret'=>$response['oauth_token_secret'],
-								'authorized'=>true
+							$oauth = array(
+								'oauth_token'=>$access_token['value'],
+								'oauth_verifier'=>$this->pin
 							);
-							if(IsSet($response['oauth_expires_in'])
-							&& $response['oauth_expires_in'] == 0)
-							{
-								if($this->debug)
-									$this->OutputDebug('Ignoring access token expiry set to 0');
-								$this->access_token_expiry = '';
-							}
-							elseif(IsSet($response['oauth_expires_in']))
-							{
-								$expires = $response['oauth_expires_in'];
-								if(strval($expires) !== strval(intval($expires))
-								|| $expires <= 0)
-									return($this->SetError('OAuth server did not return a supported type of access token expiry time'));
-								$this->access_token_expiry = gmstrftime('%Y-%m-%d %H:%M:%S', time() + $expires);
-								if($this->debug)
-									$this->OutputDebug('Access token expiry: '.$this->access_token_expiry.' UTC');
-								$access_token['expiry'] = $this->access_token_expiry;
-							}
-							else
-								$this->access_token_expiry = '';
-
-							if(!$this->StoreAccessToken($access_token))
+							if(!$this->ProcessToken1($oauth, $access_token))
 								return false;
 							if($this->debug)
 								$this->OutputDebug('The OAuth token was authorized');
+						}
+						else
+						{
+							if($this->debug)
+								$this->OutputDebug('Checking the OAuth token and verifier');
+							if(!$this->GetRequestToken($token, $verifier))
+								return false;
+							if(!IsSet($token)
+							|| ($one_a
+							&& !IsSet($verifier)))
+							{
+								if(!$this->GetRequestDenied($denied))
+									return false;
+								if(IsSet($denied)
+								&& $denied === $access_token['value'])
+								{
+									if($this->debug)
+										$this->OutputDebug('The authorization request was denied');
+									$this->authorization_error = 'the request was denied';
+									return true;
+								}
+								else
+								{
+									if($this->debug)
+										$this->OutputDebug('Reset the OAuth token state because token and verifier are not both set');
+									$access_token = array();
+								}
+							}
+							elseif($token !== $access_token['value'])
+							{
+								if($this->debug)
+									$this->OutputDebug('Reset the OAuth token state because token does not match what as previously retrieved');
+								$access_token = array();
+							}
+							else
+							{
+								$this->access_token_secret = $access_token['secret'];
+								$oauth = array(
+									'oauth_token'=>$token,
+								);
+								if($one_a)
+									$oauth['oauth_verifier'] = $verifier;
+								if(!$this->ProcessToken1($oauth, $access_token))
+									return false;
+								if($this->debug)
+									$this->OutputDebug('The OAuth token was authorized');
+							}
 						}
 					}
 					elseif($this->debug)
@@ -2179,6 +2587,8 @@ class oauth_client_class
 					{
 						$this->access_token = $access_token['value'];
 						$this->access_token_secret = $access_token['secret'];
+						if(IsSet($access_token['refresh']))
+							$this->refresh_token = $access_token['refresh'];
 						return true;
 					}
 				}
@@ -2259,8 +2669,7 @@ class oauth_client_class
 				}
 				if($this->debug)
 					$this->OutputDebug('Redirecting to OAuth authorize page '.$url);
-				$this->Redirect($url);
-				$this->exit = true;
+				$redirect_url = $url;
 				return true;
 
 			case 2:
@@ -2272,8 +2681,52 @@ class oauth_client_class
 				}
 				if(!$this->RetrieveToken($valid))
 					return false;
-				if($valid)
+				$expired = (strlen($this->access_token_expiry) && strcmp($this->access_token_expiry, gmstrftime('%Y-%m-%d %H:%M:%S')) <= 0 && strlen($this->refresh_token) === 0);
+				if($valid
+				&& !$expired)
 					return true;
+				if($this->debug)
+				{
+					if(!$valid)
+						$this->OutputDebug('A valid access token is not available');
+					elseif($expired)
+						$this->OutputDebug('The access token expired');
+				}
+				switch($this->grant_type)
+				{
+					case 'authorization_code':
+						if($this->redirect_uri === 'oob'
+						&& strlen($this->pin))
+						{
+							if($this->debug)
+								$this->OutputDebug('Getting the access token using the pin');
+							if(!$this->ProcessToken2(null, false))
+								return false;
+							if(strlen($this->authorization_error))
+								return $this->SetError($this->authorization_error);
+							return true;
+						}
+						elseif(strlen($this->oauth_username) === 0)
+							break;
+					case 'password':
+						if($this->debug)
+							$this->OutputDebug('Getting the access token using the username and password');
+						if(!$this->ProcessToken2(null, false))
+							return false;
+						if(strlen($this->authorization_error))
+							return $this->SetError($this->authorization_error);
+						return true;
+					case 'client_credentials':
+						if($this->debug)
+							$this->OutputDebug('Getting the access token using the client credentials');
+						if(!$this->ProcessToken2(null, false))
+							return false;
+						if(strlen($this->authorization_error))
+							return $this->SetError($this->authorization_error);
+						return true;
+					default:
+						return $this->SetError($this->grant_type.' is not yet a supported OAuth 2 grant type');
+				}
 				if($this->debug)
 					$this->OutputDebug('Checking the authentication state in URI '.$_SERVER['REQUEST_URI']);
 				if(!$this->GetStoredState($stored_state))
@@ -2313,8 +2766,10 @@ class oauth_client_class
 						}
 						return($this->SetError('it was not returned the OAuth dialog code'));
 					}
-					if(!$this->ProcessToken($code, false))
+					if(!$this->ProcessToken2($code, false))
 						return false;
+					if(strlen($this->authorization_error))
+						return $this->SetError($this->authorization_error);
 				}
 				else
 				{
@@ -2328,8 +2783,7 @@ class oauth_client_class
 						return($this->SetError('it was not set the OAuth dialog URL'));
 					if($this->debug)
 						$this->OutputDebug('Redirecting to OAuth Dialog '.$url);
-					$this->Redirect($url);
-					$this->exit = true;
+					$redirect_url = $url;
 				}
 				break;
 
@@ -2337,6 +2791,41 @@ class oauth_client_class
 				return($this->SetError($this->oauth_version.' is not a supported version of the OAuth protocol'));
 		}
 		return(true);
+	}
+/*
+{metadocument}
+		</do>
+	</function>
+{/metadocument}
+*/
+	
+/*
+{metadocument}
+	<function>
+		<name>Process</name>
+		<type>BOOLEAN</type>
+		<documentation>
+			<purpose>Process the OAuth protocol interaction with the OAuth
+				server.</purpose>
+			<usage>Call this function when you need to retrieve the OAuth access
+				token. Check the <variablelink>access_token</variablelink> to
+				determine if the access token was obtained successfully.</usage>
+			<returnvalue>This function returns <booleanvalue>1</booleanvalue> if
+				the OAuth protocol was processed without errors.</returnvalue>
+		</documentation>
+		<do>
+{/metadocument}
+*/
+	Function Process()
+	{
+		if(!$this->CheckAccessToken($redirect_url))
+			return false;
+		if(IsSet($redirect_url))
+		{
+			$this->Redirect($redirect_url);
+			$this->exit = true;
+		}
+		return true;
 	}
 /*
 {metadocument}
