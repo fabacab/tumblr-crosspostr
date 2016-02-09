@@ -718,9 +718,8 @@ END_HTML;
                 $r['caption'] = ($e)
                     ? apply_filters('the_excerpt', $post_excerpt)
                     : apply_filters('the_content', $post_body);
-                // Strip after apply_filters in case shortcode is used to generate <audio> element.
                 $r['caption'] = $this->strip_only($r['caption'], 'audio', 1);
-                $r['external_url'] = $this->extractByRegex('/(?:href|src)="(.*?\.(?:mp3|wav|wma|aiff|ogg|ra|ram|rm|mid|alac|flac))".*?>/i', $post_body, 1);
+                $r['external_url'] = $this->extractByRegex('/(?:href|src)="([^"]+\.(?:mp3|wav|wma|aiff|ogg|ra|ram|rm|mid|alac|flac))"/i', apply_filters('the_content', $post_body), 1);
                 break;
             case 'video':
                 $r['caption'] = ($e)
