@@ -3,8 +3,8 @@ Contributors: meitar
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
-Tested up to: 4.3
-Stable tag: 0.8.4
+Tested up to: 4.4.2
+Stable tag: 0.8.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -149,6 +149,12 @@ If you'd like to see a world without arbitrary and unnecessary limitations that 
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.8.5 =
+
+* [Bugfix](https://github.com/meitar/tumblr-crosspostr/issues/24): Recognize audio generated from WordPress shortcodes.
+* Usability: Nicer styles for the plugin's settings screen.
+* Developer: Update libraries (this fixes several outstanding bugs that were present in the packaged library versions).
 
 = Version 0.8.4 =
 

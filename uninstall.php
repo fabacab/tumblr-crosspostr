@@ -2,7 +2,7 @@
 /**
  * Tumblr Crosspostr uninstaller
  *
- * @package plugin
+ * @package WordPress/Plugin/Tumblr_Crosspostr/Uninstaller
  */
 
 // Don't execute any uninstall code unless WordPress core requests it.

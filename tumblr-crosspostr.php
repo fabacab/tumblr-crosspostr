@@ -1,19 +1,48 @@
 <?php
 /**
- * Plugin Name: Tumblr Crosspostr
- * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
- * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * Version: 0.8.4
- * Author: Meitar Moscovitz
- * Author URI: http://Cyberbusking.org/
- * Text Domain: tumblr-crosspostr
- * Domain Path: /languages
+ * Tumblr Crosspostr plugin for WordPress
+ *
+ * WordPress plugin header information:
+ *
+ * * Plugin Name: Tumblr Crosspostr
+ * * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
+ * * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
+ * * Version: 0.8.5
+ * * Author: Meitar Moscovitz
+ * * Author URI: http://Cyberbusking.org/
+ * * Text Domain: tumblr-crosspostr
+ * * Domain Path: /languages
+ *
+ * @link https://developer.wordpress.org/plugins/the-basics/header-requirements/
+ *
+ * @license https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * @copyright Copyright (c) 2014-2016 by Meitar "maymay" Moscovitz
+ *
+ * @package WordPress\Plugin\Tumblr_Crosspostr
  */
 
+/**
+ * Main class.
+ */
 class Tumblr_Crosspostr {
-    private $tumblr; //< Tumblr API manipulation wrapper.
-    private $prefix = 'tumblr_crosspostr'; //< String to prefix plugin options, settings, etc.
+    /**
+     * Tumblr API manipulation wrapper.
+     *
+     * @var Tumblr_Crosspostr_API_Client
+     */
+    private $tumblr;
 
+    /**
+     * String to prefix plugin options, settings, etc.
+     *
+     * @var string
+     */
+    private $prefix = 'tumblr_crosspostr';
+
+    /**
+     * Constructor.
+     */
     public function __construct () {
         add_action('plugins_loaded', array($this, 'registerL10n'));
         add_action('init', array($this, 'updateChangedSettings'));
@@ -1779,5 +1808,5 @@ END_HTML;
 
 }
 
-$tumblr_crosspostr = new Tumblr_Crosspostr();
+new Tumblr_Crosspostr();
 require_once 'template-functions.php';
