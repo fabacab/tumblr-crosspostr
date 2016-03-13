@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meita
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
 Tested up to: 4.4.2
-Stable tag: 0.8.5
+Stable tag: 0.8.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -149,6 +149,10 @@ If you'd like to see a world without arbitrary and unnecessary limitations that 
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.8.6 =
+
+* [Bugfix](https://github.com/meitar/tumblr-crosspostr/issues/26): Correctly translate WordPress `<!-- more -->` link to Tumblr's equivalent.
 
 = Version 0.8.5 =
 

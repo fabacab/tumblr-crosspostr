@@ -691,7 +691,11 @@ END_HTML;
     }
 
     private function prepareParamsByPostType ($post_id, $type) {
-        $post_body = get_post_field('post_content', $post_id);
+        $post_body = preg_replace(
+            '/(?:<p>)?<!--\s*more\s*-->(?:<\/p>)?/i',
+            '[[MORE]]',
+            get_post_field('post_content', $post_id)
+        );
         $post_excerpt = get_post_field('post_excerpt', $post_id);
         // Mimic wp_trim_excerpt() without The Loop.
         if (empty($post_excerpt)) {
