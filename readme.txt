@@ -77,6 +77,8 @@ Tumblr Crosspostr makes use of Manuel Lemos's `oauth_client_class` for some core
 
 It's also possible that your system administrator will apply updates to one or more of the core system packages this plugin uses without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, the plugin may begin to issue errors. Should this occur, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/meitar/tumblr-crosspostr/issues/new).
 
+If images are not posting correctly please check that your WordPress blog is not using HTTPS. The Tumblr API does not support HTTPS image sources via the API.
+
 == Frequently Asked Questions ==
 
 = Can I specify a post's tags? =
@@ -354,7 +356,7 @@ If you'd like to see a world without arbitrary and unnecessary limitations that 
 * French translation (`fr_FR`). Activate the French version of this plugin by [configuring your WordPress to use that language](http://codex.wordpress.org/WordPress_in_Your_Language). Want Tumblr Crosspostr in your language? [Help us translate](https://www.transifex.com/signup/contributor/?next=/projects/p/tumblr-crosspostr/)!
 * Bugfix: Contextual help's support and donation links now open in new tabs or windows so you don't lose your place when writing.
 
-= Version 0.6.1 = 
+= Version 0.6.1 =
 
 * Feature: Detailed help is now available from the WordPress post screen's "Help" tab.
 

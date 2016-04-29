@@ -247,6 +247,7 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
             esc_html__('In %sthe Tumblr Crosspostr box%s, ensure the "Send this post to Tumblr?" option is set to "Yes." (You can set it to "No" if you do not want to copy this post to Tumblr.)', 'tumblr-crosspostr'),
             '<a href="#tumblr-crosspostr-meta-box">', '</a>'
             ) . '</li>'
+        . '<li>' . esc_html__('If you wish to have images converted to Tumblr image URLs (avoids the "external image" issue) make sure the "Convert external images" option is checked.') . '</li>'
         . '<li>' . esc_html__('If you have more than one Tumblr, choose the one you want to send this post to from the "Send to my Tumblr blog" list.', 'tumblr-crosspostr') . '</li>'
         . '<li>' . esc_html__('Optionally, enter any additional details specifically for Tumblr, such as the "Content source" field.', 'tumblr-crosspostr') . '</li>'
         . '</ol>'
@@ -543,6 +544,10 @@ END_HTML;
                 }
             } else {
                 $prepared_post->params['tweet'] = 'off';
+            }
+
+            if (isset($_POST[$this->prefix . '_convert_external_images'])) {
+              $prepared_post->params['native_inline_images'] = true;
             }
 
             $prepared_post = apply_filters($this->prefix . '_prepared_post', $prepared_post);
@@ -890,6 +895,7 @@ END_HTML;
                 case 'use_excerpt':
                 case 'exclude_tags':
                 case 'auto_tweet':
+                case 'convert_external_images':
                 case 'debug':
                     $safe_input[$k] = intval($v);
                 break;
@@ -1012,6 +1018,15 @@ END_HTML;
                     placeholder="<?php esc_attr_e('//original-source.com/', 'tumblr-crosspostr');?>" />
                 <span class="description"><?php esc_html_e('Provide source attribution, if relevant.', 'tumblr-crosspostr');?></span>
             </label>
+        </p>
+        <p>
+          <label>
+              <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_convert_external_images" value="1"
+                  <?php if (!empty($options['convert_external_images'])) { ?>checked="checked"<?php } ?>
+                  title="<?php esc_html_e('Check to not convert external images.', 'tumblr-crosspostr');?>"
+                  />
+              <?php esc_html_e('Covert external images?', 'tumblr-crosspostr');?>
+          </label>
         </p>
     </details>
 </fieldset>
@@ -1226,6 +1241,15 @@ END_HTML;
                 </ul>
                 <p class="description"><?php print sprintf(esc_html__('Choose which %1$spost types%2$s you want to crosspost. Not all post types can be crossposted safely, but many can. If you are not sure about a post type, leave it disabled. Plugin authors may create post types that are crossposted regardless of the value of this setting. %3$spost%4$s post types are always enabled.', 'tumblr-crosspostr'), '<a href="https://codex.wordpress.org/Post_Types">', '</a>', '<code>', '</code>');?></p>
             </td>
+        </tr>
+        <tr>
+          <th>
+            <lable for="<?php esc_attr_e($this->prefix)?>_convert_external_images"><?php esc_html_e('Convert external images', 'tumblr-crosspostr');?></label>
+          </th>
+          <td>
+            <input type="checkbox" <?php if (isset($options['convert_external_images'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_convert_external_images" name="<?php esc_attr_e($this->prefix);?>_settings[convert_external_images]" />
+            <label for="<?php esc_attr_e($this->prefix);?>_convert_external_images"><span class="description"><?php esc_html_e('When enabled, external images will be converted to Tumblr image urls. This avoids the "external image" issue when posting images.', 'tumblr-crosspostr');?></span></label>
+          </td>
         </tr>
         <tr>
             <th>
