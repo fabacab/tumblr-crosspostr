@@ -3,8 +3,8 @@ Contributors: meitar
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
-Tested up to: 4.4.2
-Stable tag: 0.8.6
+Tested up to: 4.5.1
+Stable tag: 0.8.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -151,6 +151,10 @@ If you'd like to see a world without arbitrary and unnecessary limitations that 
 6. Get help where you need it from WordPress's built-in "Help" system.
 
 == Changelog ==
+
+= Version 0.8.7 =
+
+* Feature: Use Tumblr's `native_inline_images` to avoid the "External image" display on the Tumblr Dash. (Props @jeraimee.)
 
 = Version 0.8.6 =
 
