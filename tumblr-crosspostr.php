@@ -546,8 +546,8 @@ END_HTML;
                 $prepared_post->params['tweet'] = 'off';
             }
 
-            if (isset($_POST[$this->prefix . '_convert_external_images'])) {
-              $prepared_post->params['native_inline_images'] = true;
+            if (isset($_POST[$this->prefix . '_native_inline_images'])) {
+                $prepared_post->params['native_inline_images'] = true;
             }
 
             $prepared_post = apply_filters($this->prefix . '_prepared_post', $prepared_post);
@@ -895,7 +895,7 @@ END_HTML;
                 case 'use_excerpt':
                 case 'exclude_tags':
                 case 'auto_tweet':
-                case 'convert_external_images':
+                case 'native_inline_images':
                 case 'debug':
                     $safe_input[$k] = intval($v);
                 break;
@@ -990,8 +990,8 @@ END_HTML;
     <legend style="display:block;"><?php esc_html_e('Send this post to Tumblr?', 'tumblr-crosspostr');?></legend>
     <p class="description" style="float: right; width: 75%;"><?php esc_html_e('If this post is in a category that Tumblr Crosspostr excludes, this will be ignored.', 'tumblr-crosspostr');?></p>
     <ul>
-        <li><label><input type="radio" name="<?php esc_attr_e($this->prefix);?>_crosspost" value="Y"<?php if ('N' !== $x) { print ' checked="checked"'; }?>> <?php esc_html_e('Yes', 'tumblr-crosspostr');?></label></li>
-        <li><label><input type="radio" name="<?php esc_attr_e($this->prefix);?>_crosspost" value="N"<?php if ('N' === $x) { print ' checked="checked"'; }?>> <?php esc_html_e('No', 'tumblr-crosspostr');?></label></li>
+        <li><label><input type="radio" name="<?php esc_attr_e($this->prefix);?>_crosspost" value="Y"<?php checked(('N' !== $x));?>> <?php esc_html_e('Yes', 'tumblr-crosspostr');?></label></li>
+        <li><label><input type="radio" name="<?php esc_attr_e($this->prefix);?>_crosspost" value="N"<?php checked(('N' === $x));?>> <?php esc_html_e('No', 'tumblr-crosspostr');?></label></li>
     </ul>
 </fieldset>
 <fieldset>
@@ -1004,7 +1004,7 @@ END_HTML;
         </label></p>
         <p><label>
             <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_use_excerpt" value="1"
-                <?php if (1 === $e) { print 'checked="checked"'; } ?>
+                <?php checked((1 === $e));?>
                 title="<?php esc_html_e('Uncheck to send post content as crosspost content.', 'tumblr-crosspostr');?>"
                 />
             <?php esc_html_e('Send excerpt instead of main content?', 'tumblr-crosspostr');?>
@@ -1021,8 +1021,8 @@ END_HTML;
         </p>
         <p>
           <label>
-              <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_convert_external_images" value="1"
-                  <?php if (!empty($options['convert_external_images'])) { ?>checked="checked"<?php } ?>
+              <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_native_inline_images" value="1"
+                  <?php checked(!empty($options['native_inline_images']));?>
                   title="<?php esc_html_e('Leave unchecked to not convert external images.', 'tumblr-crosspostr');?>"
                   />
               <?php esc_html_e('Convert external images?', 'tumblr-crosspostr');?>
@@ -1038,7 +1038,7 @@ END_HTML;
         <p>
             <label>
                 <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_send_tweet" value="1"
-                    <?php if (!empty($options['auto_tweet'])) { ?>checked="checked"<?php } ?>
+                    <?php checked(!empty($options['auto_tweet']));?>
                     title="<?php esc_html_e('Uncheck to disable the auto-tweet.', 'tumblr-crosspostr');?>"
                     />
                 <?php esc_html_e('Send tweet?', 'tumblr-crosspostr');?>
@@ -1171,7 +1171,7 @@ END_HTML;
                         <label>
                             <input
                                 type="checkbox"
-                                <?php if (isset($options['exclude_categories']) && in_array($cat->slug, $options['exclude_categories'])) : print 'checked="checked"'; endif;?>
+                                <?php checked(isset($options['exclude_categories']) && in_array($cat->slug, $options['exclude_categories']));?>
                                 value="<?php esc_attr_e($cat->slug);?>"
                                 name="<?php esc_attr_e($this->prefix);?>_settings[exclude_categories][]">
                             <?php print esc_html($cat->name);?>
@@ -1192,7 +1192,7 @@ END_HTML;
                         <label>
                             <input type="radio" id="<?php esc_attr_e($this->prefix);?>_auto_source_yes"
                                 name="<?php esc_attr_e($this->prefix);?>_settings[auto_source]"
-                                <?php if (!isset($options['auto_source']) || $options['auto_source'] === 'Y') { print 'checked="checked"'; } ?>
+                                <?php checked(!isset($options['auto_source']) || $options['auto_source'] === 'Y');?>
                                 value="Y" />
                             <?php esc_html_e('Yes', 'tumblr-crosspostr');?>
                         </label>
@@ -1201,7 +1201,7 @@ END_HTML;
                         <label>
                             <input type="radio" id="<?php esc_attr_e($this->prefix);?>_auto_source_no"
                                 name="<?php esc_attr_e($this->prefix);?>_settings[auto_source]"
-                                <?php if (isset($options['auto_source']) && $options['auto_source'] === 'N') { print 'checked="checked"'; } ?>
+                                <?php checked(isset($options['auto_source']) && $options['auto_source'] === 'N');?>
                                 value="N" />
                             <?php esc_html_e('No', 'tumblr-crosspostr');?>
                         </label>
@@ -1215,7 +1215,7 @@ END_HTML;
                 <label for="<?php esc_attr_e($this->prefix);?>_use_excerpt"><?php esc_html_e('Send excerpts instead of main content?', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input type="checkbox" <?php if (isset($options['use_excerpt'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_use_excerpt" name="<?php esc_attr_e($this->prefix);?>_settings[use_excerpt]" />
+                <input type="checkbox" <?php checked(isset($options['use_excerpt']));?> value="1" id="<?php esc_attr_e($this->prefix);?>_use_excerpt" name="<?php esc_attr_e($this->prefix);?>_settings[use_excerpt]" />
                 <label for="<?php esc_attr_e($this->prefix);?>_use_excerpt"><span class="description"><?php esc_html_e('When enabled, the excerpts (as opposed to the body) of your WordPress posts will be used as the main content of your Tumblr posts. Useful if you prefer to crosspost summaries instead of the full text of your entires to Tumblr by default. This can be overriden on a per-post basis, too.', 'tumblr-crosspostr');?></span></label>
             </td>
         </tr>
@@ -1230,7 +1230,7 @@ END_HTML;
                         <label>
                             <input
                                 type="checkbox"
-                                <?php if (isset($options['post_types']) && in_array($cpt, $options['post_types'])) : print 'checked="checked"'; endif;?>
+                                <?php checked(isset($options['post_types']) && in_array($cpt, $options['post_types']));?>
                                 <?php if ('post' === $cpt) { print 'disabled="disabled"'; } ?>
                                 value="<?php esc_attr_e($cpt);?>"
                                 name="<?php esc_attr_e($this->prefix);?>_settings[post_types][]">
@@ -1244,11 +1244,11 @@ END_HTML;
         </tr>
         <tr>
           <th>
-            <lable for="<?php esc_attr_e($this->prefix)?>_convert_external_images"><?php esc_html_e('Convert external images', 'tumblr-crosspostr');?></label>
+            <label for="<?php esc_attr_e($this->prefix)?>_native_inline_images"><?php esc_html_e('Convert external images', 'tumblr-crosspostr');?></label>
           </th>
           <td>
-            <input type="checkbox" <?php if (isset($options['convert_external_images'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_convert_external_images" name="<?php esc_attr_e($this->prefix);?>_settings[convert_external_images]" />
-            <label for="<?php esc_attr_e($this->prefix);?>_convert_external_images"><span class="description"><?php esc_html_e('When enabled, external images will be converted to Tumblr image urls. This avoids the "external image" issue when posting images.', 'tumblr-crosspostr');?></span></label>
+            <input type="checkbox" <?php checked(isset($options['native_inline_images']));?> value="1" id="<?php esc_attr_e($this->prefix);?>_native_inline_images" name="<?php esc_attr_e($this->prefix);?>_settings[native_inline_images]" />
+            <label for="<?php esc_attr_e($this->prefix);?>_native_inline_images"><span class="description"><?php esc_html_e('When enabled, external images will be converted to Tumblr image urls. This avoids the "external image" issue when posting images.', 'tumblr-crosspostr');?></span></label>
           </td>
         </tr>
         <tr>
@@ -1274,7 +1274,7 @@ END_HTML;
                 <label for="<?php esc_attr_e($this->prefix);?>_exclude_tags"><?php esc_html_e('Do not send post tags to Tumblr', 'tumblr-crosspostr');?></label>
             </th>
             <td>
-                <input type="checkbox" <?php if (isset($options['exclude_tags'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_exclude_tags" name="<?php esc_attr_e($this->prefix);?>_settings[exclude_tags]" />
+                <input type="checkbox" <?php checked(isset($options['exclude_tags']));?> value="1" id="<?php esc_attr_e($this->prefix);?>_exclude_tags" name="<?php esc_attr_e($this->prefix);?>_settings[exclude_tags]" />
                 <label for="<?php esc_attr_e($this->prefix);?>_exclude_tags"><span class="description"><?php esc_html_e('When enabled, tags on your WordPress posts are not applied to your Tumblr posts. Useful if you maintain different taxonomies on your different sites.', 'tumblr-crosspostr');?></span></label>
             </td>
         </tr>
@@ -1301,7 +1301,7 @@ END_HTML;
                 </label>
             </th>
             <td>
-                <input type="checkbox" <?php if (isset($options['auto_tweet'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_auto_tweet" name="<?php esc_attr_e($this->prefix);?>_settings[auto_tweet]" />
+                <input type="checkbox" <?php checked(isset($options['auto_tweet']));?> value="1" id="<?php esc_attr_e($this->prefix);?>_auto_tweet" name="<?php esc_attr_e($this->prefix);?>_settings[auto_tweet]" />
                 <label for="<?php esc_attr_e($this->prefix);?>_auto_tweet"><span class="description"><?php print sprintf(esc_html__('When checked, new posts you create on WordPress will have their "%s" option enabled by default. You can always override this when editing an individual post.', 'tumblr-crosspostr'), esc_html__('Send tweet?', 'tumblr-crosspostr'));?></span></label>
             </td>
         </tr>
@@ -1340,7 +1340,7 @@ END_HTML;
                         <label>
                             <input
                                 type="checkbox"
-                                <?php if (isset($options['import_to_categories']) && in_array($cat->slug, $options['import_to_categories'])) : print 'checked="checked"'; endif;?>
+                                <?php checked(isset($options['import_to_categories']) && in_array($cat->slug, $options['import_to_categories']));?>
                                 value="<?php esc_attr_e($cat->slug);?>"
                                 name="<?php esc_attr_e($this->prefix);?>_settings[import_to_categories][]">
                             <?php print esc_html($cat->name);?>
@@ -1364,7 +1364,7 @@ END_HTML;
                 </label>
             </th>
             <td>
-                <input type="checkbox" <?php if (isset($options['debug'])) : print 'checked="checked"'; endif; ?> value="1" id="<?php esc_attr_e($this->prefix);?>_debug" name="<?php esc_attr_e($this->prefix);?>_settings[debug]" />
+                <input type="checkbox" <?php checked(isset($options['debug']));?> value="1" id="<?php esc_attr_e($this->prefix);?>_debug" name="<?php esc_attr_e($this->prefix);?>_settings[debug]" />
                 <label for="<?php esc_attr_e($this->prefix);?>_debug"><span class="description"><?php
         print sprintf(
             esc_html__('Turn this on only if you are experiencing problems using this plugin, or if you were told to do so by someone helping you fix a problem (or if you really know what you are doing). When enabled, extremely detailed technical information is displayed as a WordPress admin notice when you take actions like sending a crosspost. If you have also enabled WordPress\'s built-in debugging (%1$s) and debug log (%2$s) feature, additional information will be sent to a log file (%3$s). This file may contain sensitive information, so turn this off and erase the debug log file when you have resolved the issue.', 'tumblr-crosspostr'),
