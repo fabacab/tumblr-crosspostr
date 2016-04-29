@@ -1023,9 +1023,9 @@ END_HTML;
           <label>
               <input type="checkbox" name="<?php esc_attr_e($this->prefix);?>_convert_external_images" value="1"
                   <?php if (!empty($options['convert_external_images'])) { ?>checked="checked"<?php } ?>
-                  title="<?php esc_html_e('Check to not convert external images.', 'tumblr-crosspostr');?>"
+                  title="<?php esc_html_e('Leave unchecked to not convert external images.', 'tumblr-crosspostr');?>"
                   />
-              <?php esc_html_e('Covert external images?', 'tumblr-crosspostr');?>
+              <?php esc_html_e('Convert external images?', 'tumblr-crosspostr');?>
           </label>
         </p>
     </details>
