@@ -7,7 +7,7 @@
  * * Plugin Name: Tumblr Crosspostr
  * * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * * Version: 0.8.7
+ * * Version: 0.8.8
  * * Author: Meitar Moscovitz
  * * Author URI: http://Cyberbusking.org/
  * * Text Domain: tumblr-crosspostr
@@ -46,7 +46,6 @@ class Tumblr_Crosspostr {
     public function __construct () {
         add_action('plugins_loaded', array($this, 'registerL10n'));
         add_action('init', array($this, 'updateChangedSettings'));
-        add_action('init', array($this, 'setSyncSchedules'));
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_menu', array($this, 'registerAdminMenu'));
         add_action('admin_enqueue_scripts', array($this, 'registerAdminScripts'));
@@ -55,6 +54,7 @@ class Tumblr_Crosspostr {
         add_action('add_meta_boxes', array($this, 'addMetaBox'));
         add_action('save_post', array($this, 'savePost'));
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
+        add_action('update_option_' . $this->prefix . '_settings', array($this, 'setSyncSchedules'));
         // run late, so themes have a chance to register support
         add_action('after_setup_theme', array($this, 'registerThemeSupport'), 700);
 

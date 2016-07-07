@@ -3,9 +3,9 @@ Contributors: meitar
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 3.1
-Tested up to: 4.5.1
-Stable tag: 0.8.7
-License: GPLv3
+Tested up to: 4.5.3
+Stable tag: 0.8.8
+License: GPL-3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Tumblr Crosspostr cross-posts your WordPress entries to Tumblr. Changes to your WordPress posts are reflected in your Tumblr posts.
@@ -150,7 +150,17 @@ If you'd like to see a world without arbitrary and unnecessary limitations that 
 
 6. Get help where you need it from WordPress's built-in "Help" system.
 
+== Upgrade Notice ==
+
+= Version 0.8.8 =
+
+This version will improve Tumblr Crosspostr's speed and reduce your bandwidth usage. Websites running on shared hosting plans or who pay bandwidth usage fees are particularly encouraged to update.
+
 == Changelog ==
+
+= Version 0.8.8 =
+
+Bugfix: Quiet duplicated network requests to Tumblr's `/user/info` API endpoint.
 
 = Version 0.8.7 =
 
