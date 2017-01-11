@@ -226,6 +226,13 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
         load_plugin_textdomain('tumblr-crosspostr', false, dirname(plugin_basename(__FILE__)) . '/languages/');
     }
 
+    /**
+     * Registers the plugin's main setting field.
+     *
+     * @link https://developer.wordpress.org/reference/functions/register_setting/
+     *
+     * @uses register_setting()
+     */
     public function registerSettings () {
         register_setting(
             $this->prefix . '_settings',
@@ -356,6 +363,9 @@ END_HTML;
     /**
      * Translates a WordPress post status to a Tumblr post state.
      *
+     * Note that Tumblr supports an additional state, called Queued,
+     * but by default WordPress does not, so we do not ever use it.
+     *
      * @param string $status The WordPress post status to translate.
      * @return mixed The translates Tumblr post state or false if the WordPress status has no equivalently compatible state on Tumblr.
      */
@@ -369,7 +379,7 @@ END_HTML;
                 $state = 'published';
                 break;
             case 'future':
-                $state = 'queue';
+                $state = 'published'; // not `queued`
                 break;
             case 'auto-draft':
             case 'inherit':
@@ -380,6 +390,13 @@ END_HTML;
         return $state;
     }
 
+    /**
+     * Translates a Tumblr post state to a WordPress post status.
+     *
+     * @var string
+     *
+     * @return string
+     */
     private function TumblrState2WordPressStatus ($state) {
         switch ($state) {
             case 'draft':
@@ -395,6 +412,13 @@ END_HTML;
         return $status;
     }
 
+    /**
+     * Whether or not a given WordPress post can be cross-posted.
+     *
+     * @var int $post_id
+     *
+     * @return bool
+     */
     private function isPostCrosspostable ($post_id) {
         $options = get_option($this->prefix . '_settings');
         $crosspostable = true;
@@ -471,10 +495,16 @@ END_HTML;
             'type' => $this->WordPressPostFormat2TumblrPostType($format),
             'state' => $state,
             'tags' => implode(',', $tags),
-            'date' => get_post_time('Y-m-d H:i:s', true, $post_id) . ' GMT',
             'format' => 'html', // Tumblr's "formats" are always either 'html' or 'markdown'
             'slug' => get_post_field('post_name', $post_id)
         );
+        if ('future' === get_post_status($post_id)) {
+            $common_params['date'] = '';
+            $common_params['publish_on'] = get_post_time('Y-m-d H:i:s', true, $post_id) . ' GMT';
+        } else {
+            $common_params['date'] = get_post_time('Y-m-d H:i:s', true, $post_id) . ' GMT';
+        }
+
         if ($source_url) { $common_params['source_url'] = $source_url; }
 
         if (!empty($options['exclude_tags'])) { unset($common_params['tags']); }
@@ -509,6 +539,15 @@ END_HTML;
         return $prepared_post;
     }
 
+    /**
+     * Saves a post and its Tumblr-specific metadata.
+     *
+     * @link https://developer.wordpress.org/reference/hooks/save_post/
+     *
+     * @param int $post_id
+     *
+     * @return void
+     */
     public function savePost ($post_id) {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
         if (!$this->isConnectedToService()) { return; }
@@ -623,10 +662,25 @@ END_HTML;
         return $msg;
     }
 
+    /**
+     * Prints an HTML link to Tumblr's support page.
+     *
+     * @return string
+     */
     private function linkToTumblrSupport () {
         return '<a href="http://www.tumblr.com/help?form">' . esc_html__('Tumblr Support', 'tumblr-crosspostr') . '</a>';
     }
 
+    /**
+     * Saves one or more messages to be displayed later as an admin notice.
+     *
+     * @uses get_option
+     * @uses update_option
+     *
+     * @param string|string[] $msgs
+     *
+     * @return void
+     */
     private function addAdminNotices ($msgs) {
         if (is_string($msgs)) { $msgs = array($msgs); }
         $notices = get_option('_' . $this->prefix . '_admin_notices');
@@ -637,6 +691,14 @@ END_HTML;
         update_option('_' . $this->prefix . '_admin_notices', $notices);
     }
 
+    /**
+     * Shows saved admin notices and deletes the old ones.
+     *
+     * @uses get_option
+     * @uses delete_option
+     *
+     * @return void
+     */
     public function showAdminNotices () {
         $notices = get_option('_' . $this->prefix . '_admin_notices');
         if ($notices) {
@@ -647,6 +709,14 @@ END_HTML;
         }
     }
 
+    /**
+     * Inserts values from a given post to a string according to placeholders.
+     *
+     * @param string $str
+     * @param int $post_id
+     *
+     * @return string
+     */
     private function replacePlaceholders ($str, $post_id) {
         $placeholders = array(
             '%permalink%',
@@ -679,6 +749,7 @@ END_HTML;
      * @param array @params Any additional parameters for the request.
      * @param int $tumblr_id The ID of a specific Tumblr post (only needed if editing or deleting this post).
      * @param bool $deleting Whether or not to delete, rather than to edit, a specific Tumblr post.
+     *
      * @return array Tumblr's decoded JSON response.
      */
     private function crosspostToTumblr ($blog, $params, $tumblr_id = false, $deleting = false) {
@@ -695,6 +766,15 @@ END_HTML;
         }
     }
 
+    /**
+     * Gets an array of HTTP request parameters for the given post
+     * based on its post type.
+     *
+     * @param int $post_id
+     * @param string $type
+     *
+     * @return string[]
+     */
     private function prepareParamsByPostType ($post_id, $type) {
         $post_body = preg_replace(
             '/(?:<p>)?<!--\s*more\s*-->(?:<\/p>)?/i',
@@ -799,6 +879,7 @@ END_HTML;
      * @param string $pattern The PCRE-compatible regular expression.
      * @param string $str The source from which to extract text matching the $pattern.
      * @param int $group If the regex uses capture groups, the number of the capture group to return.
+     *
      * @return string The matched text.
      */
     private function extractByRegex ($pattern, $str, $group = 0) {
@@ -845,7 +926,12 @@ END_HTML;
     }
 
     /**
+     * Callback used to validate the value of a setting option.
+     *
+     * @link https://developer.wordpress.org/reference/functions/register_setting/
+     *
      * @param array $input An array of of our unsanitized options.
+     *
      * @return array An array of sanitized options.
      */
     public function validateSettings ($input) {
