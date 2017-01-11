@@ -7,7 +7,7 @@
  * * Plugin Name: Tumblr Crosspostr
  * * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * * Version: 0.8.8
+ * * Version: 0.8.9
  * * Author: Meitar Moscovitz
  * * Author URI: http://Cyberbusking.org/
  * * Text Domain: tumblr-crosspostr
@@ -896,6 +896,7 @@ END_HTML;
                 case 'exclude_tags':
                 case 'auto_tweet':
                 case 'native_inline_images':
+                case 'leave_no_trace':
                 case 'debug':
                     $safe_input[$k] = intval($v);
                 break;
@@ -1357,6 +1358,19 @@ END_HTML;
 <fieldset id="plugin-extras"><legend><?php esc_html_e('Plugin extras', 'tumblr-crosspostr');?></legend>
 <table class="form-table" summary="<?php esc_attr_e('Additional options to customize plugin behavior.', 'tumblr-crosspostr');?>">
     <tbody>
+        <tr>
+            <th>
+                <label for="<?php esc_attr_e($this->prefix);?>_leave_no_trace">
+                    <?php esc_html_e('Leave no trace when uninstalling', 'tumblr-crosspostr');?>
+                </label>
+            </th>
+            <td>
+                <input type="checkbox" <?php checked(isset($options['leave_no_trace']));?> value="1" id="<?php esc_attr_e($this->prefix);?>_leave_no_trace" name="<?php esc_attr_e($this->prefix);?>_settings[leave_no_trace]" />
+                <label for="<?php esc_attr_e($this->prefix);?>_leave_no_trace"><span class="description"><?php
+                    esc_html_e('When checked, Tumblr Crosspostr will delete all of its own metadata when you uninstall it. Ordinarily, when you reinstall the plugin, the association between your WordPress post and that same post on Tumblr remains intact. If you enable this and uninstall the plugin, these associations are deleted.', 'tumblr-crosspostr');
+                ?></span></label>
+            </td>
+        </tr>
         <tr>
             <th>
                 <label for="<?php esc_attr_e($this->prefix);?>_debug">
