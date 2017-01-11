@@ -15,10 +15,11 @@ if ($options['leave_no_trace']) {
     delete_post_meta_by_key('tumblr_base_hostname');
 }
 
+// Delete all temporary post metadata values.
+delete_post_meta_by_key('tumblr_crosspostr_crosspost');
+
 // Delete options.
 delete_option('tumblr_crosspostr_settings');
 delete_option('_tumblr_crosspostr_admin_notices');
 delete_option('tumblr_crosspostr_access_token');
 delete_option('tumblr_crosspostr_access_token_secret');
-
-delete_post_meta_by_key('tumblr_crosspostr_crosspost');

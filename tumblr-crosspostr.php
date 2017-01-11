@@ -7,7 +7,7 @@
  * * Plugin Name: Tumblr Crosspostr
  * * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
  * * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
- * * Version: 0.8.9
+ * * Version: 0.9.0
  * * Author: Meitar Moscovitz
  * * Author URI: http://Cyberbusking.org/
  * * Text Domain: tumblr-crosspostr
@@ -52,6 +52,7 @@ class Tumblr_Crosspostr {
         add_action('admin_head', array($this, 'registerContextualHelp'));
         add_action('admin_notices', array($this, 'showAdminNotices'));
         add_action('add_meta_boxes', array($this, 'addMetaBox'));
+        add_action('post_submitbox_misc_actions', array($this, 'postSubmitboxMiscActions'));
         add_action('save_post', array($this, 'savePost'));
         add_action('before_delete_post', array($this, 'removeFromTumblr'));
         add_action('update_option_' . $this->prefix . '_settings', array($this, 'setSyncSchedules'));
@@ -363,23 +364,20 @@ END_HTML;
     /**
      * Translates a WordPress post status to a Tumblr post state.
      *
-     * Note that Tumblr supports an additional state, called Queued,
-     * but by default WordPress does not, so we do not ever use it.
-     *
      * @param string $status The WordPress post status to translate.
+     * @param bool $queued Whether or not the post is intended for the Tumblr Queue.
+     *
      * @return mixed The translates Tumblr post state or false if the WordPress status has no equivalently compatible state on Tumblr.
      */
-    private function WordPressStatus2TumblrState ($status) {
+    private function WordPressStatus2TumblrState ($status, $queued = false) {
         switch ($status) {
             case 'draft':
             case 'private':
                 $state = $status;
                 break;
-            case 'publish':
+            case 'future':  // Tumblr doesn't have a "future" state
+            case 'publish': // and always uses "published" for this.
                 $state = 'published';
-                break;
-            case 'future':
-                $state = 'published'; // not `queued`
                 break;
             case 'auto-draft':
             case 'inherit':
@@ -387,7 +385,7 @@ END_HTML;
             default:
                 $state = false;
         }
-        return $state;
+        return ($queued) ? 'queue' : $state;
     }
 
     /**
@@ -444,11 +442,16 @@ END_HTML;
     /**
      * Translates a WordPress post data for Tumblr's API.
      *
+     * @uses $_POST['tumblr_crosspostr_publish_to_queue']
+     *
      * @param int $post_id The ID number of the WordPress post.
+     *
      * @return mixed A simple object representing data for Tumblr or FALSE if the given post should not be crossposted.
      */
     private function prepareForTumblr ($post_id) {
         if (!$this->isPostCrosspostable($post_id)) { return false; }
+
+        $queued = isset($_POST[$this->prefix.'_publish_to_queue']);
 
         $options = get_option($this->prefix . '_settings');
         $custom = get_post_custom($post_id);
@@ -483,7 +486,7 @@ END_HTML;
         }
 
         $format = (defined('DOING_AJAX') && DOING_AJAX) ? $_POST['post_format'] : get_post_format($post_id);
-        $state = $this->WordPressStatus2TumblrState(get_post_status($post_id));
+        $state = $this->WordPressStatus2TumblrState(get_post_status($post_id), $queued);
         $tags = array();
         if ($t = get_the_tags($post_id)) {
             foreach ($t as $tag) {
@@ -491,6 +494,8 @@ END_HTML;
                 $tags[] = str_replace('&amp;', '&', $tag->name);
             }
         }
+
+        // Set up parameters for all post types.
         $common_params = array(
             'type' => $this->WordPressPostFormat2TumblrPostType($format),
             'state' => $state,
@@ -498,10 +503,14 @@ END_HTML;
             'format' => 'html', // Tumblr's "formats" are always either 'html' or 'markdown'
             'slug' => get_post_field('post_name', $post_id)
         );
-        if ('future' === get_post_status($post_id)) {
+
+        if ($queued) { // Queued posts need to have an empty date.
+            $common_params['date'] = '';
+        } else if ('future' === get_post_status($post_id)) {
+            // Scheduled posts need an empty date and a "publish_on" date.
             $common_params['date'] = '';
             $common_params['publish_on'] = get_post_time('Y-m-d H:i:s', true, $post_id) . ' GMT';
-        } else {
+        } else { // All other posts should have a valid date.
             $common_params['date'] = get_post_time('Y-m-d H:i:s', true, $post_id) . ' GMT';
         }
 
@@ -537,6 +546,31 @@ END_HTML;
         $prepared_post->tumblr_id = (empty($tumblr_id)) ? false : $tumblr_id;
 
         return $prepared_post;
+    }
+
+    /**
+     * Prints the Tumblr Queue option selector for the given post.
+     *
+     * @link https://developer.wordpress.org/reference/hooks/post_submitbox_misc_actions/
+     *
+     * @param WP_Post $post
+     */
+    public function postSubmitBoxMiscActions ($post) {
+?>
+<div class="misc-pub-section <?php esc_attr_e($this->prefix);?>-publish-to-queue">
+    <label>
+        <span class="dashicons dashicons-clock"></span>
+        <input
+            id="<?php esc_attr_e($this->prefix);?>_publish_to_queue"
+            name="<?php esc_attr_e($this->prefix);?>_publish_to_queue"
+            type="checkbox"
+            <?php checked(get_post_meta($post->ID, "{$this->prefix}_publish_to_queue", true));?>
+            value="1"
+        />
+        <?php esc_html_e('Add to Queue on Tumblr', 'tumblr-crosspostr');?>
+    </label>
+</div>
+<?php
     }
 
     /**
