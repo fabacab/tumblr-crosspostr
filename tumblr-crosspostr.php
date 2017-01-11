@@ -6,10 +6,10 @@
  *
  * * Plugin Name: Tumblr Crosspostr
  * * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
- * * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog.
+ * * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog. <strong>Like this plugin? Please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted" title="Send a donation to the developer">donate</a>. &hearts; Thank you!</strong>
  * * Version: 0.9.0
- * * Author: Meitar Moscovitz
- * * Author URI: http://Cyberbusking.org/
+ * * Author: Meitar Moscovitz <meitarm+wordpress@gmail.com>
+ * * Author URI: https://Cyberbusking.org/
  * * Text Domain: tumblr-crosspostr
  * * Domain Path: /languages
  *
