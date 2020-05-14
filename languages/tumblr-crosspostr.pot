@@ -664,7 +664,7 @@ msgid "Error saving file (%s): "
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://github.com/meitar/tumblr-crosspostr/#readme"
+msgid "https://github.com/fabacab/tumblr-crosspostr/#readme"
 msgstr ""
 
 #. Description of the plugin/theme
@@ -680,7 +680,7 @@ msgid ""
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Meitar Moscovitz <meitarm+wordpress@gmail.com>"
+msgid "The Author"
 msgstr ""
 
 #. Author URI of the plugin/theme

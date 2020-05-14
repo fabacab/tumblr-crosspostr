@@ -1,6 +1,6 @@
 === Tumblr Crosspostr ===
-Contributors: meitar
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
+Contributors: maymay
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr-crosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 Tags: tumblr, post, crosspost, publishing, post formats
 Requires at least: 4.4
 Tested up to: 4.7.1
@@ -19,7 +19,7 @@ Tumblr Crosspostr posts to Tumblr whenever you hit the "Publish" (or "Save Draft
 * Import your Tumblr reblogs automatically.
 * [Always have a portable copy (a running backup) of your entire Tumblr blog](http://maymay.net/blog/2014/02/17/keep-a-running-backup-of-your-tumblr-reblogs-with-tumblr-crosspostr/).
 
-*Donations for this plugin make up a chunk of my income. If you continue to enjoy this plugin, please consider [making a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted). :) Thank you for your support!*
+*Donations for this plugin make up a chunk of my income. If you continue to enjoy this plugin, please consider [making a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr-crosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted). :) Thank you for your support!*
 
 Tumblr Crosspostr uses Tumblr's simple API to keep posts in sync; when you edit your WordPress post, it updates your Tumblr post. Private WordPress posts become private Tumblr posts, deleting a post from WordPress that you've previously cross-posted to Tumblr deletes it from Tumblr, too, and so on. The plugin supports both scheduled posts (scheduling a WordPress post schedules it to publish at the same time on Tumblr) as well as the Tumblr Queue feature.
 
@@ -75,7 +75,7 @@ Tumblr Crosspostr makes use of Manuel Lemos's `oauth_client_class` for some core
         ├── oauth_client.php
         └── oauth_configuration.json
 
-It's also possible that your system administrator will apply updates to one or more of the core system packages this plugin uses without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, the plugin may begin to issue errors. Should this occur, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/meitar/tumblr-crosspostr/issues/new).
+It's also possible that your system administrator will apply updates to one or more of the core system packages this plugin uses without your knowledge. If this happens, and the updated packages contain backward-incompatible changes, the plugin may begin to issue errors. Should this occur, please [file a bug report on the Tumblr Crosspostr project's issue tracker](https://github.com/fabacab/tumblr-crosspostr/issues/new).
 
 If images are not posting correctly please check that your WordPress blog is not using HTTPS. The Tumblr API does not support HTTPS image sources via the API.
 
@@ -160,7 +160,7 @@ Scheduled posts are now supported on the Tumblr side. Scheduling a post in WordP
 
 = 0.9 =
 
-* [Feature](https://github.com/meitar/tumblr-crosspostr/issues/25): Scheduled posting support.
+* [Feature](https://github.com/fabacab/tumblr-crosspostr/issues/25): Scheduled posting support.
 * Feature: Option to "leave no trace" when uninstalling the plugin. This is dangerous and off by default. It will permanently erase *all* associations between your WordPress posts and your Tumblr posts, deleting all Tumblr-relatd metadata for your WordPress content.
 
 = 0.8.8 =
@@ -173,11 +173,11 @@ Bugfix: Quiet duplicated network requests to Tumblr's `/user/info` API endpoint.
 
 = 0.8.6 =
 
-* [Bugfix](https://github.com/meitar/tumblr-crosspostr/issues/26): Correctly translate WordPress `<!-- more -->` link to Tumblr's equivalent.
+* [Bugfix](https://github.com/fabacab/tumblr-crosspostr/issues/26): Correctly translate WordPress `<!-- more -->` link to Tumblr's equivalent.
 
 = 0.8.5 =
 
-* [Bugfix](https://github.com/meitar/tumblr-crosspostr/issues/24): Recognize audio generated from WordPress shortcodes.
+* [Bugfix](https://github.com/fabacab/tumblr-crosspostr/issues/24): Recognize audio generated from WordPress shortcodes.
 * Usability: Nicer styles for the plugin's settings screen.
 * Developer: Update libraries (this fixes several outstanding bugs that were present in the packaged library versions).
 
@@ -217,7 +217,7 @@ Version history has been truncated due to [WordPress.org plugin repository `read
 
 == Other notes ==
 
-Maintaining this plugin is a labor of love. However, if you like it, please consider [making a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted) for your use of the plugin, [purchasing one of Meitar's web development books](http://www.amazon.com/gp/redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2Fs%3Fie%3DUTF8%26redirect%3Dtrue%26sort%3Drelevancerank%26search-type%3Dss%26index%3Dbooks%26ref%3Dntt%255Fathr%255Fdp%255Fsr%255F2%26field-author%3DMeitar%2520Moscovitz&tag=maymaydotnet-20&linkCode=ur2&camp=1789&creative=390957) or, better yet, contributing directly to [Meitar's Cyberbusking fund](http://Cyberbusking.org/). (Publishing royalties ain't exactly the lucrative income it used to be, y'know?) Your support is appreciated!
+Maintaining this plugin is a labor of love. However, if you like it, please consider [making a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr-crosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted) for your use of the plugin or, better yet, contributing directly to [my's Cyberbusking fund](http://Cyberbusking.org/). Your support is appreciated!
 
 = Developer reference =
 

@@ -5,19 +5,15 @@
  * WordPress plugin header information:
  *
  * * Plugin Name: Tumblr Crosspostr
- * * Plugin URI: https://github.com/meitar/tumblr-crosspostr/#readme
+ * * Plugin URI: https://github.com/fabacab/tumblr-crosspostr/#readme
  * * Description: Automatically crossposts to your Tumblr blog when you publish a post on your WordPress blog. <strong>Like this plugin? Please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted" title="Send a donation to the developer">donate</a>. &hearts; Thank you!</strong>
  * * Version: 0.9.0
- * * Author: Meitar Moscovitz <meitarm+wordpress@gmail.com>
- * * Author URI: https://Cyberbusking.org/
  * * Text Domain: tumblr-crosspostr
  * * Domain Path: /languages
  *
  * @link https://developer.wordpress.org/plugins/the-basics/header-requirements/
  *
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html
- *
- * @copyright Copyright (c) 2014-2016 by Meitar "maymay" Moscovitz
  *
  * @package WordPress\Plugin\Tumblr_Crosspostr
  */
@@ -177,7 +173,7 @@ class Tumblr_Crosspostr {
 <div class="donation-appeal">
     <p style="text-align: center; font-size: larger; width: 70%; margin: 0 auto;"><?php print sprintf(
 esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery stores do not offer free food. If you like this plugin, please consider %1$s to its %2$s. &hearts; Thank you!', 'tumblr-crosspostr'),
-'<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=meitarm%40gmail%2ecom&lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr%2dcrosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">' . esc_html__('making a donation', 'tumblr-crosspostr') . '</a>',
+'<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr-crosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted">' . esc_html__('making a donation', 'tumblr-crosspostr') . '</a>',
 '<a href="http://Cyberbusking.org/">' . esc_html__('houseless, jobless, nomadic developer', 'tumblr-crosspostr') . '</a>'
 );?></p>
 </div>
@@ -278,7 +274,7 @@ esc_html__('Tumblr Crosspostr is provided as free software, but sadly grocery st
         $sidebar = <<<END_HTML
 <p><strong>$x</strong></p>
 <p><a href="https://wordpress.org/support/plugin/tumblr-crosspostr" target="_blank">$y</a></p>
-<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=meitarm%40gmail%2ecom&lc=US&item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&item_number=tumblr%2dcrosspostr&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank">&hearts; $z &hearts;</a></p>
+<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr-crosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted" target="_blank">&hearts; $z &hearts;</a></p>
 END_HTML;
         $screen->set_help_sidebar($screen->get_help_sidebar() . $sidebar);
     }
@@ -303,7 +299,7 @@ END_HTML;
     public function addPluginRowMeta ($links, $file) {
         if (false !== strpos($file, basename(__FILE__))) {
             $new_links = array(
-                '&hearts; <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=meitarm%40gmail%2ecom&lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr%2dcrosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">' . esc_html__('Donate to Tumblr Crosspostr', 'tumblr-crosspostr') . '</a> &hearts;',
+                '&hearts; <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=TJLPJYXHSRBEE&amp;lc=US&amp;item_name=Tumblr%20Crosspostr%20WordPress%20Plugin&amp;item_number=tumblr-crosspostr&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted">' . esc_html__('Donate to Tumblr Crosspostr', 'tumblr-crosspostr') . '</a> &hearts;',
                 '<a href="https://wordpress.org/support/plugin/tumblr-crosspostr/">' . esc_html__('Tumblr Crosspostr support forum', 'tumblr-crosspostr') . '</a>'
             );
             $links = array_merge($links, $new_links);
